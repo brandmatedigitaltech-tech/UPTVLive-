@@ -1,0 +1,178 @@
+/* ================= CONTAINER ================= */
+.article-container {
+  max-width: 900px;
+  margin: auto;
+  padding: 15px;
+}
+
+/* ================= BACK ================= */
+.back-link {
+  color: #d60000;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* ================= CATEGORY ================= */
+.article-category {
+  margin-top: 10px;
+  color: #d60000;
+  font-weight: bold;
+}
+
+/* ================= TITLE ================= */
+.article-title {
+  margin: 10px 0;
+  font-size: 28px;
+  line-height: 1.4;
+}
+
+/* ================= META ================= */
+.article-meta {
+  color: gray;
+  margin-bottom: 15px;
+  font-size: 14px;
+}
+
+/* ================= IMAGE / SLIDER ================= */
+.slider {
+  position: relative;
+  margin: 20px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 🔥 ORIGINAL IMAGE SIZE (NO CROP) */
+.slide-img {
+  width: 100%;
+  height: auto;              /* ✅ FIXED */
+  max-height: 500px;         /* ✅ optional limit */
+  object-fit: contain;       /* ✅ NO CROP */
+  border-radius: 10px;
+}
+
+/* SINGLE IMAGE */
+.article-image {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+/* ================= SLIDER BUTTONS ================= */
+.prev-btn,
+.next-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.6);
+  color: #fff;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-size: 18px;
+}
+
+.prev-btn { left: 10px; }
+.next-btn { right: 10px; }
+
+/* ================= CONTENT ================= */
+.article-content {
+  margin-top: 20px;
+  line-height: 1.9;
+  font-size: 17px;
+  color: #222;
+}
+
+.article-content h1,
+.article-content h2,
+.article-content h3 {
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+.article-content p {
+  margin: 10px 0;
+}
+
+.article-content ul {
+  padding-left: 20px;
+}
+
+/* 🔥 IMAGE INSIDE CONTENT */
+.article-content img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  border-radius: 10px;
+  margin: 15px 0;
+}
+
+/* ================= VIDEO ================= */
+.video-container {
+  margin-top: 30px;
+  width: 100%;
+  aspect-ratio: 16/9;
+}
+
+.video-container iframe {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+}
+
+/* ================= RELATED ================= */
+.related-section {
+  margin-top: 40px;
+}
+
+.related-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 15px;
+}
+
+.related-card {
+  display: flex;
+  gap: 10px;
+  text-decoration: none;
+  color: #000;
+  align-items: center;
+}
+
+/* 🔥 RELATED IMAGE FIX */
+.related-card img {
+  width: 90px;
+  height: 65px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.related-content p {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* ================= LOADING ================= */
+.loading {
+  padding: 20px;
+  text-align: center;
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .article-title {
+    font-size: 22px;
+  }
+
+  .slide-img {
+    max-height: 300px;
+  }
+
+  .related-grid {
+    grid-template-columns: 1fr;
+  }
+}

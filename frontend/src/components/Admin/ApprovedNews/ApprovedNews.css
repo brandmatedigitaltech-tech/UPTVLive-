@@ -1,0 +1,150 @@
+/* CONTAINER */
+.approved-container {
+  padding: 20px;
+}
+
+.heading {
+  margin-bottom: 20px;
+}
+
+.empty {
+  color: gray;
+}
+
+/* LIST */
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* CARD */
+.news-card {
+  display: flex;
+  gap: 15px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.news-card:hover {
+  transform: translateY(-3px);
+}
+
+/* IMAGE */
+.image-box {
+  width: 180px;
+  height: 120px;
+  flex-shrink: 0;
+}
+
+.image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* CONTENT */
+.news-content {
+  flex: 1;
+}
+
+.title {
+  margin-bottom: 5px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.desc {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+}
+
+/* TAGS */
+.tags span {
+  margin-right: 8px;
+  font-size: 13px;
+  color: #007bff;
+}
+
+/* ACTION BUTTONS */
+.actions {
+  margin-top: 10px;
+}
+
+.actions button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-right: 10px;
+  font-size: 13px;
+}
+
+/* DELETE BUTTON */
+.delete {
+  background: #dc3545;
+  color: white;
+}
+
+.delete:hover {
+  background: #000;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .news-card {
+    flex-direction: column;
+  }
+
+  .image-box {
+    width: 100%;
+    height: 180px;
+  }
+}
+
+.loading {
+  text-align: center;
+  margin: 10px 0;
+}
+
+.news-card {
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+}
+
+.desc p {
+  margin: 5px 0;
+}
+
+.desc h1,
+.desc h2,
+.desc h3 {
+  font-size: 16px;
+  margin: 5px 0;
+}
+
+.desc img {
+  display: none; /* preview clean */
+}
+
+.preview-box .ql-editor {
+  min-height: 200px;
+  font-size: 16px;
+}
+
+.preview-box .ql-toolbar {
+  border-radius: 8px 8px 0 0;
+}
+
+.preview-box .ql-container {
+  border-radius: 0 0 8px 8px;
+}

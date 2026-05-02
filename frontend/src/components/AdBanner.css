@@ -1,0 +1,60 @@
+/* ================= UNIVERSAL AD ================= */
+.ad-banner {
+  width: 100%;
+  display: block;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+/* 🔥 AUTO FIT MEDIA */
+.ad-banner img,
+.ad-banner video,
+.ad-banner iframe {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+
+  object-fit: contain; /* 🔥 KEY LINE */
+  border-radius: 8px;
+}
+
+/* CLICKABLE AREA */
+.ad-banner a {
+  display: block;
+  width: 100%;
+}
+
+/* OPTIONAL: LIMIT HUGE ADS */
+.ad-banner {
+  max-height: 400px;
+}
+
+/* ================= UNIVERSAL AD ================= */
+.ad-banner {
+  width: 100%;
+  display: block;
+  margin: 10px 0;
+  overflow: hidden;
+}
+
+/* 🔥 AUTO FIT */
+.ad-banner img,
+.ad-banner video,
+.ad-banner iframe {
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* CLICK AREA */
+.ad-banner a {
+  display: block;
+  width: 100%;
+}
+
+/* OPTIONAL LIMIT */
+.ad-banner {
+  max-height: 400px;
+}

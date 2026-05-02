@@ -1,0 +1,115 @@
+/* HEADER */
+header {
+  background: white;
+  border-bottom: 3px solid var(--red);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+/* MAIN */
+.header-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+}
+
+/* LOGO */
+.logo-flex {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-img {
+  height: 50px;
+  object-fit: contain;
+}
+
+.logo-tagline {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* ================= SOCIAL ================= */
+.social {
+  display: flex;
+  gap: 12px;
+}
+
+/* BASE ICON */
+.icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+  background: #f2f2f2;
+  color: #333;
+
+  font-size: 16px;
+  transition: all 0.3s ease;
+}
+
+/* HOVER EFFECT (COMMON) */
+.icon:hover {
+  transform: translateY(-4px) scale(1.1);
+  color: #fff;
+}
+
+/* ================= BRAND COLORS ================= */
+
+/* FACEBOOK */
+.icon.facebook:hover {
+  background: #1877f2;
+  box-shadow: 0 5px 15px rgba(24, 119, 242, 0.4);
+}
+
+/* TWITTER (X) */
+.icon.twitter:hover {
+  background: #000;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+}
+
+/* INSTAGRAM (GRADIENT 🔥) */
+.icon.instagram:hover {
+  background: linear-gradient(
+    45deg,
+    #feda75,
+    #fa7e1e,
+    #d62976,
+    #962fbf,
+    #4f5bd5
+  );
+  box-shadow: 0 5px 15px rgba(214, 41, 118, 0.4);
+}
+
+/* YOUTUBE */
+.icon.youtube:hover {
+  background: #ff0000;
+  box-shadow: 0 5px 15px rgba(255, 0, 0, 0.4);
+}
+
+/* ================= MOBILE ================= */
+@media (max-width: 768px) {
+  .header-main {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .logo-tagline {
+    font-size: 14px;
+  }
+
+  .icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+}

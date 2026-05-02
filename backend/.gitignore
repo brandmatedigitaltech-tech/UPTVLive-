@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# env files
+.env
+
+# uploads (local storage)
+uploads/
+
+# logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# build files (frontend)
+dist/
+build/
+
+# cache
+.cache/

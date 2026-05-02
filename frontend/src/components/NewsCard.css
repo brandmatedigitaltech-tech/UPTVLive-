@@ -1,0 +1,110 @@
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.news-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+}
+
+.news-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.news-title {
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px;
+}
+
+.news-actions {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.news-actions button {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.news-actions button:first-child {
+  background: #28a745;
+  color: white;
+}
+
+.news-actions button:last-child {
+  background: #dc3545;
+  color: white;
+}
+
+.news-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.news-card {
+  background: #fff;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+  transition: 0.3s;
+}
+
+.news-card:hover {
+  transform: translateY(-5px);
+}
+
+.news-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.news-body {
+  padding: 10px;
+}
+
+.news-title {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+.news-meta {
+  font-size: 12px;
+  color: gray;
+  margin-bottom: 10px;
+}
+
+.news-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-btn {
+  background: red;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: #000;
+}

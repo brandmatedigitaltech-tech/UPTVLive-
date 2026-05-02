@@ -1,0 +1,209 @@
+/* ================= MAIN CONTAINER ================= */
+.review-container {
+  max-width: 1100px;
+  margin: auto;
+  padding: 20px;
+}
+
+/* ================= HEADER ================= */
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.review-header button {
+  background: #f1f1f1;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ================= LAYOUT ================= */
+.review-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+}
+
+/* ================= CARD ================= */
+.review-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+/* ================= TITLE ================= */
+.review-title {
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+/* ================= META ================= */
+.review-meta {
+  color: #666;
+  margin: 10px 0;
+}
+
+/* ================= TAGS ================= */
+.review-tags span {
+  display: inline-block;
+  margin-right: 8px;
+  background: #f3f3f3;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+/* ================= IMAGE ================= */
+.review-image {
+  width: 100%;
+  border-radius: 10px;
+  margin: 15px 0;
+  object-fit: cover;
+}
+
+/* ================= CONTENT (NEWS STYLE) ================= */
+.review-content {
+  line-height: 1.9;
+  font-size: 17px;
+  color: #222;
+}
+
+/* HEADINGS */
+.review-content h1 {
+  font-size: 26px;
+  margin: 20px 0 10px;
+}
+
+.review-content h2 {
+  font-size: 22px;
+  margin: 18px 0 8px;
+}
+
+.review-content h3 {
+  font-size: 18px;
+  margin: 15px 0 5px;
+}
+
+/* PARAGRAPH */
+.review-content p {
+  margin: 12px 0;
+}
+
+/* LIST */
+.review-content ul {
+  padding-left: 20px;
+  margin: 10px 0;
+}
+
+.review-content li {
+  margin-bottom: 6px;
+}
+
+/* BOLD */
+.review-content strong {
+  font-weight: bold;
+}
+
+/* IMAGE INSIDE CONTENT */
+.review-content img {
+  width: 100%;
+  border-radius: 10px;
+  margin: 15px 0;
+}
+
+/* REMOVE EXTRA BREAKS */
+.review-content br {
+  display: none;
+}
+
+/* ================= SIDEBAR ================= */
+.review-sidebar {
+  position: sticky;
+  top: 20px;
+}
+
+/* ================= COMMENT ================= */
+.review-comment-box {
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+}
+
+.review-comment-box textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+}
+
+/* ================= ACTION BUTTONS ================= */
+.review-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.approve-btn {
+  background: #28a745;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: #dc3545;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ================= STATES ================= */
+.loading,
+.empty {
+  text-align: center;
+  margin-top: 50px;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 768px) {
+  .review-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* FIX CONTENT SPACING */
+.review-content p {
+  margin: 10px 0;
+  line-height: 1.8;
+}
+
+.review-content br {
+  display: block;
+  margin: 5px 0;
+}
+
+/* HEADINGS */
+.review-content h1,
+.review-content h2,
+.review-content h3 {
+  margin: 15px 0;
+  font-weight: bold;
+}
+
+/* IMAGES */
+.review-content img {
+  width: 100%;
+  border-radius: 10px;
+  margin: 15px 0;
+}

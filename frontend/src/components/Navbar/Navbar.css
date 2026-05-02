@@ -1,0 +1,89 @@
+/* NAVBAR */
+nav {
+  background: var(--blue);
+}
+
+/* INNER */
+.nav-inner {
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+/* REMOVE SCROLLBAR (MOBILE) */
+.nav-inner::-webkit-scrollbar {
+  display: none;
+}
+
+/* NAV ITEMS */
+.nav-item {
+  padding: 10px 15px;
+  color: white;
+  cursor: pointer;
+  text-decoration: none;        /* ✅ REMOVE UNDERLINE */
+  display: inline-block;
+  transition: 0.3s ease;
+}
+
+/* HOVER */
+.nav-item:hover {
+  background: var(--red);
+  color: white;
+  text-decoration: none;        /* ✅ ensure no underline */
+}
+
+/* ACTIVE TAB */
+.nav-item.active {
+  background: var(--red);
+  font-weight: 600;
+}
+
+/* DIVIDER */
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255,255,255,0.3);
+  margin: 0 5px;
+}
+
+/* OPTIONAL AD IMAGE */
+.ad-img {
+  width: 460px;
+  height: 70px;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+/* OLD CLASS (SAFE REMOVE IF NOT USED) */
+.navbar {
+  display: flex;
+  gap: 15px;
+  overflow-x: auto;
+}
+
+/* FORCE REMOVE UNDERLINE FROM LINKS */
+.nav-inner a {
+  text-decoration: none !important;
+  color: white;
+}
+
+/* MOBILE NAVBAR */
+@media (max-width: 768px) {
+  .nav-inner {
+    overflow-x: auto;
+    gap: 5px;
+    padding: 5px 10px;
+  }
+
+  .nav-item {
+    font-size: 13px;
+    padding: 6px 10px;
+    white-space: nowrap;
+  }
+
+  .nav-divider {
+    display: none;
+  }
+}
+

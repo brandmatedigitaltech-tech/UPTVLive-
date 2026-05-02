@@ -1,0 +1,257 @@
+/* ================= CONTAINER ================= */
+.users-container {
+  padding: 20px;
+  background: #f5f7fb;
+  border-radius: 12px;
+}
+
+/* ================= TITLE ================= */
+.users-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+/* ================= FORM ================= */
+.users-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.users-form input {
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  outline: none;
+  font-size: 14px;
+  flex: 1;
+  min-width: 200px;
+}
+
+.users-form input:focus {
+  border-color: #007bff;
+}
+
+/* ADD BUTTON */
+.add-btn {
+  background: #007bff;
+  color: #fff;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.add-btn:hover {
+  background: #0056d2;
+}
+
+/* ================= USER LIST ================= */
+.user-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: 0.2s;
+}
+
+.user-card:hover {
+  transform: translateY(-2px);
+}
+
+/* LEFT INFO */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-email {
+  font-weight: 600;
+  color: #333;
+}
+
+.user-role {
+  font-size: 13px;
+  color: #777;
+}
+
+/* ================= STATUS ================= */
+.user-status {
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.online {
+  background: #22c55e;
+}
+
+.offline {
+  background: #ef4444;
+}
+
+/* ================= ACTIONS ================= */
+.user-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-btn {
+  background: #ef4444;
+  border: none;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+}
+
+/* ================= RESPONSIVE ================= */
+@media (max-width: 600px) {
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .user-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+.users-container {
+  padding: 20px;
+}
+
+.users-title {
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+/* FORM */
+.users-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.users-form input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  flex: 1;
+}
+
+.add-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* CARD */
+.user-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 15px;
+  margin-bottom: 12px;
+
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: white;
+}
+
+/* LEFT */
+.user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-email {
+  font-weight: bold;
+}
+
+.user-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* DOT */
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.online {
+  background: green;
+}
+
+.offline {
+  background: red;
+}
+
+/* BLOCK */
+.blocked {
+  color: red;
+  font-weight: bold;
+}
+
+/* RIGHT */
+.user-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.block-btn {
+  background: orange;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* STATES */
+.loading,
+.empty {
+  text-align: center;
+  margin-top: 20px;
+}

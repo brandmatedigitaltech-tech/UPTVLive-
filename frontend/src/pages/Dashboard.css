@@ -1,0 +1,95 @@
+.dashboard {
+  padding: 20px;
+}
+
+.tabs {
+  margin-bottom: 20px;
+}
+
+.tabs button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.tabs .active {
+  background: #007bff;
+  color: white;
+}
+
+.card {
+  background: #fff;
+  padding: 15px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.card button {
+  margin-right: 10px;
+  padding: 6px 10px;
+  border: none;
+  cursor: pointer;
+}
+.dashboard {
+  padding: 20px;
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.logout-btn {
+  background: #dc3545;
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: #c82333;
+}
+
+/* TABS */
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 10px 18px;
+  border: none;
+  background: #e4e7ec;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.tab:hover {
+  background: #d0d5dd;
+}
+
+.tab.active {
+  background: #d60000;
+  color: white;
+}
+
+/* CONTENT */
+.tab-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
