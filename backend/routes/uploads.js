@@ -6,7 +6,7 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 // ================= MULTIPLE UPLOAD =================
-router.post("/upload-multiple", upload.array("files", 10), async (req, res) => {
+router.post("/upload-multiple", upload.array("images", 10), async (req, res) => {
   try {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ msg: "No files uploaded ❌" });

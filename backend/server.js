@@ -58,7 +58,6 @@ app.use("/api/meta", require("./routes/metaRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/ads", require("./routes/adRoutes"));
-app.use("/api/news", require("./routes/uploads"));
 // ================= HEALTH CHECK =================
 app.get("/", (req, res) => {
   res.send("API Running 🚀");

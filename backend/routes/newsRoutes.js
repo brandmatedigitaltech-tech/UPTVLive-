@@ -39,25 +39,7 @@ router.post("/upload", upload.single("image"), (req, res) => {
 });
 
 // 🔥 MULTIPLE IMAGES UPLOAD
-router.post("/upload-multiple", upload.array("images", 10), (req, res) => {
-  try {
-    if (!req.files || req.files.length === 0) {
-      return res.status(400).json({ msg: "No files uploaded ❌" });
-    }
 
-    // const images = req.files.map((file) => file.path);
-const images = Array.isArray(req.files)
-  ? req.files
-      .map((file) => file.path || file.secure_url || file.url)
-      .filter(Boolean)
-  : [];
-    
-    return res.json({ images });
-  } catch (err) {
-    console.error("Multi Upload Error:", err);
-    return res.status(500).json({ msg: "Upload failed ❌" });
-  }
-});
 
 // ================= NEWS ROUTES =================
 
