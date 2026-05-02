@@ -165,7 +165,7 @@ const AddNews = () => {
         data.append("images", file);
       });
 
-      const res = await API.post("/news/upload-multiple", data);
+      const res = await API.post("/upload/upload-multiple", data);
 
       setForm((prev) => ({
         ...prev,

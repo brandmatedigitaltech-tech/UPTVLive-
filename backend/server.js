@@ -7,46 +7,20 @@ const connectDB = require("./config/db");
 
 const app = express();
 
-// ================= CLOUDINARY =================
-cloudinary.config({
-  cloud_name: process.env.CLOUD_NAME,
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
-});
-
 // ================= DB =================
 connectDB();
 
-// ================= CORS =================
-const allowedOrigins = [
-  "https://uptv-live.vercel.app",
-  "https://uptvlive.com",
-  "https://www.uptvlive.com",
-  "http://localhost:5173",
-];
+// ================= CLOUDINARY =================
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true); // allow Postman / curl
+// ================= CORS (FIXED) =================
+app.use(
+  cors({
+    origin: true, // 🔥 allow all (safe for now)
+    credentials: true,
+  })
+);
 
-    // if (allowedOrigins.includes(origin)) {
-    //   return callback(null, true);
-    // } else {
-    //   return callback(new Error("CORS not allowed ❌"));
-    // }
-    const corsOptions = {
-  origin: true, // 🔥 allow all (safe for now)
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-  },
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
+app.options("*", cors());
 
 // ================= BODY PARSER =================
 app.use(express.json({ limit: "10mb" }));
@@ -58,7 +32,10 @@ app.use("/api/meta", require("./routes/metaRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/ads", require("./routes/adRoutes"));
-app.use("/api/news", require("./routes/uploads"));
+
+// 🔥 FIXED (NO CONFLICT)
+app.use("/api/upload", require("./routes/uploads"));
+
 // ================= HEALTH CHECK =================
 app.get("/", (req, res) => {
   res.send("API Running 🚀");
@@ -71,7 +48,7 @@ app.use((req, res) => {
   });
 });
 
-// ================= ERROR =================
+// ================= GLOBAL ERROR HANDLER =================
 app.use((err, req, res, next) => {
   console.error("Server Error:", err);
 
