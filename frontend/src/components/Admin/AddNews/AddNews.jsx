@@ -15,9 +15,9 @@ const AddNews = () => {
   const [form, setForm] = useState({
     title: "",
     content: "",
-    sections,
-    tags,
-    categories,
+    sections: "",
+    tags : "",
+    categories : "",
 
     youtubeUrl: "",
     images: [],
