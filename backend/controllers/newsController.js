@@ -2,11 +2,56 @@ const News = require("../models/News");
 const slugify = require("slugify");
 
 // ================= CREATE =================
+// exports.createNews = async (req, res) => {
+//   try {
+//     const { title, images, youtubeUrl, sections } = req.body;
+
+//     if (!title) {
+//       return res.status(400).json({ msg: "Title is required" });
+//     }
+
+//     // 🔥 UNIQUE SLUG (FIX DUPLICATE ISSUE)
+//     const uniqueId = Math.random().toString(36).substring(2, 6);
+
+//     const slug =
+//       slugify(title, { lower: true, strict: true }) +
+//       "-" +
+//       Date.now() +
+//       "-" +
+//       uniqueId;
+
+//     const news = await News.create({
+//       ...req.body,
+
+//       slug,
+
+//       // 🔥 SAFE ARRAY
+//       images: Array.isArray(images) ? images : [],
+
+//       youtubeUrl: youtubeUrl || "",
+
+//       // 🔥 NORMALIZE SECTIONS
+//       sections: Array.isArray(sections)
+//         ? sections.map((s) => s.toLowerCase())
+//         : [],
+
+//       status: "pending",
+//       views: 0,
+//       author: req.user?.email || "Writer",
+//     });
+
+//     res.status(201).json(news);
+//   } catch (err) {
+//     console.error("Create Error:", err);
+//     res.status(500).json({ msg: err.message });
+//   }
+// };
+
 exports.createNews = async (req, res) => {
   try {
-    const { title, youtubeUrl, sections, tags, categories } = req.body;
+    const { title, youtubeUrl, sections } = req.body;
 
-    if (!title || title.trim() === "") {
+    if (!title) {
       return res.status(400).json({ msg: "Title is required" });
     }
 
@@ -19,24 +64,24 @@ exports.createNews = async (req, res) => {
       "-" +
       uniqueId;
 
+    // 🔥 CLOUDINARY IMAGES FIX
+
     const images = Array.isArray(req.body.images) ? req.body.images : [];
+
     const image = images.length > 0 ? images[0] : "";
 
     const news = await News.create({
       ...req.body,
-      title: title.trim(),
       slug,
-      image,
-      images,
+
+      image, // 🔥 THUMBNAIL
+      images, // 🔥 ALL IMAGES
+
       youtubeUrl: youtubeUrl || "",
 
-      // ✅ SAFE NORMALIZATION
       sections: Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [],
-
-      tags: Array.isArray(tags) ? tags : [],
-      categories: Array.isArray(categories) ? categories : [],
 
       status: "pending",
       views: 0,
@@ -44,14 +89,11 @@ exports.createNews = async (req, res) => {
     });
 
     res.status(201).json(news);
-
   } catch (err) {
     console.error("Create Error:", err);
     res.status(500).json({ msg: err.message });
   }
 };
-
-
 
 // ================= GET ALL =================
 exports.getNews = async (req, res) => {
@@ -66,17 +108,10 @@ exports.getNews = async (req, res) => {
   }
 };
 
-
-
-// ================= CATEGORY =================
-exports.getByCategory = async (req, res) => {
+// ================= APPROVED =================
+exports.getApprovedNews = async (req, res) => {
   try {
-    const category = req.params.category;
-
-    const news = await News.find({
-      status: "approved",
-      categories: { $in: [category] }, // ✅ faster than regex
-    })
+    const news = await News.find({ status: "approved" })
       .sort({ createdAt: -1 })
       .lean();
 
@@ -86,7 +121,27 @@ exports.getByCategory = async (req, res) => {
   }
 };
 
+// ================= CATEGORY =================
+exports.getByCategory = async (req, res) => {
+  try {
+    const category = req.params.category;
 
+    const news = await News.find({
+      status: "approved",
+      categories: {
+        $elemMatch: {
+          $regex: new RegExp(`^${category}$`, "i"),
+        },
+      },
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    res.json(news);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
+};
 
 // ================= CITY =================
 exports.getByCity = async (req, res) => {
@@ -110,7 +165,11 @@ exports.getByCity = async (req, res) => {
 
     const news = await News.find({
       status: "approved",
-      tags: { $in: [city] }, // ✅ faster
+      tags: {
+        $elemMatch: {
+          $regex: new RegExp(`^${city}$`, "i"),
+        },
+      },
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -121,8 +180,6 @@ exports.getByCity = async (req, res) => {
   }
 };
 
-
-
 // ================= SECTION =================
 exports.getBySection = async (req, res) => {
   try {
@@ -130,7 +187,11 @@ exports.getBySection = async (req, res) => {
 
     const news = await News.find({
       status: "approved",
-      sections: { $in: [section] }, // ✅ faster
+      sections: {
+        $elemMatch: {
+          $regex: new RegExp(`^${section}$`, "i"),
+        },
+      },
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -142,15 +203,14 @@ exports.getBySection = async (req, res) => {
   }
 };
 
-
-
 // ================= SINGLE =================
 exports.getSingleNews = async (req, res) => {
   try {
+    // 🔥 ATOMIC VIEW INCREMENT (FAST + SAFE)
     const news = await News.findOneAndUpdate(
       { slug: req.params.slug },
       { $inc: { views: 1 } },
-      { new: true }
+      { new: true },
     );
 
     if (!news) {
@@ -158,14 +218,12 @@ exports.getSingleNews = async (req, res) => {
     }
 
     res.json(news);
-
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
 
-
-
+// ================= UPDATE =================
 // ================= UPDATE =================
 exports.updateNews = async (req, res) => {
   try {
@@ -179,23 +237,23 @@ exports.updateNews = async (req, res) => {
       tags,
     } = req.body;
 
-    const updateData = {};
+    const updateData = {
+      ...(content && { content }),
+      ...(youtubeUrl && { youtubeUrl }),
+    };
 
-    if (content !== undefined) updateData.content = content;
-    if (youtubeUrl !== undefined) updateData.youtubeUrl = youtubeUrl;
-
-    // ✅ FIXED IMAGE BUG
-    if (images !== undefined) {
+    // ✅ IMAGES
+    if (images) {
       const imgArray = Array.isArray(images) ? images : [];
       updateData.images = imgArray;
-      updateData.image = imgArray[0] || "";
+      updateData.image = imgArray.length > 0 ? imgArray[0] : "";
     }
 
     // ✅ TITLE + SLUG
     if (title) {
       const uniqueId = Math.random().toString(36).substring(2, 6);
 
-      updateData.title = title.trim();
+      updateData.title = title;
       updateData.slug =
         slugify(title, { lower: true, strict: true }) +
         "-" +
@@ -204,20 +262,21 @@ exports.updateNews = async (req, res) => {
         uniqueId;
     }
 
-    // ✅ CRITICAL FIXES
-    if (sections !== undefined) {
+    // ✅ SECTIONS
+    if (sections) {
       updateData.sections = Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [];
     }
 
-    if (categories !== undefined) {
+    // ✅ 🔥 ADD THIS (IMPORTANT)
+    if (categories) {
       updateData.categories = Array.isArray(categories)
         ? categories
         : [];
     }
 
-    if (tags !== undefined) {
+    if (tags) {
       updateData.tags = Array.isArray(tags)
         ? tags
         : [];
@@ -241,8 +300,6 @@ exports.updateNews = async (req, res) => {
   }
 };
 
-
-
 // ================= PENDING =================
 exports.getPendingNews = async (req, res) => {
   try {
@@ -256,8 +313,6 @@ exports.getPendingNews = async (req, res) => {
   }
 };
 
-
-
 // ================= APPROVE =================
 exports.approveNews = async (req, res) => {
   try {
@@ -269,7 +324,7 @@ exports.approveNews = async (req, res) => {
         status: "approved",
         adminComment: comment || "",
       },
-      { new: true }
+      { new: true },
     );
 
     if (!news) {
@@ -277,13 +332,10 @@ exports.approveNews = async (req, res) => {
     }
 
     res.json(news);
-
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
-
-
 
 // ================= DELETE =================
 exports.deleteNews = async (req, res) => {
@@ -295,13 +347,10 @@ exports.deleteNews = async (req, res) => {
     }
 
     res.json({ msg: "Deleted successfully" });
-
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
-
-
 
 // ================= GET BY ID =================
 exports.getNewsById = async (req, res) => {
@@ -313,7 +362,6 @@ exports.getNewsById = async (req, res) => {
     }
 
     res.json(news);
-
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
