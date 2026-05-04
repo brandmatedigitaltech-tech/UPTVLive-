@@ -11,9 +11,9 @@ const cities = [
   "वाराणसी","गोरखपुर","प्रयागराज","गाज़ियाबाद",
 ];
 
-const sectionsList = ["hero","breaking","newsgrid","sidebar","special"];
+const sectionsList = ["hero", "breaking", "newsgrid", "sidebar", "special"];
 
-// ✅ IMAGE HELPER
+// ================= IMAGE HELPER =================
 const getImage = (item) => {
   if (Array.isArray(item.images) && item.images.length > 0) {
     return item.images[0];
@@ -31,6 +31,7 @@ const PendingNews = () => {
   const [previewItem, setPreviewItem] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [categoriesList, setCategoriesList] = useState([]);
 
   const editorRef = useRef(null);
   const quillRef = useRef(null);
@@ -48,8 +49,18 @@ const PendingNews = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await API.get("/meta/categories");
+      setCategoriesList(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   useEffect(() => {
     fetchNews();
+    fetchCategories();
   }, []);
 
   // ================= QUILL =================
@@ -61,7 +72,6 @@ const PendingNews = () => {
 
     const quill = new Quill(editorRef.current, {
       theme: "snow",
-      placeholder: "Edit news content...",
       modules: {
         toolbar: [
           [{ header: [1, 2, 3, false] }],
@@ -80,26 +90,36 @@ const PendingNews = () => {
     }
   }, [editMode, previewItem]);
 
+  // ================= SAFE PREVIEW SET =================
+  const openPreview = (item) => {
+    setPreviewItem({
+      ...item,
+      categories: Array.isArray(item.categories) ? item.categories : [],
+      tags: Array.isArray(item.tags) ? item.tags : [],
+      sections: Array.isArray(item.sections) ? item.sections : [],
+    });
+  };
+
   // ================= APPROVE =================
-  const approveNews = async () => {
+  const approveNews = async (id) => {
     if (!window.confirm("Approve this news?")) return;
 
     try {
-      await API.put(`/news/${previewItem._id}`, {
-        content: editMode
-          ? quillRef.current.root.innerHTML
-          : previewItem.content,
-        tags: previewItem.tags,
-        sections: previewItem.sections,
+      await API.put(`/news/${id}`, {
+        categories: previewItem.categories || [],
+        tags: previewItem.tags || [],
+        sections: previewItem.sections || [],
       });
 
-      await API.put(`/news/approve/${previewItem._id}`);
+      await API.put(`/news/approve/${id}`);
 
-      alert("Approved ✅");
+      alert("Approved + Saved ✅");
+
       setPreviewItem(null);
       setEditMode(false);
       fetchNews();
-    } catch {
+    } catch (err) {
+      console.error(err);
       alert("Approve failed ❌");
     }
   };
@@ -120,6 +140,8 @@ const PendingNews = () => {
 
   // ================= UPDATE =================
   const updateNews = async () => {
+    if (!quillRef.current) return alert("Editor not ready ❌");
+
     const content = quillRef.current.root.innerHTML;
 
     try {
@@ -127,13 +149,15 @@ const PendingNews = () => {
 
       await API.put(`/news/${previewItem._id}`, {
         content,
-        tags: previewItem.tags,
-        sections: previewItem.sections,
+        categories: previewItem.categories || [],
+        tags: previewItem.tags || [],
+        sections: previewItem.sections || [],
       });
 
       alert("Updated ✅");
 
       setEditMode(false);
+      setPreviewItem(null);
       fetchNews();
     } catch {
       alert("Update failed ❌");
@@ -142,28 +166,7 @@ const PendingNews = () => {
     }
   };
 
-  // ================= TOGGLE ALL =================
-  const toggleAllCities = () => {
-    const allSelected =
-      previewItem.tags?.length === cities.length;
-
-    setPreviewItem(prev => ({
-      ...prev,
-      tags: allSelected ? [] : [...cities],
-    }));
-  };
-
-  const toggleAllSections = () => {
-    const allSelected =
-      previewItem.sections?.length === sectionsList.length;
-
-    setPreviewItem(prev => ({
-      ...prev,
-      sections: allSelected ? [] : [...sectionsList],
-    }));
-  };
-
-  // ================= PREVIEW TEXT =================
+  // ================= TEXT PREVIEW =================
   const getTextPreview = (html) => {
     if (!html) return "";
     return html.replace(/<[^>]+>/g, "").slice(0, 120);
@@ -179,16 +182,13 @@ const PendingNews = () => {
         <p className="empty">No pending news</p>
       )}
 
+      {/* ================= LIST ================= */}
       <div className="news-list">
         {news.map((item) => (
           <div key={item._id} className="news-card">
 
             <div className="image-box">
-              <img
-                src={getImage(item)}
-                alt="news"
-                onError={(e) => (e.target.src = FALLBACK_IMG)}
-              />
+              <img src={getImage(item)} alt="news" />
             </div>
 
             <div className="news-content">
@@ -196,13 +196,9 @@ const PendingNews = () => {
               <p>{getTextPreview(item.content)}...</p>
 
               <div className="actions">
-                <button onClick={() => setPreviewItem(item)}>
-                  👁 Preview
-                </button>
-
-                <button onClick={() => deleteNews(item._id)}>
-                  ❌ Delete
-                </button>
+                <button onClick={() => openPreview(item)}>👁 Preview</button>
+                <button onClick={() => approveNews(item._id)}>✅ Approve</button>
+                <button onClick={() => deleteNews(item._id)}>❌ Delete</button>
               </div>
             </div>
 
@@ -235,22 +231,39 @@ const PendingNews = () => {
               <div ref={editorRef} style={{ height: "250px" }} />
             )}
 
-            {/* 🔥 CITY */}
+            {/* ================= CATEGORY ================= */}
+            <div className="edit-section">
+              <label>Categories</label>
+              <div className="chip-container">
+                {categoriesList.map((c) => {
+                  const selected = previewItem.categories.includes(c.name);
+
+                  return (
+                    <button
+                      key={c._id}
+                      className={`chip ${selected ? "active" : ""}`}
+                      onClick={() =>
+                        setPreviewItem(prev => ({
+                          ...prev,
+                          categories: selected
+                            ? prev.categories.filter(x => x !== c.name)
+                            : [...prev.categories, c.name],
+                        }))
+                      }
+                    >
+                      {c.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ================= CITY ================= */}
             <div className="edit-section">
               <label>City</label>
               <div className="chip-container">
-
-                <button
-                  className={`chip ${
-                    previewItem.tags?.length === cities.length ? "active" : ""
-                  }`}
-                  onClick={toggleAllCities}
-                >
-                  ALL
-                </button>
-
                 {cities.map((city) => {
-                  const selected = previewItem.tags?.includes(city);
+                  const selected = previewItem.tags.includes(city);
 
                   return (
                     <button
@@ -261,7 +274,7 @@ const PendingNews = () => {
                           ...prev,
                           tags: selected
                             ? prev.tags.filter(t => t !== city)
-                            : [...(prev.tags || []), city],
+                            : [...prev.tags, city],
                         }))
                       }
                     >
@@ -272,24 +285,12 @@ const PendingNews = () => {
               </div>
             </div>
 
-            {/* 🔥 SECTIONS */}
+            {/* ================= SECTIONS ================= */}
             <div className="edit-section">
               <label>Sections</label>
               <div className="chip-container">
-
-                <button
-                  className={`chip ${
-                    previewItem.sections?.length === sectionsList.length
-                      ? "active"
-                      : ""
-                  }`}
-                  onClick={toggleAllSections}
-                >
-                  ALL
-                </button>
-
                 {sectionsList.map((sec) => {
-                  const selected = previewItem.sections?.includes(sec);
+                  const selected = previewItem.sections.includes(sec);
 
                   return (
                     <button
@@ -300,7 +301,7 @@ const PendingNews = () => {
                           ...prev,
                           sections: selected
                             ? prev.sections.filter(s => s !== sec)
-                            : [...(prev.sections || []), sec],
+                            : [...prev.sections, sec],
                         }))
                       }
                     >
@@ -316,7 +317,7 @@ const PendingNews = () => {
               {!editMode ? (
                 <>
                   <button onClick={() => setEditMode(true)}>✏️ Edit</button>
-                  <button onClick={approveNews}>✅ Approve</button>
+                  <button onClick={() => approveNews(previewItem._id)}>✅ Approve</button>
                   <button onClick={() => deleteNews(previewItem._id)}>❌ Delete</button>
                 </>
               ) : (
@@ -324,9 +325,7 @@ const PendingNews = () => {
                   <button onClick={updateNews} disabled={saving}>
                     {saving ? "Saving..." : "💾 Save"}
                   </button>
-                  <button onClick={() => setEditMode(false)}>
-                    Cancel
-                  </button>
+                  <button onClick={() => setEditMode(false)}>Cancel</button>
                 </>
               )}
             </div>
