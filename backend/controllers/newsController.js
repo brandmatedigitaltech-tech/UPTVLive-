@@ -68,19 +68,21 @@ exports.createNews = async (req, res) => {
     const image = images[0] || "";
 
     const news = await News.create({
-      ...req.body,
       title: title.trim(),
+      content: req.body.content || "",
+
       slug,
       image,
       images,
+
       youtubeUrl: youtubeUrl || "",
 
+      // 🔥 FIX (IMPORTANT)
       sections: Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [],
 
-      // ✅ FIX
-      tags: Array.isArray(tags) ? tags : [],
+      tags: Array.isArray(tags) ? tags : [],   // ✅ FIXED
       categories: Array.isArray(categories) ? categories : [],
 
       status: "pending",
