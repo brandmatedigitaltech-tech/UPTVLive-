@@ -1,51 +1,7 @@
 const News = require("../models/News");
 const slugify = require("slugify");
 
-// ================= CREATE =================
-// exports.createNews = async (req, res) => {
-//   try {
-//     const { title, images, youtubeUrl, sections } = req.body;
 
-//     if (!title) {
-//       return res.status(400).json({ msg: "Title is required" });
-//     }
-
-//     // 🔥 UNIQUE SLUG (FIX DUPLICATE ISSUE)
-//     const uniqueId = Math.random().toString(36).substring(2, 6);
-
-//     const slug =
-//       slugify(title, { lower: true, strict: true }) +
-//       "-" +
-//       Date.now() +
-//       "-" +
-//       uniqueId;
-
-//     const news = await News.create({
-//       ...req.body,
-
-//       slug,
-
-//       // 🔥 SAFE ARRAY
-//       images: Array.isArray(images) ? images : [],
-
-//       youtubeUrl: youtubeUrl || "",
-
-//       // 🔥 NORMALIZE SECTIONS
-//       sections: Array.isArray(sections)
-//         ? sections.map((s) => s.toLowerCase())
-//         : [],
-
-//       status: "pending",
-//       views: 0,
-//       author: req.user?.email || "Writer",
-//     });
-
-//     res.status(201).json(news);
-//   } catch (err) {
-//     console.error("Create Error:", err);
-//     res.status(500).json({ msg: err.message });
-//   }
-// };
 
 exports.createNews = async (req, res) => {
   try {
