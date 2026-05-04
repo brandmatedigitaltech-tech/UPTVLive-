@@ -5,7 +5,6 @@ import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import "./ApprovedNews.css";
 
-const FALLBACK_IMG = "/no-image.jpg";
 
 // ✅ SAME IMAGE HELPER (IMPORTANT)
 const getImage = (item) => {
@@ -39,10 +38,13 @@ const ApprovedNews = () => {
   const [editMode, setEditMode] = useState(false);
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
+  // 🔥 MOVE HERE (INSIDE COMPONENT)
+  const [imageFiles, setImageFiles] = useState([]);
+  const [preview, setPreview] = useState([]);
+  const [dragActive, setDragActive] = useState(false);
+
   const quillRef = useRef(null);
   const editorRef = useRef(null);
-
-  const navigate = useNavigate();
 
   // ================= FETCH =================
   const fetchNews = async () => {
@@ -102,11 +104,14 @@ const ApprovedNews = () => {
   };
 
   // ================= OPEN EDIT =================
-  const openEdit = (item) => {
-    setEditItem(item);
-    setEditMode(true);
-    setYoutubeUrl(item.youtubeUrl || "");
-  };
+const openEdit = (item) => {
+  setEditItem(item);
+  setEditMode(true);
+  setYoutubeUrl(item.youtubeUrl || "");
+
+  // 🔥 SHOW OLD IMAGES IN PREVIEW
+  setPreview(item.images || []);
+};
 
   // ================= UPDATE =================
   const updateNews = async () => {
@@ -117,10 +122,11 @@ const ApprovedNews = () => {
     if (!content.trim()) return alert("Content required ❌");
 
     try {
-      await API.put(`/news/${editItem._id}`, {
-        content,
-        youtubeUrl,
-      });
+await API.put(`/news/${editItem._id}`, {
+  content,
+  youtubeUrl,
+  images: editItem.images, // 🔥 ADD THIS
+});
 
 
       alert("Updated ✅");
@@ -141,6 +147,65 @@ const ApprovedNews = () => {
     if (!html) return "";
     return html.replace(/<[^>]+>/g, "").slice(0, 120);
   };
+  // ================= IMAGE HANDLING =================
+const handleFile = (files) => {
+  const fileArray = Array.from(files);
+
+  setImageFiles(fileArray);
+
+  const previewUrls = fileArray.map((file) =>
+    URL.createObjectURL(file)
+  );
+
+  setPreview(previewUrls);
+};
+
+const handleChange = (e) => handleFile(e.target.files);
+
+const handleDrop = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setDragActive(false);
+
+  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    handleFile(e.dataTransfer.files);
+  }
+};
+
+const handleDrag = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  setDragActive(
+    e.type === "dragenter" || e.type === "dragover"
+  );
+};
+
+// ================= UPLOAD =================
+const uploadImage = async () => {
+  if (!imageFiles.length) return alert("Select images ❌");
+
+  try {
+    const data = new FormData();
+
+    imageFiles.forEach((file) => {
+      data.append("images", file);
+    });
+
+    const res = await API.post("/upload/upload-multiple", data);
+
+    // 🔥 UPDATE EDIT ITEM
+    setEditItem((prev) => ({
+      ...prev,
+      images: res.data.images,
+      image: res.data.images[0],
+    }));
+
+    alert("Images uploaded ✅");
+
+  } catch {
+    alert("Upload failed ❌");
+  }
+};
 
   return (
     <div className="approved-container">
@@ -241,6 +306,8 @@ const ApprovedNews = () => {
             {/* TITLE */}
             <h2>{editItem.title}</h2>
 
+            
+
             {/* ================= YOUTUBE INPUT ================= */}
             <div style={{ marginTop: "10px" }}>
               <input
@@ -270,6 +337,53 @@ const ApprovedNews = () => {
                 />
               </div>
             )}
+            {/* ================= IMAGE EDIT ================= */}
+<div style={{ marginTop: "15px" }}>
+  <label>Update Images / Thumbnail</label>
+
+  <div
+    className={`drop-zone ${dragActive ? "active" : ""}`}
+    onDragEnter={handleDrag}
+    onDragOver={handleDrag}
+    onDragLeave={handleDrag}
+    onDrop={handleDrop}
+  >
+    <input
+      type="file"
+      multiple
+      onChange={handleChange}
+    />
+
+    {preview.length === 0 ? (
+      <p>Drag & Drop or Click</p>
+    ) : (
+      <div>
+        {preview.map((img, i) => (
+          <img
+            key={i}
+            src={img}
+            className="preview-img"
+          />
+        ))}
+      </div>
+    )}
+  </div>
+
+  <button
+    style={{
+      marginTop: "8px",
+      padding: "6px 10px",
+      borderRadius: "6px",
+      background: "#2196f3",
+      color: "#fff",
+      border: "none",
+      cursor: "pointer",
+    }}
+    onClick={uploadImage}
+  >
+    Upload Images
+  </button>
+</div>
             {/* EDITOR */}
             <div
               ref={editorRef}
