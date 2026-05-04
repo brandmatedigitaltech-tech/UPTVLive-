@@ -227,3 +227,41 @@
     height: 180px;
   }
 }
+
+/* EXISTING CSS SAME */
+
+/* 🔥 NEW UI */
+.edit-section {
+  margin-top: 12px;
+}
+
+.edit-section label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.chip-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1px solid #ccc;
+  background: #f5f5f5;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.chip.active {
+  background: #e53935;
+  color: white;
+  border-color: #e53935;
+}
+.empty-chip {
+  font-size: 12px;
+  color: #888;
+}
