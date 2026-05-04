@@ -1,7 +1,51 @@
 const News = require("../models/News");
 const slugify = require("slugify");
 
+// ================= CREATE =================
+// exports.createNews = async (req, res) => {
+//   try {
+//     const { title, images, youtubeUrl, sections } = req.body;
 
+//     if (!title) {
+//       return res.status(400).json({ msg: "Title is required" });
+//     }
+
+//     // 🔥 UNIQUE SLUG (FIX DUPLICATE ISSUE)
+//     const uniqueId = Math.random().toString(36).substring(2, 6);
+
+//     const slug =
+//       slugify(title, { lower: true, strict: true }) +
+//       "-" +
+//       Date.now() +
+//       "-" +
+//       uniqueId;
+
+//     const news = await News.create({
+//       ...req.body,
+
+//       slug,
+
+//       // 🔥 SAFE ARRAY
+//       images: Array.isArray(images) ? images : [],
+
+//       youtubeUrl: youtubeUrl || "",
+
+//       // 🔥 NORMALIZE SECTIONS
+//       sections: Array.isArray(sections)
+//         ? sections.map((s) => s.toLowerCase())
+//         : [],
+
+//       status: "pending",
+//       views: 0,
+//       author: req.user?.email || "Writer",
+//     });
+
+//     res.status(201).json(news);
+//   } catch (err) {
+//     console.error("Create Error:", err);
+//     res.status(500).json({ msg: err.message });
+//   }
+// };
 
 exports.createNews = async (req, res) => {
   try {
@@ -180,24 +224,32 @@ exports.getSingleNews = async (req, res) => {
 };
 
 // ================= UPDATE =================
+// ================= UPDATE =================
 exports.updateNews = async (req, res) => {
   try {
-    const { content, images, youtubeUrl, title, sections } = req.body;
+    const {
+      content,
+      images,
+      youtubeUrl,
+      title,
+      sections,
+      categories,
+      tags,
+    } = req.body;
 
     const updateData = {
       ...(content && { content }),
       ...(youtubeUrl && { youtubeUrl }),
     };
 
-    // 🔥 SAFE IMAGES
-if (images) {
-  const imgArray = Array.isArray(images) ? images : [];
+    // ✅ IMAGES
+    if (images) {
+      const imgArray = Array.isArray(images) ? images : [];
+      updateData.images = imgArray;
+      updateData.image = imgArray.length > 0 ? imgArray[0] : "";
+    }
 
-  updateData.images = imgArray;
-  updateData.image = imgArray.length > 0 ? imgArray[0] : "";
-}
-
-    // 🔥 TITLE → NEW SLUG
+    // ✅ TITLE + SLUG
     if (title) {
       const uniqueId = Math.random().toString(36).substring(2, 6);
 
@@ -210,22 +262,38 @@ if (images) {
         uniqueId;
     }
 
-    // 🔥 NORMALIZE SECTIONS
+    // ✅ SECTIONS
     if (sections) {
       updateData.sections = Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [];
     }
 
-    const updated = await News.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-    });
+    // ✅ 🔥 ADD THIS (IMPORTANT)
+    if (categories) {
+      updateData.categories = Array.isArray(categories)
+        ? categories
+        : [];
+    }
+
+    if (tags) {
+      updateData.tags = Array.isArray(tags)
+        ? tags
+        : [];
+    }
+
+    const updated = await News.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
 
     if (!updated) {
       return res.status(404).json({ msg: "News not found" });
     }
 
     res.json(updated);
+
   } catch (err) {
     console.error("Update error:", err);
     res.status(500).json({ msg: "Update failed" });
