@@ -49,9 +49,9 @@ const slugify = require("slugify");
 
 exports.createNews = async (req, res) => {
   try {
-    const { title, youtubeUrl, sections } = req.body;
+    const { title, youtubeUrl, sections, tags, categories } = req.body;
 
-    if (!title) {
+    if (!title || title.trim() === "") {
       return res.status(400).json({ msg: "Title is required" });
     }
 
@@ -64,24 +64,24 @@ exports.createNews = async (req, res) => {
       "-" +
       uniqueId;
 
-    // 🔥 CLOUDINARY IMAGES FIX
-
     const images = Array.isArray(req.body.images) ? req.body.images : [];
-
-    const image = images.length > 0 ? images[0] : "";
+    const image = images[0] || "";
 
     const news = await News.create({
       ...req.body,
+      title: title.trim(),
       slug,
-
-      image, // 🔥 THUMBNAIL
-      images, // 🔥 ALL IMAGES
-
+      image,
+      images,
       youtubeUrl: youtubeUrl || "",
 
       sections: Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [],
+
+      // ✅ FIX
+      tags: Array.isArray(tags) ? tags : [],
+      categories: Array.isArray(categories) ? categories : [],
 
       status: "pending",
       views: 0,
@@ -89,6 +89,7 @@ exports.createNews = async (req, res) => {
     });
 
     res.status(201).json(news);
+
   } catch (err) {
     console.error("Create Error:", err);
     res.status(500).json({ msg: err.message });
