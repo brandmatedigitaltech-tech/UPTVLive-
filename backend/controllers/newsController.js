@@ -6,7 +6,7 @@ exports.createNews = async (req, res) => {
   try {
     const { title, youtubeUrl, sections, tags, categories } = req.body;
 
-    if (!title) {
+    if (!title || title.trim() === "") {
       return res.status(400).json({ msg: "Title is required" });
     }
 
@@ -24,14 +24,13 @@ exports.createNews = async (req, res) => {
 
     const news = await News.create({
       ...req.body,
+      title: title.trim(),
       slug,
-
       image,
       images,
-
       youtubeUrl: youtubeUrl || "",
 
-      // ✅ FIXED
+      // ✅ SAFE NORMALIZATION
       sections: Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [],
@@ -45,11 +44,14 @@ exports.createNews = async (req, res) => {
     });
 
     res.status(201).json(news);
+
   } catch (err) {
     console.error("Create Error:", err);
     res.status(500).json({ msg: err.message });
   }
 };
+
+
 
 // ================= GET ALL =================
 exports.getNews = async (req, res) => {
@@ -64,18 +66,7 @@ exports.getNews = async (req, res) => {
   }
 };
 
-// ================= APPROVED =================
-exports.getApprovedNews = async (req, res) => {
-  try {
-    const news = await News.find({ status: "approved" })
-      .sort({ createdAt: -1 })
-      .lean();
 
-    res.json(news);
-  } catch (err) {
-    res.status(500).json({ msg: err.message });
-  }
-};
 
 // ================= CATEGORY =================
 exports.getByCategory = async (req, res) => {
@@ -84,11 +75,7 @@ exports.getByCategory = async (req, res) => {
 
     const news = await News.find({
       status: "approved",
-      categories: {
-        $elemMatch: {
-          $regex: new RegExp(`^${category}$`, "i"),
-        },
-      },
+      categories: { $in: [category] }, // ✅ faster than regex
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -98,6 +85,8 @@ exports.getByCategory = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
 
 // ================= CITY =================
 exports.getByCity = async (req, res) => {
@@ -121,11 +110,7 @@ exports.getByCity = async (req, res) => {
 
     const news = await News.find({
       status: "approved",
-      tags: {
-        $elemMatch: {
-          $regex: new RegExp(`^${city}$`, "i"),
-        },
-      },
+      tags: { $in: [city] }, // ✅ faster
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -136,6 +121,8 @@ exports.getByCity = async (req, res) => {
   }
 };
 
+
+
 // ================= SECTION =================
 exports.getBySection = async (req, res) => {
   try {
@@ -143,11 +130,7 @@ exports.getBySection = async (req, res) => {
 
     const news = await News.find({
       status: "approved",
-      sections: {
-        $elemMatch: {
-          $regex: new RegExp(`^${section}$`, "i"),
-        },
-      },
+      sections: { $in: [section] }, // ✅ faster
     })
       .sort({ createdAt: -1 })
       .lean();
@@ -158,6 +141,8 @@ exports.getBySection = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
 
 // ================= SINGLE =================
 exports.getSingleNews = async (req, res) => {
@@ -173,10 +158,13 @@ exports.getSingleNews = async (req, res) => {
     }
 
     res.json(news);
+
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
 
 // ================= UPDATE =================
 exports.updateNews = async (req, res) => {
@@ -191,23 +179,23 @@ exports.updateNews = async (req, res) => {
       tags,
     } = req.body;
 
-    const updateData = {
-      ...(content && { content }),
-      ...(youtubeUrl && { youtubeUrl }),
-    };
+    const updateData = {};
 
-    // ✅ IMAGES
+    if (content !== undefined) updateData.content = content;
+    if (youtubeUrl !== undefined) updateData.youtubeUrl = youtubeUrl;
+
+    // ✅ FIXED IMAGE BUG
     if (images !== undefined) {
       const imgArray = Array.isArray(images) ? images : [];
       updateData.images = imgArray;
-      updateData.image = imgArray.length > 0 ? imgArray[0] : "";
+      updateData.image = imgArray[0] || "";
     }
 
-    // ✅ TITLE
+    // ✅ TITLE + SLUG
     if (title) {
       const uniqueId = Math.random().toString(36).substring(2, 6);
 
-      updateData.title = title;
+      updateData.title = title.trim();
       updateData.slug =
         slugify(title, { lower: true, strict: true }) +
         "-" +
@@ -216,21 +204,19 @@ exports.updateNews = async (req, res) => {
         uniqueId;
     }
 
-    // ✅ SECTIONS
+    // ✅ CRITICAL FIXES
     if (sections !== undefined) {
       updateData.sections = Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [];
     }
 
-    // ✅ CATEGORIES
     if (categories !== undefined) {
       updateData.categories = Array.isArray(categories)
         ? categories
         : [];
     }
 
-    // ✅ TAGS (CRITICAL FIX)
     if (tags !== undefined) {
       updateData.tags = Array.isArray(tags)
         ? tags
@@ -255,6 +241,8 @@ exports.updateNews = async (req, res) => {
   }
 };
 
+
+
 // ================= PENDING =================
 exports.getPendingNews = async (req, res) => {
   try {
@@ -267,6 +255,8 @@ exports.getPendingNews = async (req, res) => {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
 
 // ================= APPROVE =================
 exports.approveNews = async (req, res) => {
@@ -287,10 +277,13 @@ exports.approveNews = async (req, res) => {
     }
 
     res.json(news);
+
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
 
 // ================= DELETE =================
 exports.deleteNews = async (req, res) => {
@@ -302,10 +295,13 @@ exports.deleteNews = async (req, res) => {
     }
 
     res.json({ msg: "Deleted successfully" });
+
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
 };
+
+
 
 // ================= GET BY ID =================
 exports.getNewsById = async (req, res) => {
@@ -317,6 +313,7 @@ exports.getNewsById = async (req, res) => {
     }
 
     res.json(news);
+
   } catch (err) {
     res.status(500).json({ msg: err.message });
   }
