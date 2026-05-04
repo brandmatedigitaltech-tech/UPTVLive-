@@ -41,35 +41,36 @@ const Ads = () => {
   }, []);
 
   // ================= UPLOAD =================
-  const uploadFile = async (file) => {
-    if (!file) return;
+const uploadFile = async (file) => {
+  if (!file) return;
 
-    const fileType = file.type.startsWith("video") ? "video" : "image";
+  const fileType = file.type.startsWith("video") ? "video" : "image";
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const formData = new FormData();
+  formData.append("images", file); // 🔥 MUST MATCH BACKEND
 
-    try {
-      setUploading(true);
+  try {
+    setUploading(true);
 
-      const res = await API.post("/upload", formData);
-      const url = res.data.url;
+    const res = await API.post("/upload/upload-multiple", formData);
 
-      setForm((prev) => ({
-        ...prev,
-        mediaUrl: url,
-        type: fileType,
-      }));
+    const url = res.data.images[0]; // 🔥 FIX
 
-      setPreview(url);
+    setForm((prev) => ({
+      ...prev,
+      mediaUrl: url,
+      type: fileType,
+    }));
 
-    } catch {
-      alert("Upload failed ❌");
-    } finally {
-      setUploading(false);
-    }
-  };
+    setPreview(url);
 
+  } catch (err) {
+    console.error(err);
+    alert("Upload failed ❌");
+  } finally {
+    setUploading(false);
+  }
+};
   // ================= EVENTS =================
   const handleDrop = (e) => {
     e.preventDefault();
