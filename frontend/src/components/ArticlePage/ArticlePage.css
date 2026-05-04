@@ -18,6 +18,21 @@
   color: #d60000;
   font-weight: bold;
 }
+.article-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.share-btn {
+  background: #e53935;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
 
 /* ================= TITLE ================= */
 .article-title {
