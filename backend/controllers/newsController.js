@@ -157,12 +157,14 @@ exports.getByCity = async (req, res) => {
       ghaziabad: "गाज़ियाबाद",
     };
 
-    const city = cityMap[req.params.city];
+    const cityKey = req.params.city?.toLowerCase();
+    const city = cityMap[cityKey];
 
     if (!city) {
       return res.status(404).json({ msg: "City not found" });
     }
 
+    // 🔥 HYBRID (FAST + SAFE)
     const news = await News.find({
       status: "approved",
       tags: {
@@ -175,7 +177,9 @@ exports.getByCity = async (req, res) => {
       .lean();
 
     res.json(news);
+
   } catch (err) {
+    console.error("City Error:", err);
     res.status(500).json({ msg: err.message });
   }
 };
