@@ -148,3 +148,137 @@
 .preview-box .ql-container {
   border-radius: 0 0 8px 8px;
 }
+/* 🔥 MODAL IMPROVEMENT */
+.preview-box {
+  width: 95%;
+  max-width: 750px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px;
+  position: relative;
+}
+
+/* 🔥 SECTION SPACING */
+.preview-box label {
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+/* 🔥 INPUT */
+.preview-box input {
+  transition: 0.2s;
+}
+
+.preview-box input:focus {
+  border-color: #2196f3;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(33,150,243,0.1);
+}
+
+/* 🔥 DROP ZONE (UPGRADED) */
+.drop-zone {
+  border: 2px dashed #ddd;
+  padding: 16px;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  background: #fafafa;
+  transition: 0.2s;
+}
+
+.drop-zone:hover {
+  border-color: #2196f3;
+  background: #f5fbff;
+}
+
+.drop-zone.active {
+  border-color: #2196f3;
+  background: #e3f2fd;
+}
+
+/* 🔥 PREVIEW GRID */
+.drop-zone div {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* 🔥 IMAGE PREVIEW */
+.preview-img {
+  width: 90px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #eee;
+  transition: 0.2s;
+}
+
+.preview-img:hover {
+  transform: scale(1.05);
+  border-color: #2196f3;
+}
+
+/* 🔥 UPLOAD BUTTON */
+.upload-btn {
+  margin-top: 10px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #2196f3, #1976d2);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.upload-btn:hover {
+  opacity: 0.9;
+}
+
+/* 🔥 ACTION BUTTONS */
+.modal-actions {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding-top: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+/* SAVE BUTTON */
+.approve-btn {
+  flex: 1;
+  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* CANCEL BUTTON */
+.delete-btn {
+  flex: 1;
+  background: #f44336;
+  color: #fff;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* 🔥 TITLE */
+.preview-box h2 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+/* 🔥 SECTIONS SPACING */
+.preview-box > div {
+  margin-bottom: 14px;
+}
