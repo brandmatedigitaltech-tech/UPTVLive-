@@ -4,7 +4,6 @@ import API from "../../services/api";
 import "./ArticlePage.css";
 import AdBanner from "../AdBanner";
 
-
 const FALLBACK_IMG = "/no-image.jpg";
 
 const ArticlePage = () => {
@@ -15,6 +14,24 @@ const ArticlePage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const intervalRef = useRef(null);
+
+  // ================= SHARE FUNCTION =================
+  const handleShare = () => {
+    if (!article) return;
+
+    const url = `${window.location.origin}/article/${article.slug}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: article.title,
+        text: article.title,
+        url,
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Link copied ✅");
+    }
+  };
 
   // ================= SAFE IMAGE =================
   const getImage = (img) => {
@@ -79,7 +96,7 @@ const ArticlePage = () => {
     fetchArticle();
   }, [slug]);
 
-  // ================= AUTO SLIDER (IMPROVED) =================
+  // ================= AUTO SLIDER =================
   useEffect(() => {
     if (!article?.images?.length) return;
 
@@ -123,27 +140,33 @@ const ArticlePage = () => {
 
   return (
     <div className="article-container">
-    
+
       {/* BACK */}
       <Link to="/" className="back-link">← होम</Link>
-  
+
       {/* CATEGORY */}
       <p className="article-category">
         {(article.categories?.[0] || "News")} |{" "}
         {article.tags?.join(", ")}
       </p>
-  
+
       {/* TITLE */}
       <h1 className="article-title">{article.title}</h1>
-  
-      {/* META */}
-      <p className="article-meta">
-        ⏰ {new Date(article.createdAt).toLocaleString()} • 👁 {article.views}
-      </p>
-  
-      {/* 🔥 TOP AD (BEST POSITION) */}
+
+      {/* META + SHARE */}
+      <div className="article-meta-row">
+        <p className="article-meta">
+          ⏰ {new Date(article.createdAt).toLocaleString()} • 👁 {article.views}
+        </p>
+
+        <button className="share-btn" onClick={handleShare}>
+          🔗 Share
+        </button>
+      </div>
+
+      {/* 🔥 TOP AD */}
       <AdBanner position="article_top" />
-  
+
       {/* ================= IMAGE ================= */}
       {images.length > 0 ? (
         <div
@@ -166,7 +189,7 @@ const ArticlePage = () => {
             loading="lazy"
             onError={(e) => (e.target.src = FALLBACK_IMG)}
           />
-  
+
           {images.length > 1 && (
             <>
               <button
@@ -179,7 +202,7 @@ const ArticlePage = () => {
               >
                 ‹
               </button>
-              
+
               <button
                 className="next-btn"
                 onClick={() =>
@@ -198,22 +221,20 @@ const ArticlePage = () => {
           src={getImage(article.image)}
           className="article-image"
           alt="news"
-          loading="lazy"
         />
       )}
-  
-      {/* ================= CONTENT ================= */}
+
+      {/* CONTENT */}
       <div
         className="article-content"
         dangerouslySetInnerHTML={{
           __html: formatContent(article.content),
         }}
       />
-  
-      {/* 🔥 MIDDLE AD (AFTER CONTENT - CLEAN UX) */}
+
       <AdBanner position="article_middle" />
-      
-      {/* ================= YOUTUBE ================= */}
+
+      {/* YOUTUBE */}
       {article.youtubeUrl && getYouTubeEmbed(article.youtubeUrl) && (
         <div className="video-container">
           <iframe
@@ -224,34 +245,28 @@ const ArticlePage = () => {
           />
         </div>
       )}
-  
-      {/* 🔥 BOTTOM AD */}
+
       <AdBanner position="article_bottom" />
-    
-      {/* ================= RELATED ================= */}
+
+      {/* RELATED */}
       <div className="related-section">
         <h3>🔥 संबंधित खबरें</h3>
-    
+
         <div className="related-grid">
           {relatedNews.map((item) => {
             const img =
               (Array.isArray(item.images) && item.images[0]) ||
               (item.image && item.image.trim() !== "") ||
               "/no-image.jpg";
-          
+
             return (
               <Link
                 key={item._id}
                 to={`/article/${item.slug}`}
                 className="related-card"
               >
-                <img
-                  src={img}
-                  alt="related"
-                  loading="lazy"
-                  onError={(e) => (e.target.src = "/no-image.jpg")}
-                />
-  
+                <img src={img} alt="related" />
+
                 <div className="related-content">
                   <p>{item.title || "No Title"}</p>
                 </div>
@@ -260,7 +275,7 @@ const ArticlePage = () => {
           })}
         </div>
       </div>
-        
+
     </div>
   );
 };
