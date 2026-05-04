@@ -15,9 +15,7 @@ const AddNews = () => {
   const [form, setForm] = useState({
     title: "",
     content: "",
-    categories: [],
-    tags: [],
-    sections: [],
+
     youtubeUrl: "",
     images: [],
   });
@@ -233,83 +231,7 @@ const AddNews = () => {
             <div className="editor" ref={editorRef}></div>
           </div>
 
-          {/* CATEGORY */}
-          <div className="card">
-            <label>Categories</label>
-            <div className="chip-container">
-              {categoriesList.map((c) => {
-                const selected = form.categories.includes(c.name);
-                return (
-                  <button
-                    key={c._id}
-                    className={`chip ${selected ? "active" : ""}`}
-                    onClick={() =>
-                      setForm({
-                        ...form,
-                        categories: selected
-                          ? form.categories.filter((x) => x !== c.name)
-                          : [...form.categories, c.name],
-                      })
-                    }
-                  >
-                    {c.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
-          {/* CITY */}
-          <div className="card">
-            <label>City</label>
-            <div className="chip-container">
-              {cities.map((city) => {
-                const selected = form.tags.includes(city);
-                return (
-                  <button
-                    key={city}
-                    className={`chip ${selected ? "active" : ""}`}
-                    onClick={() =>
-                      setForm({
-                        ...form,
-                        tags: selected
-                          ? form.tags.filter((t) => t !== city)
-                          : [...form.tags, city],
-                      })
-                    }
-                  >
-                    {city}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* SECTIONS */}
-          <div className="card">
-            <label>Show in Sections</label>
-            <div className="chip-container">
-              {sectionsList.map((sec) => {
-                const selected = form.sections.includes(sec);
-                return (
-                  <button
-                    key={sec}
-                    className={`chip ${selected ? "active" : ""}`}
-                    onClick={() =>
-                      setForm({
-                        ...form,
-                        sections: selected
-                          ? form.sections.filter((s) => s !== sec)
-                          : [...form.sections, sec],
-                      })
-                    }
-                  >
-                    {sec.toUpperCase()}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
 
         </div>
 
