@@ -2,54 +2,9 @@ const News = require("../models/News");
 const slugify = require("slugify");
 
 // ================= CREATE =================
-// exports.createNews = async (req, res) => {
-//   try {
-//     const { title, images, youtubeUrl, sections } = req.body;
-
-//     if (!title) {
-//       return res.status(400).json({ msg: "Title is required" });
-//     }
-
-//     // 🔥 UNIQUE SLUG (FIX DUPLICATE ISSUE)
-//     const uniqueId = Math.random().toString(36).substring(2, 6);
-
-//     const slug =
-//       slugify(title, { lower: true, strict: true }) +
-//       "-" +
-//       Date.now() +
-//       "-" +
-//       uniqueId;
-
-//     const news = await News.create({
-//       ...req.body,
-
-//       slug,
-
-//       // 🔥 SAFE ARRAY
-//       images: Array.isArray(images) ? images : [],
-
-//       youtubeUrl: youtubeUrl || "",
-
-//       // 🔥 NORMALIZE SECTIONS
-//       sections: Array.isArray(sections)
-//         ? sections.map((s) => s.toLowerCase())
-//         : [],
-
-//       status: "pending",
-//       views: 0,
-//       author: req.user?.email || "Writer",
-//     });
-
-//     res.status(201).json(news);
-//   } catch (err) {
-//     console.error("Create Error:", err);
-//     res.status(500).json({ msg: err.message });
-//   }
-// };
-
 exports.createNews = async (req, res) => {
   try {
-    const { title, youtubeUrl, sections } = req.body;
+    const { title, youtubeUrl, sections, tags, categories } = req.body;
 
     if (!title) {
       return res.status(400).json({ msg: "Title is required" });
@@ -64,24 +19,25 @@ exports.createNews = async (req, res) => {
       "-" +
       uniqueId;
 
-    // 🔥 CLOUDINARY IMAGES FIX
-
     const images = Array.isArray(req.body.images) ? req.body.images : [];
-
     const image = images.length > 0 ? images[0] : "";
 
     const news = await News.create({
       ...req.body,
       slug,
 
-      image, // 🔥 THUMBNAIL
-      images, // 🔥 ALL IMAGES
+      image,
+      images,
 
       youtubeUrl: youtubeUrl || "",
 
+      // ✅ FIXED
       sections: Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [],
+
+      tags: Array.isArray(tags) ? tags : [],
+      categories: Array.isArray(categories) ? categories : [],
 
       status: "pending",
       views: 0,
@@ -206,11 +162,10 @@ exports.getBySection = async (req, res) => {
 // ================= SINGLE =================
 exports.getSingleNews = async (req, res) => {
   try {
-    // 🔥 ATOMIC VIEW INCREMENT (FAST + SAFE)
     const news = await News.findOneAndUpdate(
       { slug: req.params.slug },
       { $inc: { views: 1 } },
-      { new: true },
+      { new: true }
     );
 
     if (!news) {
@@ -223,7 +178,6 @@ exports.getSingleNews = async (req, res) => {
   }
 };
 
-// ================= UPDATE =================
 // ================= UPDATE =================
 exports.updateNews = async (req, res) => {
   try {
@@ -243,13 +197,13 @@ exports.updateNews = async (req, res) => {
     };
 
     // ✅ IMAGES
-    if (images) {
+    if (images !== undefined) {
       const imgArray = Array.isArray(images) ? images : [];
       updateData.images = imgArray;
       updateData.image = imgArray.length > 0 ? imgArray[0] : "";
     }
 
-    // ✅ TITLE + SLUG
+    // ✅ TITLE
     if (title) {
       const uniqueId = Math.random().toString(36).substring(2, 6);
 
@@ -263,20 +217,21 @@ exports.updateNews = async (req, res) => {
     }
 
     // ✅ SECTIONS
-    if (sections) {
+    if (sections !== undefined) {
       updateData.sections = Array.isArray(sections)
         ? sections.map((s) => s.toLowerCase())
         : [];
     }
 
-    // ✅ 🔥 ADD THIS (IMPORTANT)
-    if (categories) {
+    // ✅ CATEGORIES
+    if (categories !== undefined) {
       updateData.categories = Array.isArray(categories)
         ? categories
         : [];
     }
 
-    if (tags) {
+    // ✅ TAGS (CRITICAL FIX)
+    if (tags !== undefined) {
       updateData.tags = Array.isArray(tags)
         ? tags
         : [];
@@ -324,7 +279,7 @@ exports.approveNews = async (req, res) => {
         status: "approved",
         adminComment: comment || "",
       },
-      { new: true },
+      { new: true }
     );
 
     if (!news) {
