@@ -2,24 +2,8 @@ import { Link } from "react-router-dom";
 
 const FALLBACK_IMG = "/no-image.jpg";
 
-// 🔥 SAFE IMAGE HANDLER (SUPPORTS MULTIPLE IMAGES)
-// const getImage = (news) => {
-//   // 1️⃣ check multiple images
-//   if (Array.isArray(news.images) && news.images.length > 0) {
-//     return news.images[0];
-//   }
-
-//   // 2️⃣ fallback to single image
-//   if (news.image && news.image.trim() !== "") {
-//     return news.image;
-//   }
-
-//   return FALLBACK_IMG;
-// };
-
-
+// ================= IMAGE =================
 const getImage = (news) => {
-  // 1️⃣ check multiple images (VALID URL only)
   if (
     Array.isArray(news.images) &&
     news.images.length > 0 &&
@@ -29,7 +13,6 @@ const getImage = (news) => {
     return news.images[0];
   }
 
-  // 2️⃣ fallback to single image
   if (news.image && news.image.trim() !== "") {
     return news.image;
   }
@@ -48,8 +31,26 @@ const NewsCard = ({ news }) => {
       : news.title
     : "No Title";
 
-  // 🔥 SAFE SLUG
   const articleLink = news.slug ? `/article/${news.slug}` : "#";
+
+  // ================= SIMPLE SHARE =================
+  const handleShare = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const url = `${window.location.origin}${articleLink}`;
+
+    if (navigator.share) {
+      navigator.share({
+        title: news.title,
+        text: news.title,
+        url,
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Link copied ✅");
+    }
+  };
 
   return (
     <Link
@@ -58,33 +59,31 @@ const NewsCard = ({ news }) => {
     >
       <div style={card}>
 
+        {/* 🔥 SIMPLE SHARE BUTTON */}
+        <button style={shareBtn} onClick={handleShare}>
+          <i className="fas fa-share"></i>
+        </button>
+
         {/* IMAGE */}
         <img
-          src={imageUrl || FALLBACK_IMG}
+          src={imageUrl}
           alt={titleText}
           style={image}
           loading="lazy"
-          onError={(e) => {
-            e.target.src = FALLBACK_IMG;
-          }}
+          onError={(e) => (e.target.src = FALLBACK_IMG)}
         />
 
         {/* CONTENT */}
         <div style={body}>
-
-          {/* CATEGORY */}
           <span style={tag}>
             {news.categories?.[0] || "News"}
           </span>
 
-          {/* TITLE */}
           <h3 style={title}>{titleText}</h3>
 
-          {/* META */}
           <div style={meta}>
             ⏰ {formatDate(news.createdAt)} • 👁 {news.views || 0}
           </div>
-
         </div>
 
       </div>
@@ -92,7 +91,7 @@ const NewsCard = ({ news }) => {
   );
 };
 
-// 📅 DATE FORMAT
+// ================= DATE =================
 const formatDate = (date) => {
   if (!date) return "Today";
 
@@ -106,8 +105,9 @@ const formatDate = (date) => {
   }
 };
 
-/* 🔥 STYLES (UNCHANGED UI) */
+// ================= STYLES =================
 const card = {
+  position: "relative",
   borderRadius: "10px",
   overflow: "hidden",
   background: "#fff",
@@ -141,6 +141,23 @@ const title = {
 const meta = {
   fontSize: "12px",
   color: "gray",
+};
+
+const shareBtn = {
+  position: "absolute",
+  top: "10px",
+  right: "10px",
+  width: "34px",
+  height: "34px",
+  borderRadius: "50%",
+  background: "rgba(0,0,0,0.6)",
+  color: "#fff",
+  border: "none",
+  cursor: "pointer",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  zIndex: 2,
 };
 
 export default NewsCard;
