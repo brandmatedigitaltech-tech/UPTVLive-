@@ -145,3 +145,51 @@ exports.addCity = async (req, res) => {
     });
   }
 };
+
+// ================= DELETE CATEGORY =================
+
+exports.deleteCategory = async (req, res) => {
+  try {
+
+    await Category.findByIdAndDelete(
+      req.params.id
+    );
+
+    res.json({
+      msg: "Category deleted",
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Delete failed",
+    });
+
+  }
+};
+
+// ================= DELETE CITY =================
+
+exports.deleteCity = async (req, res) => {
+  try {
+
+    await City.findByIdAndDelete(
+      req.params.id
+    );
+
+    res.json({
+      msg: "City deleted",
+    });
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
+      msg: "Delete failed",
+    });
+
+  }
+};

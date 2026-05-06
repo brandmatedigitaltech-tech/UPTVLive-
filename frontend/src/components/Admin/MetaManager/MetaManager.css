@@ -1,59 +1,309 @@
+/* ===================================================== */
+/* ================= MAIN CONTAINER ==================== */
+/* ===================================================== */
+
 .meta-container {
-  padding: 20px;
+  padding: 25px;
 }
+
+/* ===================================================== */
+/* ================= TITLE ============================= */
+/* ===================================================== */
 
 .meta-title {
-  margin-bottom: 20px;
+  font-size: 38px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 35px;
 }
 
+/* ===================================================== */
+/* ================= BOX =============================== */
+/* ===================================================== */
+
 .meta-box {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
+  background: #ffffff;
+
+  border-radius: 20px;
+
+  padding: 28px;
+
+  margin-bottom: 35px;
+
+  border: 1px solid #e5e7eb;
+
+  box-shadow:
+    0 4px 10px rgba(0, 0, 0, 0.04),
+    0 1px 3px rgba(0, 0, 0, 0.06);
 }
+
+/* ===================================================== */
+/* ================= SECTION TITLE ===================== */
+/* ===================================================== */
+
+.meta-box h3 {
+  font-size: 30px;
+
+  font-weight: 700;
+
+  color: #111827;
+
+  margin-bottom: 24px;
+}
+
+/* ===================================================== */
+/* ================= FORM ============================== */
+/* ===================================================== */
 
 .meta-form {
   display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
+
+  gap: 14px;
+
+  margin-bottom: 28px;
 }
+
+/* ===================================================== */
+/* ================= INPUT ============================= */
+/* ===================================================== */
 
 .meta-form input {
   flex: 1;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
+
+  height: 58px;
+
+  border: 1px solid #d1d5db;
+
+  border-radius: 14px;
+
+  padding: 0 18px;
+
+  font-size: 16px;
+
+  background: #f9fafb;
+
+  outline: none;
+
+  transition: 0.3s ease;
 }
 
-.meta-form button {
-  padding: 10px 20px;
-  border: none;
-  background: #0d6efd;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
+.meta-form input:focus {
+  border-color: #2563eb;
+
+  background: #ffffff;
+
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
 }
+
+/* ===================================================== */
+/* ================= ADD BUTTON ======================== */
+/* ===================================================== */
+
+.meta-form button {
+  min-width: 130px;
+
+  height: 58px;
+
+  border: none;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #2563eb,
+    #1d4ed8
+  );
+
+  color: white;
+
+  font-size: 16px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition: 0.3s ease;
+}
+
+.meta-form button:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
+}
+
+/* ===================================================== */
+/* ================= LIST ============================== */
+/* ===================================================== */
 
 .meta-list {
   display: flex;
+
   flex-direction: column;
-  gap: 10px;
+
+  gap: 18px;
 }
+
+/* ===================================================== */
+/* ================= ITEM ============================== */
+/* ===================================================== */
 
 .meta-item {
   display: flex;
+
   justify-content: space-between;
+
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #eee;
+
+  gap: 20px;
+
+  padding: 18px 22px;
+
+  border-radius: 16px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
 }
 
+.meta-item:hover {
+  background: #eff6ff;
+
+  border-color: #bfdbfe;
+
+  transform: translateY(-1px);
+}
+
+/* ===================================================== */
+/* ================= ITEM TEXT ========================= */
+/* ===================================================== */
+
+.meta-item span {
+  font-size: 18px;
+
+  font-weight: 700;
+
+  color: #111827;
+
+  text-transform: capitalize;
+
+  word-break: break-word;
+}
+
+/* ===================================================== */
+/* ================= DELETE BUTTON ===================== */
+/* ===================================================== */
+
 .delete-btn {
-  background: red;
-  color: white;
+  width: 120px !important;
+
+  height: 48px;
+
   border: none;
-  padding: 6px 14px;
-  border-radius: 5px;
+
+  border-radius: 14px;
+
+  background: linear-gradient(
+    135deg,
+    #ef4444,
+    #dc2626
+  );
+
+  color: white;
+
+  font-size: 15px;
+
+  font-weight: 700;
+
   cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  flex: unset !important;
+
+  max-width: 120px;
+
+  min-width: 120px;
+
+  transition: 0.3s ease;
+}
+
+.delete-btn:hover {
+  transform: translateY(-2px);
+
+  box-shadow: 0 8px 18px rgba(239, 68, 68, 0.25);
+}
+/* ===================================================== */
+/* ================= LOADING =========================== */
+/* ===================================================== */
+
+.meta-container p {
+  font-size: 16px;
+
+  color: #475569;
+}
+
+/* ===================================================== */
+/* ================= EMPTY ============================= */
+/* ===================================================== */
+
+.meta-empty {
+  padding: 22px;
+
+  text-align: center;
+
+  border-radius: 14px;
+
+  background: #f8fafc;
+
+  border: 1px dashed #cbd5e1;
+
+  color: #64748b;
+
+  font-size: 15px;
+}
+
+/* ===================================================== */
+/* ================= MOBILE ============================ */
+/* ===================================================== */
+
+@media (max-width: 768px) {
+
+  .meta-container {
+    padding: 15px;
+  }
+
+  .meta-title {
+    font-size: 28px;
+  }
+
+  .meta-box {
+    padding: 18px;
+  }
+
+  .meta-box h3 {
+    font-size: 24px;
+  }
+
+  .meta-form {
+    flex-direction: column;
+  }
+
+  .meta-form button {
+    width: 100%;
+  }
+
+  .meta-item {
+    flex-direction: column;
+
+    align-items: flex-start;
+  }
+
+  .delete-btn {
+    width: 100% !important;
+  }
+
 }
