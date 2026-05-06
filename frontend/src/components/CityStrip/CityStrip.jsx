@@ -1,34 +1,83 @@
-import React from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  Link,
+  useLocation,
+} from "react-router-dom";
+
 import "./CityStrip.css";
 
-const cities = [
-  { name: "कानपुर", slug: "kanpur" },
-  { name: "लखनऊ", slug: "lucknow" },
-  { name: "अयोध्या", slug: "ayodhya" },
-  { name: "आगरा", slug: "agra" },
-  { name: "वाराणसी", slug: "varanasi" },
-  { name: "गोरखपुर", slug: "gorakhpur" },
-  { name: "प्रयागराज", slug: "prayagraj" },
-  { name: "गाज़ियाबाद", slug: "ghaziabad" }
-];
+import API from "../../services/api";
 
 const CityStrip = () => {
-  const location = useLocation();
+
+  const location =
+    useLocation();
+
+  // ================= STATE =================
+  const [cities, setCities] =
+    useState([]);
+
+  // ================= FETCH =================
+  useEffect(() => {
+
+    const fetchCities =
+      async () => {
+
+        try {
+
+          const res =
+            await API.get(
+              "/meta/cities"
+            );
+
+          const data =
+            Array.isArray(
+              res.data
+            )
+              ? res.data
+              : [];
+
+          setCities(data);
+
+        } catch (err) {
+
+          console.log(
+            "CityStrip Error:",
+            err
+          );
+        }
+      };
+
+    fetchCities();
+
+  }, []);
 
   return (
     <div className="city-strip">
 
       {cities.map((city) => {
-        const isActive = location.pathname === `/city/${city.slug}`;
+
+        const isActive =
+          location.pathname ===
+          `/city/${city.slug}`;
 
         return (
           <Link
-            key={city.slug}
+            key={city._id}
             to={`/city/${city.slug}`}
-            className={`city-link ${isActive ? "active" : ""}`}
+            className={`city-link ${
+              isActive
+                ? "active"
+                : ""
+            }`}
           >
+
             {city.name}
+
           </Link>
         );
       })}

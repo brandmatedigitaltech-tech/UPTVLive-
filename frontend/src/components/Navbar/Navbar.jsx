@@ -1,39 +1,91 @@
 import "./Navbar.css";
-import { Link, useLocation } from "react-router-dom";
+
+import {
+  Link,
+  useLocation,
+} from "react-router-dom";
+
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import API from "../../services/api";
 
 const Navbar = () => {
+
   const location = useLocation();
 
-  // 🔥 CATEGORY LIST (CLEAN + SCALABLE)
-  const categories = [
-    "nation",
-    "state",
-    "world",
-    "special",
-    "sports",
-    "business",
-    "tech",
-    "auto",
-    "lifestyle",
-    "career",
+  // ================= STATE =================
+  const [categories, setCategories] =
+    useState([]);
 
-  ];
+  // ================= FETCH =================
+  useEffect(() => {
 
-  // 🔥 ACTIVE CHECK
+    const fetchCategories =
+      async () => {
+        try {
+
+          const res =
+            await API.get(
+              "/meta/categories"
+            );
+
+          const data =
+            Array.isArray(
+              res.data
+            )
+              ? res.data
+              : [];
+
+          setCategories(data);
+
+        } catch (err) {
+
+          console.log(
+            "Navbar Error:",
+            err
+          );
+
+        }
+      };
+
+    fetchCategories();
+
+  }, []);
+
+  // ================= ACTIVE =================
   const isActive = (path) => {
-    return location.pathname.startsWith(path);
+    return location.pathname.startsWith(
+      path
+    );
+  };
+
+  // ================= LABEL =================
+  const formatLabel = (text) => {
+
+    if (!text) return "";
+
+    return (
+      text.charAt(0).toUpperCase() +
+      text.slice(1)
+    );
   };
 
   return (
     <nav>
       <div className="container">
+
         <div className="nav-inner">
 
-          {/* HOME */}
+          {/* ================= HOME ================= */}
           <Link
             to="/"
             className={`nav-item ${
-              location.pathname === "/" ? "active" : ""
+              location.pathname === "/"
+                ? "active"
+                : ""
             }`}
           >
             Home
@@ -41,20 +93,31 @@ const Navbar = () => {
 
           <div className="nav-divider"></div>
 
-          {/* 🔥 ALL CATEGORIES */}
-          {categories.map((cat, index) => (
+          {/* ================= DYNAMIC CATEGORY ================= */}
+          {categories.map((cat) => (
+
             <Link
-              key={cat}
-              to={`/category/${cat}`}
+              key={cat._id}
+              to={`/category/${cat.name}`}
               className={`nav-item ${
-                isActive(`/category/${cat}`) ? "active" : ""
+                isActive(
+                  `/category/${cat.name}`
+                )
+                  ? "active"
+                  : ""
               }`}
             >
-              {cat === "video" ? "📹 Video" : cat.charAt(0).toUpperCase() + cat.slice(1)}
+
+              {cat.name === "video"
+                ? "📹 Video"
+                : formatLabel(cat.name)}
+
             </Link>
+
           ))}
 
         </div>
+
       </div>
     </nav>
   );

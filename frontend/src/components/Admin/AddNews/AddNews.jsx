@@ -1,164 +1,268 @@
-import { useEffect, useState, useRef } from "react";
+import {
+  useEffect,
+  useState,
+  useRef,
+} from "react";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
 import API from "../../../services/api";
+
 import Quill from "quill";
+
 import "quill/dist/quill.snow.css";
+
 import "./AddNews.css";
 
-const cities = [
-  "कानपुर","लखनऊ","अयोध्या","आगरा",
-  "वाराणसी","गोरखपुर","प्रयागराज","गाज़ियाबाद",
-];
-
-const sectionsList = ["hero", "breaking", "newsgrid", "sidebar", "special"];
+// =====================================================
+// ================= COMPONENT =========================
+// =====================================================
 
 const AddNews = () => {
+  const navigate = useNavigate();
+
+  // =====================================================
+  // ================= FORM ==============================
+  // =====================================================
+
   const [form, setForm] = useState({
     title: "",
     content: "",
-    sections: "",
-    tags : "",
-    categories : "",
-
     youtubeUrl: "",
     images: [],
   });
 
-  const [categoriesList, setCategoriesList] = useState([]);
-  const [tagInput, setTagInput] = useState("");
-  const [imageFiles, setImageFiles] = useState([]);
-  const [preview, setPreview] = useState([]);
-  const [dragActive, setDragActive] = useState(false);
-  const [loading, setLoading] = useState(false);
+  // =====================================================
+  // ================= STATES ============================
+  // =====================================================
+
+  const [imageFiles, setImageFiles] =
+    useState([]);
+
+  const [preview, setPreview] =
+    useState([]);
+
+  const [dragActive, setDragActive] =
+    useState(false);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [uploading, setUploading] =
+    useState(false);
+
+  // =====================================================
+  // ================= EDITOR ============================
+  // =====================================================
 
   const editorRef = useRef(null);
+
   const quillRef = useRef(null);
 
-  // ================= INIT =================
+  // =====================================================
+  // ================= QUILL INIT ========================
+  // =====================================================
+
   useEffect(() => {
-    fetchMeta();
+    if (
+      editorRef.current &&
+      !quillRef.current
+    ) {
+      quillRef.current = new Quill(
+        editorRef.current,
+        {
+          theme: "snow",
 
-    if (!quillRef.current) {
-      quillRef.current = new Quill(editorRef.current, {
-        theme: "snow",
-        placeholder: "Write news content...",
-        modules: {
-          toolbar: [
-            [{ header: [1, 2, 3, false] }],
-            ["bold", "italic", "underline"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            ["image", "link"],
-            ["clean"],
-          ],
-        },
-      });
+          placeholder:
+            "Write news content...",
 
-      quillRef.current.on("text-change", () => {
-        let html = quillRef.current.root.innerHTML;
+          modules: {
+            toolbar: [
+              [
+                {
+                  header: [
+                    1,
+                    2,
+                    3,
+                    false,
+                  ],
+                },
+              ],
 
-        html = html
-          .replace(/<span class="ql-ui".*?<\/span>/g, "")
-          .replace(/contenteditable="false"/g, "")
-          .replace(/data-list="[^"]*"/g, "")
-          .replace(/class="ql-[^"]*"/g, "")
-          .replace(/style="[^"]*"/g, "")
-          .replace(/<p><br><\/p>/g, "");
+              [
+                "bold",
+                "italic",
+                "underline",
+              ],
 
-        setForm((prev) => ({
-          ...prev,
-          content: html,
-        }));
-      });
+              [
+                {
+                  list: "ordered",
+                },
+
+                {
+                  list: "bullet",
+                },
+              ],
+
+              [
+                "image",
+                "link",
+              ],
+
+              ["clean"],
+            ],
+          },
+        }
+      );
+
+      // ================= CONTENT CHANGE =================
+
+      quillRef.current.on(
+        "text-change",
+        () => {
+          let html =
+            quillRef.current.root.innerHTML;
+
+          // ✅ CLEAN QUILL GARBAGE
+          html = html
+            .replace(
+              /<span class="ql-ui".*?<\/span>/g,
+              ""
+            )
+
+            .replace(
+              /contenteditable="false"/g,
+              ""
+            )
+
+            .replace(
+              /data-list="[^"]*"/g,
+              ""
+            )
+
+            .replace(
+              /class="ql-[^"]*"/g,
+              ""
+            )
+
+            .replace(
+              /style="[^"]*"/g,
+              ""
+            )
+
+            .replace(
+              /<p><br><\/p>/g,
+              ""
+            );
+
+          setForm((prev) => ({
+            ...prev,
+            content: html,
+          }));
+        }
+      );
     }
+
+    // ================= CLEANUP =================
+
+    return () => {
+      preview.forEach((img) => {
+        if (
+          typeof img === "string" &&
+          img.startsWith("blob:")
+        ) {
+          URL.revokeObjectURL(img);
+        }
+      });
+    };
+
   }, []);
 
-  // ================= FETCH META =================
-  const fetchMeta = async () => {
-    try {
-      const res = await API.get("/meta/categories");
-      setCategoriesList(res.data);
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  // =====================================================
+  // ================= IMAGE =============================
+  // =====================================================
 
-  // ================= SUBMIT =================
-  const submit = async () => {
-    if (!form.title || !form.content) {
-      return alert("Title & Content required ❌");
-    }
-
-    try {
-      setLoading(true);
-
-      await API.post("/news", form);
-
-      alert("Submitted for approval ✅");
-
-      setForm({
-        title: "",
-        content: "",
-        categories: [],
-        tags: [],
-        sections: [],
-        youtubeUrl: "",
-        images: [],
-      });
-
-      setPreview([]);
-      setImageFiles([]);
-
-      if (quillRef.current) {
-        quillRef.current.setText("");
-      }
-
-    } catch {
-      alert("Submit failed ❌");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ================= IMAGE =================
   const handleFile = (files) => {
-    const fileArray = Array.from(files);
+    const fileArray =
+      Array.from(files);
 
     setImageFiles(fileArray);
 
-    const previewUrls = fileArray.map((file) =>
-      URL.createObjectURL(file)
-    );
+    // ✅ REMOVE OLD BLOBS
+    preview.forEach((img) => {
+      if (
+        typeof img === "string" &&
+        img.startsWith("blob:")
+      ) {
+        URL.revokeObjectURL(img);
+      }
+    });
+
+    // ✅ CREATE PREVIEW
+    const previewUrls =
+      fileArray.map((file) =>
+        URL.createObjectURL(file)
+      );
 
     setPreview(previewUrls);
   };
 
-  // 🔥 FIXED
-  const handleChange = (e) => handleFile(e.target.files);
-
-  // 🔥 FIXED DRAG
-  const handleDrop = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFile(e.dataTransfer.files);
-    }
+  const handleChange = (e) => {
+    handleFile(e.target.files);
   };
+
+  // =====================================================
+  // ================= DRAG ==============================
+  // =====================================================
 
   const handleDrag = (e) => {
     e.preventDefault();
+
     e.stopPropagation();
+
     setDragActive(
-      e.type === "dragenter" || e.type === "dragover"
+      e.type === "dragenter" ||
+      e.type === "dragover"
     );
   };
 
-  // ================= UPLOAD =================
+  // =====================================================
+  // ================= DROP ==============================
+  // =====================================================
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+
+    e.stopPropagation();
+
+    setDragActive(false);
+
+    if (
+      e.dataTransfer.files &&
+      e.dataTransfer.files.length > 0
+    ) {
+      handleFile(
+        e.dataTransfer.files
+      );
+    }
+  };
+
+  // =====================================================
+  // ================= UPLOAD ============================
+  // =====================================================
+
   const uploadImage = async () => {
-    if (!imageFiles.length) return alert("Select images ❌");
+    if (!imageFiles.length) {
+      return alert(
+        "Select images first ❌"
+      );
+    }
 
     try {
-      setLoading(true);
+      setUploading(true);
 
       const data = new FormData();
 
@@ -166,126 +270,312 @@ const AddNews = () => {
         data.append("images", file);
       });
 
-      const res = await API.post("/upload/upload-multiple", data);
+      const res = await API.post(
+        "/upload/upload-multiple",
+        data
+      );
 
       setForm((prev) => ({
         ...prev,
-        images: res.data.images,
+        images:
+          res.data.images || [],
       }));
 
-      alert("Images uploaded ✅");
+      alert(
+        "Images uploaded successfully ✅"
+      );
 
-    } catch {
+    } catch (err) {
+      console.error(err);
+
       alert("Upload failed ❌");
+
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // =====================================================
+  // ================= RESET =============================
+  // =====================================================
+
+  const resetForm = () => {
+    setForm({
+      title: "",
+      content: "",
+      youtubeUrl: "",
+      images: [],
+    });
+
+    setImageFiles([]);
+
+    preview.forEach((img) => {
+      if (
+        typeof img === "string" &&
+        img.startsWith("blob:")
+      ) {
+        URL.revokeObjectURL(img);
+      }
+    });
+
+    setPreview([]);
+
+    // ✅ RESET EDITOR
+    if (quillRef.current) {
+      quillRef.current.setText("");
+    }
+  };
+
+  // =====================================================
+  // ================= SUBMIT ============================
+  // =====================================================
+
+  const submit = async () => {
+    // ✅ TITLE VALIDATION
+    if (
+      !form.title ||
+      form.title.trim() === ""
+    ) {
+      return alert(
+        "Title is required ❌"
+      );
+    }
+
+    // ✅ CONTENT VALIDATION
+    if (
+      !form.content ||
+      form.content.trim() === ""
+    ) {
+      return alert(
+        "Content is required ❌"
+      );
+    }
+
+    try {
+      setLoading(true);
+
+      // ✅ SUBMIT
+      await API.post(
+        "/news",
+        form
+      );
+
+      alert(
+        "News submitted for approval ✅"
+      );
+
+      // ✅ RESET
+      resetForm();
+
+      // ✅ REDIRECT TO DASHBOARD
+      navigate("/dashboard");
+
+    } catch (err) {
+      console.error(err);
+
+      alert("Submit failed ❌");
+
     } finally {
       setLoading(false);
     }
   };
 
-  // ================= TAG =================
-  const addTag = () => {
-    if (!tagInput.trim()) return;
-
-    const newTag = tagInput.trim();
-
-    if (form.tags.includes(newTag)) return;
-
-    setForm((prev) => ({
-      ...prev,
-      tags: [...prev.tags, newTag],
-    }));
-
-    setTagInput("");
-  };
-
-  const removeItem = (type, index) => {
-    setForm((prev) => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== index),
-    }));
-  };
+  // =====================================================
+  // ================= RENDER ============================
+  // =====================================================
 
   return (
     <div className="cms-container">
 
+      {/* HEADER */}
       <div className="cms-header">
-        <h2>📰 Create News</h2>
-        <p>Professional News CMS Editor</p>
+        <h2>
+          📰 Create News
+        </h2>
+
+        <p>
+          Professional News CMS Editor
+        </p>
       </div>
 
+      {/* GRID */}
       <div className="cms-grid">
 
-        {/* LEFT */}
+        {/* ================================================= */}
+        {/* ================= LEFT ========================== */}
+        {/* ================================================= */}
+
         <div className="cms-left">
 
+          {/* TITLE */}
           <div className="card">
-            <label>Title</label>
+            <label>
+              News Title
+            </label>
+
             <input
               className="input"
+
+              placeholder="Enter news title..."
+
               value={form.title}
+
               onChange={(e) =>
-                setForm({ ...form, title: e.target.value })
+                setForm({
+                  ...form,
+
+                  title:
+                    e.target.value,
+                })
               }
             />
           </div>
 
+          {/* CONTENT */}
           <div className="card">
-            <label>Content</label>
-            <div className="editor" ref={editorRef}></div>
+            <label>
+              News Content
+            </label>
+
+            <div
+              className="editor"
+              ref={editorRef}
+            />
           </div>
-
-
 
         </div>
 
-        {/* RIGHT */}
+        {/* ================================================= */}
+        {/* ================= RIGHT ========================= */}
+        {/* ================================================= */}
+
         <div className="cms-right">
 
+          {/* YOUTUBE */}
           <div className="card">
-            <label>YouTube Video Link</label>
+            <label>
+              YouTube Video Link
+            </label>
+
             <input
               className="input"
-              value={form.youtubeUrl}
+
+              placeholder="https://youtube.com/..."
+
+              value={
+                form.youtubeUrl
+              }
+
               onChange={(e) =>
-                setForm({ ...form, youtubeUrl: e.target.value })
+                setForm({
+                  ...form,
+
+                  youtubeUrl:
+                    e.target.value,
+                })
               }
             />
           </div>
 
+          {/* IMAGE */}
           <div className="card">
-            <label>Upload Images</label>
+
+            <label>
+              Upload Images
+            </label>
 
             <div
-              className={`drop-zone ${dragActive ? "active" : ""}`}
-              onDragEnter={handleDrag}
-              onDragOver={handleDrag}
-              onDragLeave={handleDrag}
+              className={`drop-zone ${
+                dragActive
+                  ? "active"
+                  : ""
+              }`}
+
+              onDragEnter={
+                handleDrag
+              }
+
+              onDragOver={
+                handleDrag
+              }
+
+              onDragLeave={
+                handleDrag
+              }
+
               onDrop={handleDrop}
             >
               <input
                 type="file"
+
                 multiple
-                onChange={handleChange}
+
+                onChange={
+                  handleChange
+                }
               />
 
-              {preview.length === 0 ? (
-                <p>Drag & Drop or Click</p>
+              {preview.length ===
+              0 ? (
+                <p>
+                  Drag & Drop or
+                  Click
+                </p>
               ) : (
                 <div>
-                  {preview.map((img, i) => (
-                    <img key={i} src={img} className="preview-img" />
-                  ))}
+                  {preview.map(
+                    (
+                      img,
+                      i
+                    ) => (
+                      <img
+                        key={i}
+
+                        src={img}
+
+                        className="preview-img"
+
+                        alt="preview"
+                      />
+                    )
+                  )}
                 </div>
               )}
             </div>
 
-            <button className="upload-btn" onClick={uploadImage}>
-              {loading ? "Uploading..." : "Upload Images"}
+            {/* UPLOAD BUTTON */}
+            <button
+              className="upload-btn"
+
+              onClick={
+                uploadImage
+              }
+
+              disabled={
+                uploading
+              }
+            >
+              {uploading
+                ? "Uploading..."
+                : "Upload Images"}
             </button>
+
           </div>
 
-          <button className="submit-btn" onClick={submit}>
-            {loading ? "Publishing..." : "🚀 Publish News"}
+          {/* SUBMIT */}
+          <button
+            className="submit-btn"
+
+            onClick={submit}
+
+            disabled={
+              loading ||
+              uploading
+            }
+          >
+            {loading
+              ? "Publishing..."
+              : "🚀 Publish News"}
           </button>
 
         </div>

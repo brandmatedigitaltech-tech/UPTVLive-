@@ -1,136 +1,163 @@
 const News = require("../models/News");
-const slugify = require("slugify");
+const createSlug = require("../utils/slugify");
 
-// ================= CREATE =================
-// exports.createNews = async (req, res) => {
-//   try {
-//     const { title, images, youtubeUrl, sections } = req.body;
+// ================= HELPERS =================
 
-//     if (!title) {
-//       return res.status(400).json({ msg: "Title is required" });
-//     }
+// ✅ SAFE ARRAY
+const safeArray = (value) => {
+  return Array.isArray(value) ? value : [];
+};
 
-//     // 🔥 UNIQUE SLUG (FIX DUPLICATE ISSUE)
-//     const uniqueId = Math.random().toString(36).substring(2, 6);
+// ✅ CLEAN STRING
+const safeString = (value) => {
+  return typeof value === "string" ? value.trim() : "";
+};
 
-//     const slug =
-//       slugify(title, { lower: true, strict: true }) +
-//       "-" +
-//       Date.now() +
-//       "-" +
-//       uniqueId;
+// ✅ SEO DESCRIPTION
+const generateSeoDescription = (html = "") => {
+  return html
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .substring(0, 160);
+};
 
-//     const news = await News.create({
-//       ...req.body,
+// ✅ UNIQUE SLUG
+const generateUniqueSlug = async (title) => {
+  const baseSlug = createSlug(title);
 
-//       slug,
+  let slug = baseSlug;
+  let counter = 1;
 
-//       // 🔥 SAFE ARRAY
-//       images: Array.isArray(images) ? images : [],
+  while (await News.findOne({ slug })) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
 
-//       youtubeUrl: youtubeUrl || "",
+  return slug;
+};
 
-//       // 🔥 NORMALIZE SECTIONS
-//       sections: Array.isArray(sections)
-//         ? sections.map((s) => s.toLowerCase())
-//         : [],
-
-//       status: "pending",
-//       views: 0,
-//       author: req.user?.email || "Writer",
-//     });
-
-//     res.status(201).json(news);
-//   } catch (err) {
-//     console.error("Create Error:", err);
-//     res.status(500).json({ msg: err.message });
-//   }
-// };
-
+// ================= CREATE NEWS =================
 exports.createNews = async (req, res) => {
   try {
-    const { title, youtubeUrl, sections, tags, categories } = req.body;
+    const {
+      title,
+      content,
+      youtubeUrl,
+      sections,
+      tags,
+      categories,
+    } = req.body;
 
-    if (!title || title.trim() === "") {
-      return res.status(400).json({ msg: "Title is required" });
+    // ✅ TITLE VALIDATION
+    if (!title || safeString(title) === "") {
+      return res.status(400).json({
+        msg: "Title is required ❌",
+      });
     }
 
-    const uniqueId = Math.random().toString(36).substring(2, 6);
+    // ✅ IMAGES
+    const images = safeArray(req.body.images);
 
-    const slug =
-      slugify(title, { lower: true, strict: true }) +
-      "-" +
-      Date.now() +
-      "-" +
-      uniqueId;
-
-    const images = Array.isArray(req.body.images) ? req.body.images : [];
+    // ✅ MAIN IMAGE
     const image = images[0] || "";
 
+    // ✅ UNIQUE SEO SLUG
+    const slug = await generateUniqueSlug(title);
+
+    // ✅ SEO DESCRIPTION
+    const seoDescription = generateSeoDescription(content);
+
+    // ✅ CREATE NEWS
     const news = await News.create({
-      title: title.trim(),
-      content: req.body.content || "",
+      title: safeString(title),
+
+      content: content || "",
 
       slug,
+
       image,
+
       images,
 
-      youtubeUrl: youtubeUrl || "",
+      youtubeUrl: safeString(youtubeUrl),
 
-      // 🔥 FIX (IMPORTANT)
-      sections: Array.isArray(sections)
-        ? sections.map((s) => s.toLowerCase())
-        : [],
+      sections: safeArray(sections).map((s) =>
+        String(s).toLowerCase()
+      ),
 
-      tags: Array.isArray(tags) ? tags : [],   // ✅ FIXED
-      categories: Array.isArray(categories) ? categories : [],
+      tags: safeArray(tags),
+
+      categories: safeArray(categories),
+
+      seoDescription,
 
       status: "pending",
+
       views: 0,
+
       author: req.user?.email || "Writer",
     });
 
-    res.status(201).json(news);
+    return res.status(201).json(news);
 
   } catch (err) {
     console.error("Create Error:", err);
-    res.status(500).json({ msg: err.message });
+
+    return res.status(500).json({
+      msg: "Failed to create news ❌",
+    });
   }
 };
 
-// ================= GET ALL =================
+// ================= GET ALL APPROVED =================
 exports.getNews = async (req, res) => {
   try {
-    const news = await News.find({ status: "approved" })
+    const news = await News.find({
+      status: "approved",
+    })
       .sort({ createdAt: -1 })
       .lean();
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Get News Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to fetch news ❌",
+    });
   }
 };
 
-// ================= APPROVED =================
+// ================= APPROVED NEWS =================
 exports.getApprovedNews = async (req, res) => {
   try {
-    const news = await News.find({ status: "approved" })
+    const news = await News.find({
+      status: "approved",
+    })
       .sort({ createdAt: -1 })
       .lean();
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Approved News Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to fetch approved news ❌",
+    });
   }
 };
 
 // ================= CATEGORY =================
 exports.getByCategory = async (req, res) => {
   try {
-    const category = req.params.category;
+    const category = safeString(req.params.category);
 
     const news = await News.find({
       status: "approved",
+
       categories: {
         $elemMatch: {
           $regex: new RegExp(`^${category}$`, "i"),
@@ -140,60 +167,75 @@ exports.getByCategory = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Category Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to fetch category news ❌",
+    });
   }
 };
 
 // ================= CITY =================
+// ================= CITY =================
 exports.getByCity = async (req, res) => {
+
   try {
-    const cityMap = {
-      lucknow: "लखनऊ",
-      kanpur: "कानपुर",
-      ayodhya: "अयोध्या",
-      agra: "आगरा",
-      varanasi: "वाराणसी",
-      gorakhpur: "गोरखपुर",
-      prayagraj: "प्रयागराज",
-      ghaziabad: "गाज़ियाबाद",
-    };
 
-    const cityKey = req.params.city?.toLowerCase();
-    const city = cityMap[cityKey];
+    // ✅ URL CITY
+    const city =
+      safeString(req.params.city)
+        .toLowerCase()
+        .trim();
 
-    if (!city) {
-      return res.status(404).json({ msg: "City not found" });
-    }
+    // ✅ FIND NEWS
+    const news =
+      await News.find({
 
-    // 🔥 HYBRID (FAST + SAFE)
-    const news = await News.find({
-      status: "approved",
-      tags: {
-        $elemMatch: {
-          $regex: new RegExp(`^${city}$`, "i"),
+        status: "approved",
+
+        tags: {
+          $elemMatch: {
+            $regex: new RegExp(
+              `^${city}$`,
+              "i"
+            ),
+          },
         },
-      },
-    })
-      .sort({ createdAt: -1 })
-      .lean();
 
-    res.json(news);
+      })
+        .sort({
+          createdAt: -1,
+        })
+        .lean();
+
+    return res.json(news);
 
   } catch (err) {
-    console.error("City Error:", err);
-    res.status(500).json({ msg: err.message });
+
+    console.error(
+      "City Error:",
+      err
+    );
+
+    return res.status(500).json({
+      msg:
+        "Failed to fetch city news ❌",
+    });
   }
 };
-
 // ================= SECTION =================
 exports.getBySection = async (req, res) => {
   try {
-    const section = req.params.section.toLowerCase();
+    const section = safeString(
+      req.params.section
+    ).toLowerCase();
 
     const news = await News.find({
       status: "approved",
+
       sections: {
         $elemMatch: {
           $regex: new RegExp(`^${section}$`, "i"),
@@ -203,120 +245,175 @@ exports.getBySection = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean();
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
     console.error("Section Error:", err);
-    res.status(500).json({ msg: err.message });
+
+    return res.status(500).json({
+      msg: "Failed to fetch section news ❌",
+    });
   }
 };
 
-// ================= SINGLE =================
+// ================= SINGLE NEWS =================
 exports.getSingleNews = async (req, res) => {
   try {
-    // 🔥 ATOMIC VIEW INCREMENT (FAST + SAFE)
+    const slug = safeString(req.params.slug);
+
+    // ✅ INCREMENT VIEWS
     const news = await News.findOneAndUpdate(
-      { slug: req.params.slug },
-      { $inc: { views: 1 } },
-      { new: true },
-    );
+      { slug },
+
+      {
+        $inc: {
+          views: 1,
+        },
+      },
+
+      {
+        new: true,
+      }
+    ).lean();
 
     if (!news) {
-      return res.status(404).json({ msg: "Not found" });
+      return res.status(404).json({
+        msg: "News not found ❌",
+      });
     }
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Single News Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to fetch article ❌",
+    });
   }
 };
 
-// ================= UPDATE =================
-// ================= UPDATE =================
+// ================= UPDATE NEWS =================
 exports.updateNews = async (req, res) => {
   try {
     const {
-      content,
-      images,
-      youtubeUrl,
       title,
+      content,
+      youtubeUrl,
       sections,
       categories,
       tags,
+      images,
     } = req.body;
 
-    const updateData = {
-      ...(content && { content }),
-      ...(youtubeUrl && { youtubeUrl }),
-    };
-
-    // ✅ IMAGES
-    if (images) {
-      const imgArray = Array.isArray(images) ? images : [];
-      updateData.images = imgArray;
-      updateData.image = imgArray.length > 0 ? imgArray[0] : "";
-    }
-
-    // ✅ TITLE + SLUG
-    if (title) {
-      const uniqueId = Math.random().toString(36).substring(2, 6);
-
-      updateData.title = title;
-      updateData.slug =
-        slugify(title, { lower: true, strict: true }) +
-        "-" +
-        Date.now() +
-        "-" +
-        uniqueId;
-    }
-
-    // ✅ SECTIONS
-    if (sections) {
-      updateData.sections = Array.isArray(sections)
-        ? sections.map((s) => s.toLowerCase())
-        : [];
-    }
-
-    // ✅ 🔥 ADD THIS (IMPORTANT)
-    if (categories) {
-      updateData.categories = Array.isArray(categories)
-        ? categories
-        : [];
-    }
-
-    if (tags) {
-      updateData.tags = Array.isArray(tags)
-        ? tags
-        : [];
-    }
-
-    const updated = await News.findByIdAndUpdate(
-      req.params.id,
-      updateData,
-      { new: true }
+    const existingNews = await News.findById(
+      req.params.id
     );
 
-    if (!updated) {
-      return res.status(404).json({ msg: "News not found" });
+    if (!existingNews) {
+      return res.status(404).json({
+        msg: "News not found ❌",
+      });
     }
 
-    res.json(updated);
+    // ✅ UPDATE DATA
+    const updateData = {};
+
+    // ================= TITLE =================
+    if (typeof title !== "undefined") {
+      updateData.title = safeString(title);
+
+      // ✅ ONLY CHANGE SLUG IF TITLE CHANGED
+      if (
+        safeString(title) !== existingNews.title
+      ) {
+        updateData.slug =
+          await generateUniqueSlug(title);
+      }
+    }
+
+    // ================= CONTENT =================
+    if (typeof content !== "undefined") {
+      updateData.content = content;
+
+      updateData.seoDescription =
+        generateSeoDescription(content);
+    }
+
+    // ================= YOUTUBE =================
+    if (typeof youtubeUrl !== "undefined") {
+      updateData.youtubeUrl =
+        safeString(youtubeUrl);
+    }
+
+    // ================= IMAGES =================
+    if (typeof images !== "undefined") {
+      const imgArray = safeArray(images);
+
+      updateData.images = imgArray;
+
+      updateData.image =
+        imgArray.length > 0
+          ? imgArray[0]
+          : "";
+    }
+
+    // ================= SECTIONS =================
+    if (typeof sections !== "undefined") {
+      updateData.sections =
+        safeArray(sections).map((s) =>
+          String(s).toLowerCase()
+        );
+    }
+
+    // ================= CATEGORY =================
+    if (typeof categories !== "undefined") {
+      updateData.categories =
+        safeArray(categories);
+    }
+
+    // ================= TAGS =================
+    if (typeof tags !== "undefined") {
+      updateData.tags = safeArray(tags);
+    }
+
+    const updated =
+      await News.findByIdAndUpdate(
+        req.params.id,
+        updateData,
+        {
+          new: true,
+        }
+      );
+
+    return res.json(updated);
 
   } catch (err) {
-    console.error("Update error:", err);
-    res.status(500).json({ msg: "Update failed" });
+    console.error("Update Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to update news ❌",
+    });
   }
 };
 
 // ================= PENDING =================
 exports.getPendingNews = async (req, res) => {
   try {
-    const news = await News.find({ status: "pending" })
+    const news = await News.find({
+      status: "pending",
+    })
       .sort({ createdAt: -1 })
       .lean();
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Pending Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to fetch pending news ❌",
+    });
   }
 };
 
@@ -325,51 +422,128 @@ exports.approveNews = async (req, res) => {
   try {
     const { comment } = req.body;
 
-    const news = await News.findByIdAndUpdate(
-      req.params.id,
-      {
-        status: "approved",
-        adminComment: comment || "",
-      },
-      { new: true },
-    );
+    const news =
+      await News.findByIdAndUpdate(
+        req.params.id,
+        {
+          status: "approved",
+
+          adminComment:
+            safeString(comment),
+        },
+        {
+          new: true,
+        }
+      );
 
     if (!news) {
-      return res.status(404).json({ msg: "News not found" });
+      return res.status(404).json({
+        msg: "News not found ❌",
+      });
     }
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Approve Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to approve news ❌",
+    });
   }
 };
 
 // ================= DELETE =================
 exports.deleteNews = async (req, res) => {
   try {
-    const deleted = await News.findByIdAndDelete(req.params.id);
+    const deleted =
+      await News.findByIdAndDelete(
+        req.params.id
+      );
 
     if (!deleted) {
-      return res.status(404).json({ msg: "News not found" });
+      return res.status(404).json({
+        msg: "News not found ❌",
+      });
     }
 
-    res.json({ msg: "Deleted successfully" });
+    return res.json({
+      msg: "News deleted successfully ✅",
+    });
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Delete Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to delete news ❌",
+    });
   }
 };
 
 // ================= GET BY ID =================
 exports.getNewsById = async (req, res) => {
   try {
-    const news = await News.findById(req.params.id).lean();
+    const news = await News.findById(
+      req.params.id
+    ).lean();
 
     if (!news) {
-      return res.status(404).json({ msg: "News not found" });
+      return res.status(404).json({
+        msg: "News not found ❌",
+      });
     }
 
-    res.json(news);
+    return res.json(news);
+
   } catch (err) {
-    res.status(500).json({ msg: err.message });
+    console.error("Get By ID Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to fetch news ❌",
+    });
+  }
+};
+
+// ================= SEO =================
+exports.getSeoData = async (req, res) => {
+  try {
+    const slug = safeString(req.params.slug);
+
+    const news = await News.findOne({
+      slug,
+    }).lean();
+
+    if (!news) {
+      return res.status(404).json({
+        msg: "News not found ❌",
+      });
+    }
+
+    return res.json({
+      title: news.title,
+
+      description:
+        news.seoDescription ||
+
+        "Latest news updates from UPTV Live",
+
+      image:
+        news.image ||
+
+        news.images?.[0] ||
+
+        "",
+
+      slug: news.slug,
+
+      createdAt: news.createdAt,
+    });
+
+  } catch (err) {
+    console.error("SEO Error:", err);
+
+    return res.status(500).json({
+      msg: "Failed to fetch SEO data ❌",
+    });
   }
 };

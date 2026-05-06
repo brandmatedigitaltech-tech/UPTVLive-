@@ -1,0 +1,59 @@
+.meta-container {
+  padding: 20px;
+}
+
+.meta-title {
+  margin-bottom: 20px;
+}
+
+.meta-box {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.meta-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.meta-form input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.meta-form button {
+  padding: 10px 20px;
+  border: none;
+  background: #0d6efd;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.meta-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.meta-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+}

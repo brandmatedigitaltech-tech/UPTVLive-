@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+
 import {
   BrowserRouter,
   Routes,
@@ -10,14 +11,14 @@ import {
 
 import AdBanner from "./components/AdBanner";
 
-// ===== COMMON =====
+// ================= COMMON =================
 import TopBar from "./components/TopBar/TopBar";
 import Header from "./components/Header/Header";
 import Navbar from "./components/Navbar/Navbar";
 import BreakingNews from "./components/BreakingNews/BreakingNews";
 import Footer from "./components/Footer/Footer";
 
-// ===== HOME =====
+// ================= HOME =================
 import Hero from "./components/Hero/Hero";
 import NewsGrid from "./components/NewsGrid/NewsGrid";
 import CitySection from "./components/CitySection/CitySection";
@@ -26,34 +27,187 @@ import SpecialSection from "./components/SpecialSection/SpecialSection";
 import Sidebar from "./components/Sidebar/Sidebar";
 import VideoSection from "./components/VideoSection/VideoSection";
 
-// ===== PAGES =====
+// ================= PAGES =================
 import ArticlePage from "./components/ArticlePage/ArticlePage";
 import About from "./components/about/about";
 import Contact from "./components/Contact/Contact";
 import CityPage from "./components/CityPage/CityPage";
 import CategoryPage from "./components/CategoryPage/CategoryPage";
 
-// ===== ADMIN =====
+// ================= ADMIN =================
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import ReviewPage from "./pages/ReviewPage";
 
-/* ================= SCROLL ================= */
+// ======================================================
+// ================= SCROLL TO TOP ======================
+// ======================================================
+
 const ScrollToTop = () => {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+
+  }, [pathname]);
+
   return null;
 };
 
-/* ================= BASE LAYOUT ================= */
+// ======================================================
+// ================= GLOBAL SEO =========================
+// ======================================================
+
+const GlobalSeo = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+
+    // ✅ DEFAULT TITLE
+    let pageTitle =
+      "UPTV Live - Latest News Updates";
+
+    // ✅ DEFAULT DESCRIPTION
+    let description =
+      "UPTV Live provides latest breaking news, politics, city news, videos and updates.";
+
+    // ================= PAGE TITLE =================
+
+    if (path === "/") {
+      pageTitle =
+        "UPTV Live - Breaking News & Latest Updates";
+
+    } else if (path.includes("/about")) {
+      pageTitle =
+        "About Us | UPTV Live";
+
+    } else if (path.includes("/contact")) {
+      pageTitle =
+        "Contact Us | UPTV Live";
+
+    } else if (path.includes("/city/")) {
+      pageTitle =
+        "City News | UPTV Live";
+
+    } else if (
+      path.includes("/category/")
+    ) {
+      pageTitle =
+        "Category News | UPTV Live";
+
+    } else if (
+      path.includes("/article/")
+    ) {
+      pageTitle =
+        "Latest Article | UPTV Live";
+    }
+
+    // ✅ TITLE
+    document.title = pageTitle;
+
+    // ================= META =================
+
+    const updateMeta = (
+      property,
+      content,
+      isName = false
+    ) => {
+      const attr = isName
+        ? "name"
+        : "property";
+
+      let element =
+        document.querySelector(
+          `meta[${attr}="${property}"]`
+        );
+
+      if (!element) {
+        element =
+          document.createElement("meta");
+
+        element.setAttribute(attr, property);
+
+        document.head.appendChild(element);
+      }
+
+      element.setAttribute(
+        "content",
+        content
+      );
+    };
+
+    // ✅ BASIC SEO
+    updateMeta(
+      "description",
+      description,
+      true
+    );
+
+    // ✅ OPEN GRAPH
+    updateMeta(
+      "og:title",
+      pageTitle
+    );
+
+    updateMeta(
+      "og:description",
+      description
+    );
+
+    updateMeta(
+      "og:type",
+      "website"
+    );
+
+    updateMeta(
+      "og:url",
+      window.location.href
+    );
+
+    // ✅ TWITTER
+    updateMeta(
+      "twitter:card",
+      "summary_large_image",
+      true
+    );
+
+    updateMeta(
+      "twitter:title",
+      pageTitle,
+      true
+    );
+
+    updateMeta(
+      "twitter:description",
+      description,
+      true
+    );
+
+  }, [location]);
+
+  return null;
+};
+
+// ======================================================
+// ================= BASE LAYOUT ========================
+// ======================================================
+
 const BaseLayout = () => {
   return (
     <>
       <TopBar />
+
       <Header />
+
       <Navbar />
+
       <BreakingNews />
-      <TopCitySection/>
+
+      <TopCitySection />
 
       <main>
         <Outlet />
@@ -64,48 +218,50 @@ const BaseLayout = () => {
   );
 };
 
-/* ================= HOME ================= */
+// ======================================================
+// ================= HOME PAGE ==========================
+// ======================================================
+
 const HomePage = () => {
   return (
     <>
-      {/* 🔥 TOP STICKY AD (BEST CPM POSITION) */}
+      {/* TOP AD */}
       <div className="container">
         <AdBanner position="home_top" />
       </div>
 
+      {/* HERO */}
       <Hero />
 
-      {/* 🔥 AFTER HERO (HIGH VISIBILITY) */}
+      {/* HERO AD */}
       <div className="container">
         <AdBanner position="home_after_hero" />
       </div>
 
+      {/* MAIN */}
       <div className="container">
         <div className="main-layout">
 
-          {/* ================= LEFT CONTENT ================= */}
+          {/* LEFT */}
           <div className="main-content">
 
             <NewsGrid />
 
-            {/* 🔥 INLINE AD (BEST ENGAGEMENT) */}
             <AdBanner position="home_inline_1" />
 
             <CitySection />
 
-            {/* 🔥 SECOND INLINE AD */}
             <AdBanner position="home_inline_2" />
 
             <SpecialSection />
 
           </div>
 
-          {/* ================= SIDEBAR ================= */}
+          {/* RIGHT */}
           <div className="right-sidebar">
 
             <Sidebar />
 
-            {/* 🔥 SIDEBAR AD */}
             <AdBanner position="sidebar" />
 
           </div>
@@ -113,14 +269,15 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* 🔥 BEFORE VIDEO */}
+      {/* VIDEO AD */}
       <div className="container">
         <AdBanner position="home_before_video" />
       </div>
 
+      {/* VIDEO */}
       <VideoSection />
 
-      {/* 🔥 FOOTER AD */}
+      {/* FOOTER AD */}
       <div className="container">
         <AdBanner position="home_bottom" />
       </div>
@@ -128,53 +285,126 @@ const HomePage = () => {
   );
 };
 
-/* ================= PROTECTED ROUTE ================= */
-const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
+// ======================================================
+// ================= PROTECTED ROUTE ====================
+// ======================================================
+
+const ProtectedRoute = ({
+  children,
+}) => {
+  const token =
+    localStorage.getItem("token");
 
   if (!token) {
-    return <Navigate to="/admin" replace />;
+    return (
+      <Navigate
+        to="/admin"
+        replace
+      />
+    );
   }
 
   return children;
 };
 
-/* ================= 404 ================= */
+// ======================================================
+// ================= 404 PAGE ===========================
+// ======================================================
+
 const NotFound = () => {
+  useEffect(() => {
+    document.title =
+      "404 - Page Not Found | UPTV Live";
+  }, []);
+
   return (
-    <div style={{ padding: "40px", textAlign: "center" }}>
+    <div
+      style={{
+        padding: "40px",
+        textAlign: "center",
+      }}
+    >
       <h1>404</h1>
-      <p>Page not found ❌</p>
+
+      <p>
+        Page not found ❌
+      </p>
+
+      <a
+        href="/"
+        style={{
+          marginTop: "20px",
+          display: "inline-block",
+        }}
+      >
+        वापस होम जाएं
+      </a>
     </div>
   );
 };
 
-/* ================= ROUTES ================= */
+// ======================================================
+// ================= ROUTES =============================
+// ======================================================
+
 const AppRoutes = () => {
   return (
     <>
       <ScrollToTop />
 
+      <GlobalSeo />
+
       <Routes>
 
-        {/* 🌐 WEBSITE */}
-        <Route path="/" element={<BaseLayout />}>
+        {/* WEBSITE */}
+        <Route
+          path="/"
+          element={<BaseLayout />}
+        >
+          {/* HOME */}
+          <Route
+            index
+            element={<HomePage />}
+          />
 
-          <Route index element={<HomePage />} />
+          {/* ARTICLE */}
+          <Route
+            path="article/:slug"
+            element={<ArticlePage />}
+          />
 
-          <Route path="article/:slug" element={<ArticlePage />} />
-          <Route path="city/:city" element={<CityPage />} />
-          <Route path="category/:category" element={<CategoryPage />} />
+          {/* CITY */}
+          <Route
+            path="city/:city"
+            element={<CityPage />}
+          />
 
-          <Route path="about" element={<About />} />
-          <Route path="contact" element={<Contact />} />
+          {/* CATEGORY */}
+          <Route
+            path="category/:category"
+            element={<CategoryPage />}
+          />
 
+          {/* ABOUT */}
+          <Route
+            path="about"
+            element={<About />}
+          />
+
+          {/* CONTACT */}
+          <Route
+            path="contact"
+            element={<Contact />}
+          />
         </Route>
 
-        {/* 🔐 LOGIN */}
-        <Route path="/admin" element={<Login />} />
+        {/* LOGIN */}
+        <Route
+          path="/admin"
+          element={<Login />}
+        />
 
-        {/* ✅ SINGLE DASHBOARD FOR ALL */}
+        {/* DASHBOARD */}
         <Route
           path="/dashboard"
           element={
@@ -184,7 +414,7 @@ const AppRoutes = () => {
           }
         />
 
-        {/* 🔍 REVIEW PAGE */}
+        {/* REVIEW */}
         <Route
           path="/review/:id"
           element={
@@ -194,15 +424,21 @@ const AppRoutes = () => {
           }
         />
 
-        {/* ❌ 404 */}
-        <Route path="*" element={<NotFound />} />
+        {/* 404 */}
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
 
       </Routes>
     </>
   );
 };
 
-/* ================= ROOT ================= */
+// ======================================================
+// ================= ROOT APP ===========================
+// ======================================================
+
 const App = () => {
   return (
     <BrowserRouter>

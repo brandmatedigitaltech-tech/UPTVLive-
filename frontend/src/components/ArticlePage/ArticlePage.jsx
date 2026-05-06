@@ -1,8 +1,10 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { Helmet } from "react-helmet-async";
 import API from "../../services/api";
 import "./ArticlePage.css";
 import AdBanner from "../AdBanner";
+
 
 const FALLBACK_IMG = "/no-image.jpg";
 
@@ -10,40 +12,38 @@ const ArticlePage = () => {
   const { slug } = useParams();
 
   const [article, setArticle] = useState(null);
+
   const [relatedNews, setRelatedNews] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const [currentIndex, setCurrentIndex] =
+    useState(0);
 
   const intervalRef = useRef(null);
 
-  // ================= SHARE FUNCTION =================
-  const handleShare = () => {
-    if (!article) return;
+  // =====================================================
+  // ================= SAFE IMAGE ========================
+  // =====================================================
 
-    const url = `${window.location.origin}/article/${article.slug}`;
-
-    if (navigator.share) {
-      navigator.share({
-        title: article.title,
-        text: article.title,
-        url,
-      });
-    } else {
-      navigator.clipboard.writeText(url);
-      alert("Link copied ✅");
-    }
-  };
-
-  // ================= SAFE IMAGE =================
   const getImage = (img) => {
-    if (!img || img.trim() === "") return FALLBACK_IMG;
+    if (!img || img.trim() === "") {
+      return FALLBACK_IMG;
+    }
+
     return img;
   };
 
-  // ================= CLEAN HTML =================
+  // =====================================================
+  // ================= CLEAN HTML ========================
+  // =====================================================
+
   const decodeHtml = (html) => {
     if (!html) return "";
-    const txt = document.createElement("textarea");
+
+    const txt =
+      document.createElement("textarea");
+
     txt.innerHTML = html;
+
     return txt.value;
   };
 
@@ -51,25 +51,48 @@ const ArticlePage = () => {
     if (!html) return "";
 
     const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
 
-    doc.querySelectorAll("span").forEach((el) => {
-      el.replaceWith(...el.childNodes);
-    });
+    const doc = parser.parseFromString(
+      html,
+      "text/html"
+    );
 
-    doc.querySelectorAll("*").forEach((el) => {
-      el.removeAttribute("style");
-      el.removeAttribute("class");
-      el.removeAttribute("contenteditable");
-      el.removeAttribute("data-list");
-    });
+    // ✅ REMOVE SCRIPT TAGS
+    doc
+      .querySelectorAll("script")
+      .forEach((el) => el.remove());
+
+    // ✅ REMOVE IFRAME TAGS
+    doc
+      .querySelectorAll("iframe")
+      .forEach((el) => el.remove());
+
+    // ✅ REMOVE STYLES
+    doc
+      .querySelectorAll("*")
+      .forEach((el) => {
+        el.removeAttribute("style");
+
+        el.removeAttribute("class");
+
+        el.removeAttribute(
+          "contenteditable"
+        );
+
+        el.removeAttribute("data-list");
+      });
 
     return doc.body.innerHTML;
   };
 
-  const formatContent = (html) => cleanHtml(decodeHtml(html));
+  const formatContent = (html) => {
+    return cleanHtml(decodeHtml(html));
+  };
 
-  // ================= YOUTUBE =================
+  // =====================================================
+  // ================= YOUTUBE ===========================
+  // =====================================================
+
   const getYouTubeEmbed = (url) => {
     if (!url) return null;
 
@@ -78,116 +101,379 @@ const ArticlePage = () => {
 
     const match = url.match(regExp);
 
-    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+    return match
+      ? `https://www.youtube.com/embed/${match[1]}`
+      : null;
   };
 
-  // ================= FETCH ARTICLE =================
+  // =====================================================
+  // ================= SHARE HELPERS =====================
+  // =====================================================
+
+  const articleUrl = article
+    ? `${window.location.origin}/article/${article.slug}`
+    : "";
+
+  // ✅ NATIVE SHARE
+  const handleShare = async () => {
+    if (!article) return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: article.title,
+          text:
+            article.seoDescription ||
+            article.title,
+          url: articleUrl,
+        });
+
+      } else {
+        await navigator.clipboard.writeText(
+          articleUrl
+        );
+
+        alert("Link copied ✅");
+      }
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // ✅ COPY LINK
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        articleUrl
+      );
+
+      alert("Link copied ✅");
+
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  // =====================================================
+  // ================= SEO META ==========================
+  // =====================================================
+
+
+
+  // =====================================================
+  // ================= FETCH ARTICLE =====================
+  // =====================================================
+
   useEffect(() => {
     const fetchArticle = async () => {
       try {
-        const res = await API.get(`/news/${slug}`);
+        const res = await API.get(
+          `/news/${slug}`
+        );
+
         setArticle(res.data);
+
         setCurrentIndex(0);
+
       } catch (err) {
         console.error(err);
       }
     };
 
     fetchArticle();
+
   }, [slug]);
 
-  // ================= AUTO SLIDER =================
-  useEffect(() => {
-    if (!article?.images?.length) return;
+  // =====================================================
+  // ================= AUTO SLIDER =======================
+  // =====================================================
 
+  const stopSlider = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+
+      intervalRef.current = null;
+    }
+  };
+
+  const startSlider = () => {
     stopSlider();
+
+    if (
+      !article?.images ||
+      article.images.length <= 1
+    ) {
+      return;
+    }
 
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) =>
-        prev === article.images.length - 1 ? 0 : prev + 1
+        prev === article.images.length - 1
+          ? 0
+          : prev + 1
       );
     }, 3000);
-
-    return stopSlider;
-  }, [article]);
-
-  const stopSlider = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
   };
 
-  // ================= RELATED =================
+  useEffect(() => {
+    startSlider();
+
+    return () => stopSlider();
+
+  }, [article]);
+
+  // =====================================================
+  // ================= RELATED NEWS ======================
+  // =====================================================
+
   useEffect(() => {
     const fetchRelated = async () => {
       try {
         const res = await API.get("/news");
 
-        const filtered = (Array.isArray(res.data) ? res.data : [])
-          .filter((n) => n.slug !== slug)
+        const allNews = Array.isArray(
+          res.data
+        )
+          ? res.data
+          : [];
+
+        // ✅ BETTER RELATED FILTER
+        const filtered = allNews
+          .filter(
+            (n) =>
+              n.slug !== slug &&
+              (
+                n.categories?.some((c) =>
+                  article?.categories?.includes(
+                    c
+                  )
+                ) ||
+
+                n.tags?.some((t) =>
+                  article?.tags?.includes(
+                    t
+                  )
+                )
+              )
+          )
           .slice(0, 4);
 
         setRelatedNews(filtered);
+
       } catch (err) {
         console.log(err);
       }
     };
 
-    fetchRelated();
-  }, [slug]);
+    if (article) {
+      fetchRelated();
+    }
 
-  if (!article) return <p className="loading">Loading...</p>;
+  }, [slug, article]);
 
-  const images = Array.isArray(article.images) ? article.images : [];
+  // =====================================================
+  // ================= LOADING ===========================
+  // =====================================================
+
+  if (!article) {
+    return (
+      <p className="loading">
+        Loading...
+      </p>
+    );
+  }
+
+  const images = Array.isArray(
+    article.images
+  )
+    ? article.images
+    : [];
+
+  // =====================================================
+  // ================= RENDER ============================
+  // =====================================================
 
   return (
     <div className="article-container">
+   
+
+    <Helmet>
+      <title>
+        {article.title} | UPTV Live
+      </title>
+
+      <meta
+        name="description"
+        content={
+          article.seoDescription ||
+          article.title
+        }
+      />
+
+      {/* OPEN GRAPH */}
+      <meta
+        property="og:title"
+        content={article.title}
+      />
+
+      <meta
+        property="og:description"
+        content={
+          article.seoDescription ||
+          article.title
+        }
+      />
+
+      <meta
+        property="og:image"
+        content={
+          article.image ||
+          article.images?.[0] ||
+          FALLBACK_IMG
+        }
+      />
+
+      <meta
+        property="og:url"
+        content={articleUrl}
+      />
+
+      <meta
+        property="og:type"
+        content="article"
+      />
+
+      {/* TWITTER */}
+      <meta
+        name="twitter:card"
+        content="summary_large_image"
+      />
+
+      <meta
+        name="twitter:title"
+        content={article.title}
+      />
+
+      <meta
+        name="twitter:description"
+        content={
+          article.seoDescription ||
+          article.title
+        }
+      />
+
+      <meta
+        name="twitter:image"
+        content={
+          article.image ||
+          article.images?.[0] ||
+          FALLBACK_IMG
+        }
+      />
+    </Helmet>
 
       {/* BACK */}
-      <Link to="/" className="back-link">← होम</Link>
+      <Link
+        to="/"
+        className="back-link"
+      >
+        ← होम
+      </Link>
 
       {/* CATEGORY */}
       <p className="article-category">
-        {(article.categories?.[0] || "News")} |{" "}
+        {article.categories?.[0] ||
+          "News"}{" "}
+        |{" "}
         {article.tags?.join(", ")}
       </p>
 
       {/* TITLE */}
-      <h1 className="article-title">{article.title}</h1>
+      <h1 className="article-title">
+        {article.title}
+      </h1>
 
-      {/* META + SHARE */}
+      {/* META */}
       <div className="article-meta-row">
         <p className="article-meta">
-          ⏰ {new Date(article.createdAt).toLocaleString()} • 👁 {article.views}
+          ⏰{" "}
+          {new Date(
+            article.createdAt
+          ).toLocaleString()}{" "}
+          • 👁 {article.views}
         </p>
 
-        <button className="share-btn" onClick={handleShare}>
-          🔗 Share
-        </button>
+        {/* SHARE */}
+        <div
+          style={{
+            display: "flex",
+            gap: "8px",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            className="share-btn"
+            onClick={handleShare}
+          >
+            🔗 Share
+          </button>
+
+          <a
+            href={`https://wa.me/?text=${encodeURIComponent(
+              articleUrl
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="share-btn"
+          >
+            WhatsApp
+          </a>
+
+          <a
+            href={`https://t.me/share/url?url=${encodeURIComponent(
+              articleUrl
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+            className="share-btn"
+          >
+            Telegram
+          </a>
+
+          <button
+            className="share-btn"
+            onClick={copyLink}
+          >
+            Copy
+          </button>
+        </div>
       </div>
 
-      {/* 🔥 TOP AD */}
+      {/* TOP AD */}
       <AdBanner position="article_top" />
 
-      {/* ================= IMAGE ================= */}
+      {/* ================================================= */}
+      {/* ================= IMAGE SLIDER ================== */}
+      {/* ================================================= */}
+
       {images.length > 0 ? (
         <div
           className="slider"
           onMouseEnter={stopSlider}
-          onMouseLeave={() => {
-            if (images.length > 1) {
-              intervalRef.current = setInterval(() => {
-                setCurrentIndex((prev) =>
-                  prev === images.length - 1 ? 0 : prev + 1
-                );
-              }, 3000);
-            }
-          }}
+          onMouseLeave={startSlider}
         >
           <img
-            src={getImage(images[currentIndex])}
+            src={getImage(
+              images[currentIndex]
+            )}
             className="slide-img"
-            alt="news"
+            alt={article.title}
             loading="lazy"
-            onError={(e) => (e.target.src = FALLBACK_IMG)}
+            onError={(e) => {
+              e.target.src =
+                FALLBACK_IMG;
+            }}
           />
 
           {images.length > 1 && (
@@ -196,7 +482,9 @@ const ArticlePage = () => {
                 className="prev-btn"
                 onClick={() =>
                   setCurrentIndex((prev) =>
-                    prev === 0 ? images.length - 1 : prev - 1
+                    prev === 0
+                      ? images.length - 1
+                      : prev - 1
                   )
                 }
               >
@@ -207,7 +495,10 @@ const ArticlePage = () => {
                 className="next-btn"
                 onClick={() =>
                   setCurrentIndex((prev) =>
-                    prev === images.length - 1 ? 0 : prev + 1
+                    prev ===
+                    images.length - 1
+                      ? 0
+                      : prev + 1
                   )
                 }
               >
@@ -220,7 +511,8 @@ const ArticlePage = () => {
         <img
           src={getImage(article.image)}
           className="article-image"
-          alt="news"
+          alt={article.title}
+          loading="lazy"
         />
       )}
 
@@ -228,36 +520,50 @@ const ArticlePage = () => {
       <div
         className="article-content"
         dangerouslySetInnerHTML={{
-          __html: formatContent(article.content),
+          __html: formatContent(
+            article.content
+          ),
         }}
       />
 
+      {/* MIDDLE AD */}
       <AdBanner position="article_middle" />
 
       {/* YOUTUBE */}
-      {article.youtubeUrl && getYouTubeEmbed(article.youtubeUrl) && (
-        <div className="video-container">
-          <iframe
-            src={getYouTubeEmbed(article.youtubeUrl)}
-            title="YouTube video"
-            frameBorder="0"
-            allowFullScreen
-          />
-        </div>
-      )}
+      {article.youtubeUrl &&
+        getYouTubeEmbed(
+          article.youtubeUrl
+        ) && (
+          <div className="video-container">
+            <iframe
+              src={getYouTubeEmbed(
+                article.youtubeUrl
+              )}
+              title="YouTube video"
+              frameBorder="0"
+              allowFullScreen
+            />
+          </div>
+        )}
 
+      {/* BOTTOM AD */}
       <AdBanner position="article_bottom" />
 
-      {/* RELATED */}
+      {/* ================================================= */}
+      {/* ================= RELATED ======================= */}
+      {/* ================================================= */}
+
       <div className="related-section">
-        <h3>🔥 संबंधित खबरें</h3>
+        <h3>
+          🔥 संबंधित खबरें
+        </h3>
 
         <div className="related-grid">
           {relatedNews.map((item) => {
             const img =
-              (Array.isArray(item.images) && item.images[0]) ||
-              (item.image && item.image.trim() !== "") ||
-              "/no-image.jpg";
+              item.image ||
+              item.images?.[0] ||
+              FALLBACK_IMG;
 
             return (
               <Link
@@ -265,10 +571,21 @@ const ArticlePage = () => {
                 to={`/article/${item.slug}`}
                 className="related-card"
               >
-                <img src={img} alt="related" />
+                <img
+                  src={img}
+                  alt={item.title}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.target.src =
+                      FALLBACK_IMG;
+                  }}
+                />
 
                 <div className="related-content">
-                  <p>{item.title || "No Title"}</p>
+                  <p>
+                    {item.title ||
+                      "No Title"}
+                  </p>
                 </div>
               </Link>
             );

@@ -8,7 +8,7 @@ import PendingNews from "../components/Admin/PendingNews/PendingNews";
 import ApprovedNews from "../components/Admin/ApprovedNews/ApprovedNews";
 import Users from "../components/Admin/Users/Users";
 import Ads from "../components/Admin/Ads/Ads";
-
+import MetaManager from "../components/Admin/MetaManager/MetaManager";
 import "./Dashboard.css";
 
 const Dashboard = () => {
@@ -55,7 +55,14 @@ const Dashboard = () => {
       return;
     }
 
-    const allowedTabs = ["add", "pending", "approved", "users", "ads"];
+    const allowedTabs = [
+  "add",
+  "pending",
+  "approved",
+  "users",
+  "ads",
+  "meta",
+];
 
     if (!allowedTabs.includes(currentTab)) {
       setTab("add");
@@ -145,6 +152,20 @@ const Dashboard = () => {
             >
               📢 Ads
             </button>
+            <button
+  className={`tab ${
+    tab === "meta"
+      ? "active"
+      : ""
+  }`}
+  onClick={() =>
+    handleTabChange(
+      "meta"
+    )
+  }
+>
+  ⚙ Meta
+</button>
           </>
         )}
       </div>
@@ -161,6 +182,10 @@ const Dashboard = () => {
         {tab === "users" && role === "admin" && <Users />}
 
         {tab === "ads" && role === "admin" && <Ads />}
+        {tab === "meta" &&
+  role === "admin" && (
+    <MetaManager />
+)}
 
       </div>
 

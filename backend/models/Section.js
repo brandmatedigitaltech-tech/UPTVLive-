@@ -1,7 +1,7 @@
 const mongoose =
   require("mongoose");
 
-const categorySchema =
+const sectionSchema =
   new mongoose.Schema(
     {
       name: {
@@ -18,6 +18,6 @@ const categorySchema =
 
 module.exports =
   mongoose.model(
-    "Category",
-    categorySchema
+    "Section",
+    sectionSchema
   );

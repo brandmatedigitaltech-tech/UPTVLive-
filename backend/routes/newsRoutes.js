@@ -1,10 +1,11 @@
 const express = require("express");
+
 const router = express.Router();
 
-// 🔥 CLOUDINARY UPLOAD MIDDLEWARE
+// ================= MIDDLEWARE =================
 const upload = require("../middleware/upload");
 
-// 🔥 IMPORT CONTROLLERS
+// ================= CONTROLLERS =================
 const {
   createNews,
   getNews,
@@ -18,63 +19,130 @@ const {
   getBySection,
   getNewsById,
   updateNews,
+  getSeoData,
 } = require("../controllers/newsController");
 
-// ================= UPLOAD ROUTES =================
+// ======================================================
+// ================= IMAGE UPLOAD ROUTES =================
+// ======================================================
 
 // ✅ SINGLE IMAGE UPLOAD
-router.post("/upload", upload.single("image"), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ msg: "No file uploaded ❌" });
+router.post(
+  "/upload",
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          msg: "No file uploaded ❌",
+        });
+      }
+
+      return res.json({
+        image: req.file.path,
+      });
+
+    } catch (err) {
+      console.error("Upload Error:", err);
+
+      return res.status(500).json({
+        msg: "Upload failed ❌",
+      });
     }
-
-    return res.json({
-      image: req.file.path, // 🔥 Cloudinary URL
-    });
-  } catch (err) {
-    console.error("Upload Error:", err);
-    return res.status(500).json({ msg: "Upload failed ❌" });
   }
-});
+);
 
-// 🔥 MULTIPLE IMAGES UPLOAD
+// ✅ MULTIPLE IMAGE UPLOAD
+router.post(
+  "/upload-multiple",
+  upload.array("images", 10),
+  async (req, res) => {
+    try {
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          msg: "No files uploaded ❌",
+        });
+      }
 
+      const images = req.files.map(
+        (file) => file.path
+      );
 
-// ================= NEWS ROUTES =================
+      return res.json({
+        images,
+      });
 
-// 📝 CREATE NEWS
+    } catch (err) {
+      console.error(
+        "Multiple Upload Error:",
+        err
+      );
+
+      return res.status(500).json({
+        msg: "Multiple upload failed ❌",
+      });
+    }
+  }
+);
+
+// ======================================================
+// ====================== NEWS ==========================
+// ======================================================
+
+// ✅ CREATE NEWS
 router.post("/", createNews);
 
-// 📥 GET ALL NEWS
+// ✅ GET ALL APPROVED NEWS
 router.get("/", getNews);
 
-// 🔍 GET BY ID
-router.get("/id/:id", getNewsById);
-
-// ✅ APPROVED NEWS
+// ✅ GET APPROVED
 router.get("/approved", getApprovedNews);
 
-// 📂 CATEGORY
-router.get("/category/:category", getByCategory);
+// ✅ GET PENDING
+router.get("/pending", getPendingNews);
 
-// 🏙 CITY
+// ✅ GET BY ID
+router.get("/id/:id", getNewsById);
+
+// ✅ SEO DATA
+router.get("/seo/:slug", getSeoData);
+
+// ✅ CATEGORY
+router.get(
+  "/category/:category",
+  getByCategory
+);
+
+// ✅ CITY
 router.get("/city/:city", getByCity);
 
-// 🔥 SECTION
-router.get("/section/:section", getBySection);
+// ✅ SECTION
+router.get(
+  "/section/:section",
+  getBySection
+);
 
-// 🔐 ADMIN ROUTES
-router.get("/pending", getPendingNews);
-router.put("/approve/:id", approveNews);
+// ======================================================
+// ================= ADMIN ROUTES =======================
+// ======================================================
 
-// 🔥 UPDATE NEWS
+// ✅ APPROVE NEWS
+router.put(
+  "/approve/:id",
+  approveNews
+);
+
+// ✅ UPDATE NEWS
 router.put("/:id", updateNews);
 
-// ❌ DELETE NEWS
+// ✅ DELETE NEWS
 router.delete("/:id", deleteNews);
 
-// 📖 SINGLE NEWS (⚠️ ALWAYS LAST)
+// ======================================================
+// ================= SINGLE ARTICLE =====================
+// ======================================================
+
+// ⚠️ ALWAYS KEEP LAST
 router.get("/:slug", getSingleNews);
 
 module.exports = router;
