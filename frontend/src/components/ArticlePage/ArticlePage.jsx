@@ -6,7 +6,8 @@ import "./ArticlePage.css";
 import AdBanner from "../AdBanner";
 
 
-const FALLBACK_IMG = "/no-image.jpg";
+const FALLBACK_IMG =
+  "https://www.uptvlive.com/no-image.jpg";
 
 const ArticlePage = () => {
   const { slug } = useParams();
@@ -110,10 +111,9 @@ const ArticlePage = () => {
   // ================= SHARE HELPERS =====================
   // =====================================================
 
-  const articleUrl = article
-    ? `${window.location.origin}/article/${article.slug}`
-    : "";
-
+const articleUrl = article
+  ? `https://www.uptvlive.com/article/${article.slug}`
+  : "";
   // ✅ NATIVE SHARE
   const handleShare = async () => {
     if (!article) return;
@@ -289,7 +289,12 @@ const ArticlePage = () => {
   )
     ? article.images
     : [];
-
+const seoImage =
+  article.image?.startsWith("http")
+    ? article.image
+    : article.images?.[0]?.startsWith("http")
+    ? article.images[0]
+    : FALLBACK_IMG;
   // =====================================================
   // ================= RENDER ============================
   // =====================================================
@@ -327,11 +332,7 @@ const ArticlePage = () => {
 
       <meta
         property="og:image"
-        content={
-          article.image ||
-          article.images?.[0] ||
-          FALLBACK_IMG
-        }
+        content={seoImage}
       />
 
       <meta
@@ -364,12 +365,9 @@ const ArticlePage = () => {
       />
 
       <meta
-        name="twitter:image"
-        content={
-          article.image ||
-          article.images?.[0] ||
-          FALLBACK_IMG
-        }
+  name="twitter:image"
+  content={seoImage}
+
       />
     </Helmet>
 
@@ -421,8 +419,10 @@ const ArticlePage = () => {
 
           <a
             href={`https://wa.me/?text=${encodeURIComponent(
-              articleUrl
-            )}`}
+`${article.title}
+
+${articleUrl}`
+)}`}
             target="_blank"
             rel="noreferrer"
             className="share-btn"
