@@ -2,20 +2,13 @@ import { defineConfig } from "vite";
 
 import react from "@vitejs/plugin-react";
 
-// =====================================================
-// ================= VITE CONFIG =======================
-// =====================================================
-
 export default defineConfig({
 
   plugins: [
     react(),
   ],
 
-  // =====================================================
-  // ================= DEV SERVER ========================
-  // =====================================================
-
+  // DEV SERVER
   server: {
 
     proxy: {
@@ -32,43 +25,47 @@ export default defineConfig({
     },
   },
 
-  // =====================================================
-  // ================= BUILD OPTIMIZATION ================
-  // =====================================================
-
+  // BUILD
   build: {
 
-    // ✅ REMOVE LARGE WARNING
     chunkSizeWarningLimit: 1000,
 
-    // ✅ BETTER MINIFY
-    minify: "esbuild",
-
-    // ✅ SPLIT CHUNKS
     rollupOptions: {
 
       output: {
 
-        manualChunks: {
+        manualChunks(id) {
 
-          react: [
-            "react",
-            "react-dom",
-          ],
+          // REACT
+          if (
+            id.includes("react")
+          ) {
+            return "react";
+          }
 
-          router: [
-            "react-router-dom",
-          ],
+          // ROUTER
+          if (
+            id.includes(
+              "react-router-dom"
+            )
+          ) {
+            return "router";
+          }
 
-          editor: [
-            "@tiptap/react",
-            "@tiptap/starter-kit",
-            "quill",
-          ],
+          // EDITOR
+          if (
+            id.includes("@tiptap") ||
+            id.includes("quill")
+          ) {
+            return "editor";
+          }
 
-          icons: [
-            "react-icons",
-          ],
+          // ICONS
+          if (
+            id.includes("react-icons")
+          ) {
+            return "icons";
+          }
         },
       },
     },
