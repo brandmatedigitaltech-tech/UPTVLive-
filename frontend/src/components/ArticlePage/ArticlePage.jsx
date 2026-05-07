@@ -545,7 +545,40 @@ if (
             gap: "8px",
             flexWrap: "wrap",
           }}
+
         >
+
+          <button
+  className="share-btn"
+  onClick={async () => {
+
+    try {
+
+      if (navigator.share) {
+
+        await navigator.share({
+          title: article.title,
+          text: description,
+          url: articleUrl,
+        });
+
+      } else {
+
+        await navigator.clipboard.writeText(
+          articleUrl
+        );
+
+        alert("Link copied ✅");
+      }
+
+    } catch (err) {
+
+      console.log(err);
+    }
+  }}
+>
+  Share
+</button>
 
           <button
             className="share-btn"
@@ -556,16 +589,7 @@ if (
             WhatsApp
           </button>
 
-          <a
-            href={`https://t.me/share/url?url=${encodeURIComponent(
-              articleUrl
-            )}`}
-            target="_blank"
-            rel="noreferrer"
-            className="share-btn"
-          >
-            Telegram
-          </a>
+
 
           <button
             className="share-btn"
