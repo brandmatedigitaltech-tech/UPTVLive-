@@ -978,31 +978,7 @@ setMediaLinks(
 
 {/* YOUTUBE PREVIEW */}
 
-{getYouTubeEmbed(
-  youtubeUrl
-) && (
-  <iframe
-    src={getYouTubeEmbed(
-      youtubeUrl
-    )}
 
-    title="YouTube"
-
-    width="100%"
-
-    height="250"
-
-    allowFullScreen
-
-    style={{
-      borderRadius:
-        "10px",
-
-      marginTop:
-        "10px",
-    }}
-  />
-)}
 
             {/* ================================================= */}
             {/* ================= IMAGE ======================== */}
