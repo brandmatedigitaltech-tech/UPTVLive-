@@ -169,13 +169,18 @@ const getEmbedLink = (url) => {
 
   // ================= INSTAGRAM =================
 
-  if (
-    url.includes("instagram.com")
-  ) {
+// ================= INSTAGRAM =================
 
-    return `${url}embed`;
-  }
+if (
+  url.includes("instagram.com")
+) {
 
+  // REMOVE QUERY PARAMS
+  const cleanUrl =
+    url.split("?")[0];
+
+  return `${cleanUrl}embed/captioned/`;
+}
   // ================= FACEBOOK =================
 
   if (
