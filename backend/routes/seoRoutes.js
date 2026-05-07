@@ -1,209 +1,85 @@
 const express = require("express");
+const axios = require("axios");
 
 const router = express.Router();
 
-const axios = require("axios");
+const WEBSITE_URL = "https://www.uptvlive.com";
+const API_URL = "https://api.uptvlive.com/api/news";
 
-// =====================================================
-// ================= WEBSITE ===========================
-// =====================================================
+router.get("/article/:slug", async (req, res) => {
+  try {
+    const { slug } = req.params;
 
-const WEBSITE_URL =
-  "https://www.uptvlive.com";
+    // FETCH ARTICLE
+    const response = await axios.get(`${API_URL}/slug/${slug}`);
 
-// =====================================================
-// ================= API URL ===========================
-// =====================================================
+    const news = response.data;
 
-const API_URL =
-  "https://api.uptvlive.com/api/news";
+    if (!news) {
+      return res.status(404).send("Article not found");
+    }
 
-// =====================================================
-// ================= FALLBACK ==========================
-// =====================================================
+    // TITLE
+    const title = news.title || "UPTV Live";
 
-const FALLBACK_IMAGE =
-  "https://www.uptvlive.com/no-image.jpg";
+    // DESCRIPTION
+    const description =
+      news.content
+        ?.replace(/<[^>]+>/g, "")
+        ?.substring(0, 180) || "Latest Hindi News";
 
-// =====================================================
-// ================= SEO ROUTE =========================
-// =====================================================
+    // IMAGE
+    const image =
+      news.images?.[0] ||
+      news.image ||
+      "https://www.uptvlive.com/logo.jpeg";
 
-router.get(
-  "/article/:slug",
-  async (req, res) => {
+    // URL
+    const url = `${WEBSITE_URL}/article/${slug}`;
 
-    try {
+    // FRONTEND URL
+    const frontendURL = url;
 
-      const { slug } =
-        req.params;
-
-      // =====================================================
-      // ================= FETCH ARTICLE =====================
-      // =====================================================
-
-      const response =
-        await axios.get(
-          `${API_URL}/${slug}`
-        );
-
-      const article =
-        response.data;
-
-      // =====================================================
-      // ================= SAFE DATA =========================
-      // =====================================================
-
-      const title =
-        article?.title ||
-        "UPTV Live";
-
-      const description =
-        article?.seoDescription ||
-
-        article?.content
-          ?.replace(/<[^>]*>?/gm, "")
-          ?.replace(/\s+/g, " ")
-          ?.trim()
-          ?.slice(0, 180) ||
-
-        "Latest breaking news from UPTV Live";
-
-      const image =
-        article?.image?.startsWith(
-          "http"
-        )
-          ? article.image
-
-          : article?.images?.[0]?.startsWith(
-              "http"
-            )
-          ? article.images[0]
-
-          : FALLBACK_IMAGE;
-
-      const articleUrl =
-        `${WEBSITE_URL}/article/${article.slug}`;
-
-      // =====================================================
-      // ================= HTML ==============================
-      // =====================================================
-
-      const html = `
+    res.send(`
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-/>
+<title>${title}</title>
 
-<title>
-${title}
-</title>
+<meta name="description" content="${description}" />
 
-<meta
-name="description"
-content="${description}"
-/>
+<meta property="og:type" content="article" />
+<meta property="og:title" content="${title}" />
+<meta property="og:description" content="${description}" />
+<meta property="og:image" content="${image}" />
+<meta property="og:url" content="${url}" />
 
-<!-- ================================================= -->
-<!-- ================= OPEN GRAPH ==================== -->
-<!-- ================================================= -->
-
-<meta
-property="og:type"
-content="article"
-/>
-
-<meta
-property="og:title"
-content="${title}"
-/>
-
-<meta
-property="og:description"
-content="${description}"
-/>
-
-<meta
-property="og:image"
-content="${image}"
-/>
-
-<meta
-property="og:url"
-content="${articleUrl}"
-/>
-
-<meta
-property="og:site_name"
-content="UPTV Live"
-/>
-
-<!-- ================================================= -->
-<!-- ================= TWITTER ======================= -->
-<!-- ================================================= -->
-
-<meta
-name="twitter:card"
-content="summary_large_image"
-/>
-
-<meta
-name="twitter:title"
-content="${title}"
-/>
-
-<meta
-name="twitter:description"
-content="${description}"
-/>
-
-<meta
-name="twitter:image"
-content="${image}"
-/>
-
-<!-- ================================================= -->
-<!-- ================= REDIRECT ====================== -->
-<!-- ================================================= -->
-
-<script>
-
-window.location.href =
-"${articleUrl}";
-
-</script>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${title}" />
+<meta name="twitter:description" content="${description}" />
+<meta name="twitter:image" content="${image}" />
 
 </head>
 
 <body>
 
-Redirecting...
+<script>
+window.location.replace("${frontendURL}");
+</script>
 
 </body>
-
 </html>
-      `;
+    `);
+  } catch (err) {
+    console.error(err);
 
-      res.send(html);
-
-    } catch (err) {
-
-      console.log(err);
-
-      res.redirect(
-        WEBSITE_URL
-      );
-    }
+    res.status(500).send("SEO Error");
   }
-);
+});
 
-module.exports =
-  router;
+module.exports = router;
