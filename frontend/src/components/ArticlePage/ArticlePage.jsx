@@ -141,9 +141,20 @@ const cleanHtml = (html) => {
   // ================= YOUTUBE ===========================
   // =====================================================
 
-  const getYouTubeEmbed = (url) => {
+// =====================================================
+// ================= MEDIA EMBED ========================
+// =====================================================
 
-    if (!url) return null;
+const getEmbedLink = (url) => {
+
+  if (!url) return null;
+
+  // ================= YOUTUBE =================
+
+  if (
+    url.includes("youtube.com") ||
+    url.includes("youtu.be")
+  ) {
 
     const regExp =
       /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&]+)/;
@@ -154,8 +165,30 @@ const cleanHtml = (html) => {
     return match
       ? `https://www.youtube.com/embed/${match[1]}`
       : null;
-  };
+  }
 
+  // ================= INSTAGRAM =================
+
+  if (
+    url.includes("instagram.com")
+  ) {
+
+    return `${url}embed`;
+  }
+
+  // ================= FACEBOOK =================
+
+  if (
+    url.includes("facebook.com")
+  ) {
+
+    return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&show_text=true&width=500`;
+  }
+
+  // ================= OTHER WEBSITE =================
+
+  return url;
+};
   // =====================================================
   // ================= FETCH ARTICLE =====================
   // =====================================================
@@ -638,26 +671,52 @@ const cleanHtml = (html) => {
 
       {/* YOUTUBE */}
 
+      {/* ================= MEDIA LINKS ================= */}
+
+{
+  Array.isArray(article.mediaLinks) &&
+  article.mediaLinks.length > 0 && (
+
+    <div className="media-links-container">
+
       {
-        article.youtubeUrl &&
-        getYouTubeEmbed(
-          article.youtubeUrl
-        ) && (
+        article.mediaLinks.map(
+          (link, index) => {
 
-          <div className="video-container">
+            const embedUrl =
+              getEmbedLink(link);
 
-            <iframe
-              src={getYouTubeEmbed(
-                article.youtubeUrl
-              )}
-              title="YouTube video"
-              frameBorder="0"
-              allowFullScreen
-            />
+            return (
 
-          </div>
+              <div
+                key={index}
+                className="video-container"
+                style={{
+                  marginBottom: "20px",
+                }}
+              >
+
+                <iframe
+                  src={embedUrl}
+                  title={`media-${index}`}
+                  frameBorder="0"
+                  allowFullScreen
+                  style={{
+                    width: "100%",
+                    height: "450px",
+                    borderRadius: "12px",
+                  }}
+                />
+
+              </div>
+            );
+          }
         )
       }
+
+    </div>
+  )
+}
 
       {/* BOTTOM AD */}
 
