@@ -101,8 +101,8 @@ const ApprovedNews = () => {
   const [saving, setSaving] =
     useState(false);
 
-  const [youtubeUrl, setYoutubeUrl] =
-    useState("");
+const [mediaLinks, setMediaLinks] =
+  useState([""]);
 
   const [categoriesList, setCategoriesList] =
     useState([]);
@@ -385,10 +385,11 @@ const ApprovedNews = () => {
           : [],
     });
 
-    setYoutubeUrl(
-      item.youtubeUrl ||
-        ""
-    );
+setMediaLinks(
+  item.mediaLinks?.length
+    ? item.mediaLinks
+    : [""]
+);
 
     setPreview(
       (
@@ -503,7 +504,7 @@ const ApprovedNews = () => {
 
             content,
 
-            youtubeUrl,
+            mediaLinks,
 
             images:
               previewItem.images ||
@@ -921,56 +922,87 @@ const ApprovedNews = () => {
 
             <div className="edit-section">
 
-              <label>
-                YouTube Link
-              </label>
+  <label>
+    Media / Social Links
+  </label>
 
-              <input
-                className="input"
+  {
+    mediaLinks.map(
+      (link, index) => (
 
-                value={
-                  youtubeUrl
-                }
+        <input
+          key={index}
 
-                onChange={(
-                  e
-                ) =>
-                  setYoutubeUrl(
-                    e.target
-                      .value
-                  )
-                }
-              />
+          className="input"
 
-            </div>
+          placeholder="Paste Instagram / Facebook / YouTube / Website Link"
+
+          value={link}
+
+          onChange={(e) => {
+
+            const updated =
+              [...mediaLinks];
+
+            updated[index] =
+              e.target.value;
+
+            setMediaLinks(
+              updated
+            );
+          }}
+        />
+      )
+    )
+  }
+
+  <button
+    className="upload-btn"
+
+    type="button"
+
+    onClick={() => {
+
+      setMediaLinks([
+        ...mediaLinks,
+        "",
+      ]);
+    }}
+  >
+    + Add More Link
+  </button>
+
+</div>
 
             {/* YOUTUBE PREVIEW */}
 
-            {getYouTubeEmbed(
-              youtubeUrl
-            ) && (
-              <iframe
-                src={getYouTubeEmbed(
-                  youtubeUrl
-                )}
+{/* YOUTUBE PREVIEW */}
 
-                title="YouTube"
+{getYouTubeEmbed(
+  youtubeUrl
+) && (
+  <iframe
+    src={getYouTubeEmbed(
+      youtubeUrl
+    )}
 
-                width="100%"
+    title="YouTube"
 
-                height="250"
+    width="100%"
 
-                allowFullScreen
+    height="250"
 
-                style={{
-                  borderRadius:
-                    "10px",
+    allowFullScreen
 
-                  marginTop:
-                    "10px",
-                }}
-              />
-            )}
+    style={{
+      borderRadius:
+        "10px",
+
+      marginTop:
+        "10px",
+    }}
+  />
+)}
 
             {/* ================================================= */}
             {/* ================= IMAGE ======================== */}

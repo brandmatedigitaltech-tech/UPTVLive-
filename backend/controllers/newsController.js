@@ -40,14 +40,14 @@ const generateUniqueSlug = async (title) => {
 // ================= CREATE NEWS =================
 exports.createNews = async (req, res) => {
   try {
-    const {
-      title,
-      content,
-      youtubeUrl,
-      sections,
-      tags,
-      categories,
-    } = req.body;
+const {
+  title,
+  content,
+  mediaLinks,
+  sections,
+  tags,
+  categories,
+} = req.body;
 
     // ✅ TITLE VALIDATION
     if (!title || safeString(title) === "") {
@@ -80,7 +80,10 @@ exports.createNews = async (req, res) => {
 
       images,
 
-      youtubeUrl: safeString(youtubeUrl),
+      mediaLinks: safeArray(mediaLinks)
+  .filter((link) => typeof link === "string")
+  .map((link) => link.trim())
+  .filter(Boolean),
 
       sections: safeArray(sections).map((s) =>
         String(s).toLowerCase()
@@ -296,15 +299,15 @@ exports.getSingleNews = async (req, res) => {
 // ================= UPDATE NEWS =================
 exports.updateNews = async (req, res) => {
   try {
-    const {
-      title,
-      content,
-      youtubeUrl,
-      sections,
-      categories,
-      tags,
-      images,
-    } = req.body;
+const {
+  title,
+  content,
+  mediaLinks,
+  sections,
+  categories,
+  tags,
+  images,
+} = req.body;
 
     const existingNews = await News.findById(
       req.params.id
@@ -341,10 +344,19 @@ exports.updateNews = async (req, res) => {
     }
 
     // ================= YOUTUBE =================
-    if (typeof youtubeUrl !== "undefined") {
-      updateData.youtubeUrl =
-        safeString(youtubeUrl);
-    }
+if (typeof mediaLinks !== "undefined") {
+
+  updateData.mediaLinks =
+    safeArray(mediaLinks)
+      .filter(
+        (link) =>
+          typeof link === "string"
+      )
+      .map((link) =>
+        link.trim()
+      )
+      .filter(Boolean);
+}
 
     // ================= IMAGES =================
     if (typeof images !== "undefined") {
