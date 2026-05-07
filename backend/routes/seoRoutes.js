@@ -68,8 +68,12 @@ router.get("/article/:slug", async (req, res) => {
 
 <body>
 
+<h2>Redirecting...</h2>
+
 <script>
-window.location.replace("${frontendURL}");
+setTimeout(() => {
+  window.location.href = "${frontendURL}";
+}, 1500);
 </script>
 
 </body>
