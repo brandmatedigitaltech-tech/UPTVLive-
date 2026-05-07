@@ -44,10 +44,68 @@ router.get("/article/:slug", async (req, res) => {
       "Latest Hindi News";
 
     // ================= IMAGE =================
-    const image =
-      news.images?.[0] ||
-      news.image ||
+// ================= IMAGE =================
+
+let image = FALLBACK_IMAGE;
+
+// images array
+if (
+  Array.isArray(news.images) &&
+  news.images.length > 0
+) {
+  const firstImage =
+    news.images[0];
+
+  // if direct string
+  if (
+    typeof firstImage ===
+    "string"
+  ) {
+    image = firstImage;
+  }
+
+  // if object
+  else if (
+    typeof firstImage ===
+    "object"
+  ) {
+    image =
+      firstImage.url ||
+      firstImage.secure_url ||
+      firstImage.path ||
       FALLBACK_IMAGE;
+  }
+}
+
+// single image
+else if (news.image) {
+  image = news.image;
+}
+
+// thumbnail
+else if (news.thumbnail) {
+  image = news.thumbnail;
+}
+
+// featured image
+else if (news.featuredImage) {
+  image = news.featuredImage;
+}
+
+// FIX RELATIVE URL
+if (
+  image &&
+  !image.startsWith("http")
+) {
+  image =
+    `${WEBSITE_URL}/${image}`;
+}
+
+// DEBUG
+console.log(
+  "SEO IMAGE:",
+  image
+);
 
     // ================= ARTICLE URL =================
     const url =
