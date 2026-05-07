@@ -13,12 +13,60 @@ connectDB();
 // ================= CLOUDINARY =================
 
 // ================= CORS (FIXED) =================
+// =====================================================
+// ================= CORS ==============================
+// =====================================================
+
+const allowedOrigins = [
+  "https://www.uptvlive.com",
+  "https://uptvlive.com",
+  "https://api.uptvlive.com",
+  "http://localhost:5173",
+  "http://localhost:5174",
+];
+
 app.use(
   cors({
-    origin: true, // 🔥 allow all (safe for now)
+    origin: function (origin, callback) {
+
+      // allow requests without origin
+      // (mobile apps / postman)
+
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (
+        allowedOrigins.includes(origin)
+      ) {
+        callback(null, true);
+      } else {
+        callback(
+          new Error(
+            "CORS Not Allowed"
+          )
+        );
+      }
+    },
+
     credentials: true,
+
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "OPTIONS",
+    ],
+
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
   })
 );
+
+app.options("*", cors());
 
 app.options("*", cors());
 
@@ -56,10 +104,7 @@ app.use((err, req, res, next) => {
     msg: err.message || "Server Error ❌",
   });
 });
-app.use(
-  "/seo",
-  require("./routes/seoRoutes")
-);
+
 
 // ================= SERVER =================
 const PORT = process.env.PORT || 5000;
