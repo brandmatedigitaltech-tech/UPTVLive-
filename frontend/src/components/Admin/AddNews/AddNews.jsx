@@ -27,12 +27,12 @@ const AddNews = () => {
   // ================= FORM ==============================
   // =====================================================
 
-  const [form, setForm] = useState({
-    title: "",
-    content: "",
-    youtubeUrl: "",
-    images: [],
-  });
+const [form, setForm] = useState({
+  title: "",
+  content: "",
+  mediaLinks: [""],
+  images: [],
+});
 
   // =====================================================
   // ================= STATES ============================
@@ -303,7 +303,7 @@ const AddNews = () => {
     setForm({
       title: "",
       content: "",
-      youtubeUrl: "",
+      mediaLinks: [""],
       images: [],
     });
 
@@ -453,29 +453,64 @@ const AddNews = () => {
 
           {/* YOUTUBE */}
           <div className="card">
-            <label>
-              YouTube Video Link
-            </label>
 
-            <input
-              className="input"
+  <label>
+    Media / Social Links
+  </label>
 
-              placeholder="https://youtube.com/..."
+  {
+    form.mediaLinks.map(
+      (link, index) => (
 
-              value={
-                form.youtubeUrl
-              }
+        <input
+          key={index}
 
-              onChange={(e) =>
-                setForm({
-                  ...form,
+          className="input"
 
-                  youtubeUrl:
-                    e.target.value,
-                })
-              }
-            />
-          </div>
+          placeholder="Paste YouTube / Instagram / Facebook / Website Link"
+
+          value={link}
+
+          onChange={(e) => {
+
+            const updatedLinks =
+              [...form.mediaLinks];
+
+            updatedLinks[index] =
+              e.target.value;
+
+            setForm({
+              ...form,
+              mediaLinks:
+                updatedLinks,
+            });
+          }}
+        />
+      )
+    )
+  }
+
+  <button
+    type="button"
+
+    className="upload-btn"
+
+    onClick={() => {
+
+      setForm({
+        ...form,
+
+        mediaLinks: [
+          ...form.mediaLinks,
+          "",
+        ],
+      });
+    }}
+  >
+    + Add More Link
+  </button>
+
+</div>
 
           {/* IMAGE */}
           <div className="card">

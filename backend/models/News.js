@@ -63,12 +63,11 @@ const newsSchema = new mongoose.Schema(
     },
 
     // ================= YOUTUBE =================
-    youtubeUrl: {
-      type: String,
-      default: "",
-      trim: true,
-    },
-
+// ================= MEDIA LINKS =================
+mediaLinks: {
+  type: [String],
+  default: [],
+},
     // ================= STATUS =================
     status: {
       type: String,
