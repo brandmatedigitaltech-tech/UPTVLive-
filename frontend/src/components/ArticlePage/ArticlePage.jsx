@@ -192,7 +192,7 @@ if (
 
   // ================= OTHER WEBSITE =================
 
-  return url;
+  return null;
 };
   // =====================================================
   // ================= FETCH ARTICLE =====================
@@ -701,17 +701,35 @@ if (
                 }}
               >
 
-                <iframe
-                  src={embedUrl}
-                  title={`media-${index}`}
-                  frameBorder="0"
-                  allowFullScreen
-                  style={{
-                    width: "100%",
-                    height: "450px",
-                    borderRadius: "12px",
-                  }}
-                />
+                {
+  embedUrl ? (
+
+    <iframe
+      src={embedUrl}
+      title={`media-${index}`}
+      frameBorder="0"
+      allowFullScreen
+      style={{
+        width: "100%",
+        height: "450px",
+        borderRadius: "12px",
+      }}
+    />
+
+  ) : (
+
+    <a
+      href={link}
+      target="_blank"
+      rel="noreferrer"
+      className="external-link-card"
+    >
+
+      🔗 Open External Content
+
+    </a>
+  )
+}
 
               </div>
             );
