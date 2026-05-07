@@ -3,21 +3,15 @@ const axios = require("axios");
 
 const router = express.Router();
 
-// ================= WEBSITE =================
 const WEBSITE_URL =
   "https://www.uptvlive.com";
 
-// ================= API =================
 const API_URL =
   "https://api.uptvlive.com/api/news";
 
-// ================= FALLBACK =================
-const FALLBACK_IMAGE =
-  "https://www.uptvlive.com/logo.jpeg";
-
-// =====================================================
-// ================= SEO ARTICLE ========================
-// =====================================================
+// ==========================================
+// SEO ARTICLE ROUTE
+// ==========================================
 
 router.get(
   "/article/:slug",
@@ -25,70 +19,55 @@ router.get(
 
     try {
 
-      // ================= GET SLUG =================
-
       const slug =
         decodeURIComponent(
           req.params.slug
         );
 
-      // ================= FETCH NEWS =================
-
+      // FETCH ARTICLE
       const response =
         await axios.get(
           `${API_URL}/${slug}`
         );
 
-      const news =
+      const article =
         response.data;
 
-      // ================= NOT FOUND =================
-
-      if (!news) {
-
+      if (!article) {
         return res
           .status(404)
           .send("Article not found");
       }
 
-      // ================= TITLE =================
-
+      // TITLE
       const title =
-        news.title ||
+        article.title ||
         "UPTV Live";
 
-      // ================= DESCRIPTION =================
-
+      // DESCRIPTION
       const description =
+        article.seoDescription ||
 
-        news.seoDescription ||
-
-        news.content
+        article.content
           ?.replace(/<[^>]+>/g, "")
           ?.replace(/\s+/g, " ")
           ?.trim()
-          ?.substring(0, 180) ||
+          ?.slice(0, 180) ||
 
         "Latest Hindi News";
 
-      // ================= IMAGE =================
-
+      // IMAGE
       const image =
+        article.image ||
+        article.images?.[0] ||
+        "https://www.uptvlive.com/logo.jpeg";
 
-        news.image ||
+      // ARTICLE URL
+      const articleUrl =
+        `${WEBSITE_URL}/article/${article.slug}`;
 
-        news.images?.[0] ||
-
-        FALLBACK_IMAGE;
-
-      // ================= ARTICLE URL =================
-
-      const articleURL =
-        `${WEBSITE_URL}/article/${news.slug}`;
-
-      // ================= HTML =================
-
-      const html = `
+      // SEND HTML
+      res.send(`
 <!DOCTYPE html>
 <html lang="en">
 
@@ -110,40 +89,24 @@ content="${description}"
 
 <link
 rel="canonical"
-href="${articleURL}"
+href="${articleUrl}"
 />
 
 <!-- OPEN GRAPH -->
 
-<meta
-property="og:type"
-content="article"
-/>
+<meta property="og:type" content="article" />
 
-<meta
-property="og:title"
-content="${title}"
-/>
+<meta property="og:title" content="${title}" />
 
-<meta
-property="og:description"
-content="${description}"
-/>
+<meta property="og:description" content="${description}" />
 
-<meta
-property="og:image"
-content="${image}"
-/>
+<meta property="og:image" content="${image}" />
 
-<meta
-property="og:url"
-content="${articleURL}"
-/>
+<meta property="og:url" content="${articleUrl}" />
 
-<meta
-property="og:site_name"
-content="UPTV Live"
-/>
+<meta property="og:site_name" content="UPTV Live" />
+
+<meta property="og:locale" content="hi_IN" />
 
 <!-- TWITTER -->
 
@@ -171,7 +134,7 @@ content="${image}"
 
 <meta
 http-equiv="refresh"
-content="1;url=${articleURL}"
+content="1;url=${articleUrl}"
 />
 
 </head>
@@ -185,20 +148,13 @@ Redirecting...
 </body>
 
 </html>
-`;
-
-      // ================= SEND HTML =================
-
-      return res.send(html);
+      `);
 
     } catch (err) {
 
-      console.error(
-        "SEO ERROR:",
-        err.message
-      );
+      console.log(err);
 
-      return res
+      res
         .status(500)
         .send("SEO Error");
     }
