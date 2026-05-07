@@ -67,18 +67,13 @@ router.get(
         `${WEBSITE_URL}/article/${article.slug}`;
 
       // SEND HTML
-      res.send(`
+     res.send(`
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8" />
-
-<meta
-name="viewport"
-content="width=device-width, initial-scale=1.0"
-/>
 
 <title>${title}</title>
 
@@ -91,8 +86,6 @@ content="${description}"
 rel="canonical"
 href="${articleUrl}"
 />
-
-<!-- OPEN GRAPH -->
 
 <meta property="og:type" content="article" />
 
@@ -107,8 +100,6 @@ href="${articleUrl}"
 <meta property="og:site_name" content="UPTV Live" />
 
 <meta property="og:locale" content="hi_IN" />
-
-<!-- TWITTER -->
 
 <meta
 name="twitter:card"
@@ -130,25 +121,35 @@ name="twitter:image"
 content="${image}"
 />
 
-<!-- REDIRECT -->
-
-<meta
-http-equiv="refresh"
-content="1;url=${articleUrl}"
-/>
+<script>
+setTimeout(() => {
+  window.location.href =
+    "${articleUrl}";
+}, 3000);
+</script>
 
 </head>
 
-<body>
+<body
+style="
+font-family:sans-serif;
+padding:40px;
+text-align:center;
+"
+>
 
 <h2>
-Redirecting...
+Redirecting to article...
 </h2>
+
+<p>
+UPTV Live News
+</p>
 
 </body>
 
 </html>
-      `);
+`);
 
     } catch (err) {
 

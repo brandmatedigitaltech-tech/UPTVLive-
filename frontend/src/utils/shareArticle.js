@@ -6,28 +6,12 @@ export const shareToWhatsApp = (article) => {
   const slug =
     article?.slug || article?._id;
 
-  // ✅ ONLY ONE CLEAN URL
+  // ✅ SEO URL
   const url =
-    `https://www.uptvlive.com/seo/article/${slug}`;
-
-  const shortDescription =
-    article?.content
-      ?.replace(/<[^>]*>?/gm, "")
-      ?.replace(/\s+/g, " ")
-      ?.trim()
-      ?.slice(0, 140);
-
-  const text = `
-📰 ${title}
-
-${shortDescription || ""}
-
-👉 Read More:
-${url}
-  `;
+    `https://api.uptvlive.com/seo/article/${slug}`;
 
   const whatsappURL =
-    `https://wa.me/?text=${encodeURIComponent(text)}`;
+    `https://wa.me/?text=${encodeURIComponent(url)}`;
 
   window.open(
     whatsappURL,
