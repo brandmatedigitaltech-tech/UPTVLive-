@@ -1,119 +1,115 @@
 const express = require("express");
+
 const axios = require("axios");
 
 const router = express.Router();
 
-// ================= WEBSITE =================
-const WEBSITE_URL = "https://www.uptvlive.com";
+// ======================================================
+// ================= WEBSITE URL ========================
+// ======================================================
 
-// ================= API =================
-const API_URL = "https://api.uptvlive.com/api/news";
+const WEBSITE_URL =
+  "https://www.uptvlive.com";
 
-// ================= FALLBACK IMAGE =================
+// ======================================================
+// ================= API URL ============================
+// ======================================================
+
+const API_URL =
+  "https://api.uptvlive.com/api/news";
+
+// ======================================================
+// ================= FALLBACK IMAGE =====================
+// ======================================================
+
 const FALLBACK_IMAGE =
   "https://www.uptvlive.com/logo.jpeg";
 
-// ================= SEO ROUTE =================
-router.get("/article/:slug", async (req, res) => {
-  try {
-    const { slug } = req.params;
+// ======================================================
+// ================= SEO ARTICLE ROUTE ==================
+// ======================================================
 
-    // ================= FETCH ARTICLE =================
-    const response = await axios.get(
-      `${API_URL}/slug/${slug}`
-    );
+router.get(
+  "/article/:slug",
+  async (req, res) => {
+    try {
 
-    const news = response.data;
+      const slug =
+        decodeURIComponent(
+          req.params.slug
+        );
 
-    // ================= NOT FOUND =================
-    if (!news) {
-      return res.status(404).send("Article not found");
-    }
+      // ======================================================
+      // ================= FETCH ARTICLE ======================
+      // ======================================================
 
-    // ================= TITLE =================
-    const title =
-      news.title || "UPTV Live";
+      const response =
+        await axios.get(
+          `${API_URL}/${slug}`
+        );
 
-    // ================= DESCRIPTION =================
-    const description =
-      news.content
-        ?.replace(/<[^>]+>/g, "")
-        ?.replace(/\s+/g, " ")
-        ?.trim()
-        ?.substring(0, 180) ||
-      "Latest Hindi News";
+      const news =
+        response.data;
 
-    // ================= IMAGE =================
-// ================= IMAGE =================
+      // ======================================================
+      // ================= NOT FOUND ==========================
+      // ======================================================
 
-let image = FALLBACK_IMAGE;
+      if (!news) {
+        return res
+          .status(404)
+          .send("Article not found");
+      }
 
-// images array
-if (
-  Array.isArray(news.images) &&
-  news.images.length > 0
-) {
-  const firstImage =
-    news.images[0];
+      // ======================================================
+      // ================= TITLE ==============================
+      // ======================================================
 
-  // if direct string
-  if (
-    typeof firstImage ===
-    "string"
-  ) {
-    image = firstImage;
-  }
+      const title =
+        news.title ||
+        "UPTV Live";
 
-  // if object
-  else if (
-    typeof firstImage ===
-    "object"
-  ) {
-    image =
-      firstImage.url ||
-      firstImage.secure_url ||
-      firstImage.path ||
-      FALLBACK_IMAGE;
-  }
-}
+      // ======================================================
+      // ================= DESCRIPTION ========================
+      // ======================================================
 
-// single image
-else if (news.image) {
-  image = news.image;
-}
+      const description =
+        news.content
+          ?.replace(
+            /<[^>]+>/g,
+            ""
+          )
+          ?.replace(
+            /\s+/g,
+            " "
+          )
+          ?.trim()
+          ?.substring(0, 180) ||
+        "Latest Hindi News";
 
-// thumbnail
-else if (news.thumbnail) {
-  image = news.thumbnail;
-}
+      // ======================================================
+      // ================= IMAGE ==============================
+      // ======================================================
 
-// featured image
-else if (news.featuredImage) {
-  image = news.featuredImage;
-}
+      const image =
+        news.images?.[0] ||
+        news.image ||
+        FALLBACK_IMAGE;
 
-// FIX RELATIVE URL
-if (
-  image &&
-  !image.startsWith("http")
-) {
-  image =
-    `${WEBSITE_URL}/${image}`;
-}
+      // ======================================================
+      // ================= ARTICLE URL ========================
+      // ======================================================
 
-// DEBUG
-console.log(
-  "SEO IMAGE:",
-  image
-);
+      const articleURL =
+        `${WEBSITE_URL}/article/${slug}`;
 
-    // ================= ARTICLE URL =================
-    const url =
-      `${WEBSITE_URL}/article/${slug}`;
+      // ======================================================
+      // ================= HTML ===============================
+      // ======================================================
 
-    // ================= HTML =================
-    const seoHTML = `
+      const html = `
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -134,10 +130,12 @@ console.log(
 
 <link
   rel="canonical"
-  href="${url}"
+  href="${articleURL}"
 />
 
-<!-- ================= OPEN GRAPH ================= -->
+<!-- ================================================== -->
+<!-- ================= OPEN GRAPH ===================== -->
+<!-- ================================================== -->
 
 <meta
   property="og:type"
@@ -145,8 +143,13 @@ console.log(
 />
 
 <meta
+  property="og:site_name"
+  content="UPTV Live"
+/>
+
+<meta
   property="og:url"
-  content="${url}"
+  content="${articleURL}"
 />
 
 <meta
@@ -165,11 +168,28 @@ console.log(
 />
 
 <meta
-  property="og:site_name"
-  content="UPTV Live"
+  property="og:image:secure_url"
+  content="${image}"
 />
 
-<!-- ================= TWITTER ================= -->
+<meta
+  property="og:image:type"
+  content="image/jpeg"
+/>
+
+<meta
+  property="og:image:width"
+  content="1200"
+/>
+
+<meta
+  property="og:image:height"
+  content="630"
+/>
+
+<!-- ================================================== -->
+<!-- ================= TWITTER ======================== -->
+<!-- ================================================== -->
 
 <meta
   name="twitter:card"
@@ -178,7 +198,7 @@ console.log(
 
 <meta
   name="twitter:url"
-  content="${url}"
+  content="${articleURL}"
 />
 
 <meta
@@ -196,11 +216,13 @@ console.log(
   content="${image}"
 />
 
-<!-- ================= REDIRECT ================= -->
+<!-- ================================================== -->
+<!-- ================= REDIRECT ======================= -->
+<!-- ================================================== -->
 
 <meta
   http-equiv="refresh"
-  content="2;url=${url}"
+  content="2; url=${articleURL}"
 />
 
 </head>
@@ -211,19 +233,40 @@ console.log(
 Redirecting to article...
 </h2>
 
+<script>
+
+setTimeout(() => {
+
+  window.location.href =
+    "${articleURL}";
+
+}, 1500);
+
+</script>
+
 </body>
 
 </html>
-`;
+      `;
 
-    // ================= SEND HTML =================
-    return res.send(seoHTML);
+      // ======================================================
+      // ================= SEND HTML ==========================
+      // ======================================================
 
-  } catch (err) {
-    console.error("SEO ERROR:", err);
+      return res.send(html);
 
-    return res.status(500).send("SEO Error");
+    } catch (err) {
+
+      console.error(
+        "SEO ERROR:",
+        err.message
+      );
+
+      return res
+        .status(500)
+        .send("SEO Error");
+    }
   }
-});
+);
 
 module.exports = router;
