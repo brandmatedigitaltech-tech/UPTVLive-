@@ -6,15 +6,10 @@ export const shareToWhatsApp = (article) => {
   const slug =
     article?.slug || article?._id;
 
-  // ✅ SEO URL FOR WHATSAPP PREVIEW
-  const seoUrl =
-    `https://api.uptvlive.com/seo/article/${slug}`;
+  // ✅ ONLY ONE CLEAN URL
+  const url =
+    `https://www.uptvlive.com/seo/article/${slug}`;
 
-  // ✅ CLEAN URL FOR USERS
-  const publicUrl =
-    `https://www.uptvlive.com/article/${slug}`;
-
-  // REMOVE HTML TAGS
   const shortDescription =
     article?.content
       ?.replace(/<[^>]*>?/gm, "")
@@ -22,19 +17,13 @@ export const shareToWhatsApp = (article) => {
       ?.trim()
       ?.slice(0, 140);
 
-  // ✅ IMPORTANT
-  // ONLY seoUrl SHOULD BE LAST
-  // OTHERWISE WHATSAPP PREVIEW BREAKS
-
   const text = `
 📰 ${title}
 
 ${shortDescription || ""}
 
 👉 Read More:
-${publicUrl}
-
-${seoUrl}
+${url}
   `;
 
   const whatsappURL =
