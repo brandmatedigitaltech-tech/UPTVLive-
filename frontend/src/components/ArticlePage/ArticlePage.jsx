@@ -179,7 +179,7 @@ if (
   const cleanUrl =
     url.split("?")[0];
 
-  return `${cleanUrl}embed/captioned/`;
+  return `${cleanUrl}embed`;
 }
   // ================= FACEBOOK =================
 
@@ -693,13 +693,24 @@ if (
 
             return (
 
-              <div
-                key={index}
-                className="video-container"
-                style={{
-                  marginBottom: "20px",
-                }}
-              >
+<div
+  key={index}
+  className={`video-container
+    ${
+      link.includes("youtube")
+      || link.includes("youtu.be")
+        ? "youtube-embed"
+      : link.includes("instagram")
+        ? "instagram-embed"
+      : link.includes("facebook")
+        ? "facebook-embed"
+      : link.includes("twitter")
+        || link.includes("x.com")
+        ? "twitter-embed"
+      : "website-embed"
+    }
+  `}
+>
 
                 {
   embedUrl ? (
@@ -709,11 +720,7 @@ if (
       title={`media-${index}`}
       frameBorder="0"
       allowFullScreen
-      style={{
-        width: "100%",
-        height: "450px",
-        borderRadius: "12px",
-      }}
+      
     />
 
   ) : (
