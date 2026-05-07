@@ -1,5 +1,5 @@
 import "./Header.css";
-import logo from "../../assets/logo.jpeg";
+
 import { Link } from "react-router-dom";
 
 import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
@@ -20,7 +20,7 @@ const Header = () => {
           <Link to="/" onClick={handleClick} className="logo-wrap">
             <div className="logo-flex">
               <img
-                src={logo}
+                src="/logo.jpeg"
                 alt="UPTV Logo"
                 className="logo-img"
               />

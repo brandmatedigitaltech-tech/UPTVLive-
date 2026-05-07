@@ -32,7 +32,7 @@ app.use("/api/meta", require("./routes/metaRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/users", require("./routes/userRoutes"));
 app.use("/api/ads", require("./routes/adRoutes"));
-
+app.use("/", require("./routes/seoRoutes"));
 // 🔥 FIXED (NO CONFLICT)
 app.use("/api/upload", require("./routes/uploads"));
 
@@ -56,6 +56,10 @@ app.use((err, req, res, next) => {
     msg: err.message || "Server Error ❌",
   });
 });
+app.use(
+  "/seo",
+  require("./routes/seoRoutes")
+);
 
 // ================= SERVER =================
 const PORT = process.env.PORT || 5000;

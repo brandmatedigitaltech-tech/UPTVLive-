@@ -1,6 +1,12 @@
-import { defineConfig } from "vite";
+import { defineConfig }
+from "vite";
 
-import react from "@vitejs/plugin-react";
+import react
+from "@vitejs/plugin-react";
+
+// =====================================================
+// ================= VITE CONFIG =======================
+// =====================================================
 
 export default defineConfig({
 
@@ -8,7 +14,6 @@ export default defineConfig({
     react(),
   ],
 
-  // DEV SERVER
   server: {
 
     proxy: {
@@ -25,49 +30,9 @@ export default defineConfig({
     },
   },
 
-  // BUILD
   build: {
 
-    chunkSizeWarningLimit: 1000,
-
-    rollupOptions: {
-
-      output: {
-
-        manualChunks(id) {
-
-          // REACT
-          if (
-            id.includes("react")
-          ) {
-            return "react";
-          }
-
-          // ROUTER
-          if (
-            id.includes(
-              "react-router-dom"
-            )
-          ) {
-            return "router";
-          }
-
-          // EDITOR
-          if (
-            id.includes("@tiptap") ||
-            id.includes("quill")
-          ) {
-            return "editor";
-          }
-
-          // ICONS
-          if (
-            id.includes("react-icons")
-          ) {
-            return "icons";
-          }
-        },
-      },
-    },
+    chunkSizeWarningLimit:
+      1000,
   },
 });

@@ -7,7 +7,7 @@ export const shareToWhatsApp = (article) => {
     article?.slug || article?._id;
 
   const url =
-    `https://www.uptvlive.com/article/${slug}`;
+    `https://api.uptvlive.com/seo/article/${slug}`;
 
   // ✅ REMOVE HTML TAGS
   const shortDescription =

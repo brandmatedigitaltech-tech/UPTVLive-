@@ -5,7 +5,7 @@ import React, {
 
 import "./Footer.css";
 
-import logo from "../../assets/logo.jpeg";
+
 
 import {
   FaFacebookF,
@@ -134,7 +134,7 @@ function Footer() {
           >
 
             <img
-              src={logo}
+              src="/logo.jpeg"
               alt="UP TV LIVE"
               className="footer-logo"
             />

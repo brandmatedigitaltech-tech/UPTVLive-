@@ -64,61 +64,71 @@ const ArticlePage = () => {
   // ================= CLEAN HTML ========================
   // =====================================================
 
-  const decodeHtml = (html) => {
+const decodeHtml = (html) => {
 
-    if (!html) return "";
+  if (!html) return "";
 
-    const txt =
-      document.createElement("textarea");
+  // ✅ SAFE FOR REACT-SNAP
+  if (typeof window === "undefined") {
+    return html;
+  }
 
-    txt.innerHTML = html;
+  const txt =
+    document.createElement("textarea");
 
-    return txt.value;
-  };
+  txt.innerHTML = html;
 
-  const cleanHtml = (html) => {
+  return txt.value;
+};
 
-    if (!html) return "";
+const cleanHtml = (html) => {
 
-    const parser =
-      new DOMParser();
+  if (!html) return "";
 
-    const doc =
-      parser.parseFromString(
-        html,
-        "text/html"
+  // ✅ SAFE FOR REACT-SNAP
+  if (typeof window === "undefined") {
+    return html;
+  }
+
+  const parser =
+    new DOMParser();
+
+  const doc =
+    parser.parseFromString(
+      html,
+      "text/html"
+    );
+
+  // REMOVE SCRIPTS
+  doc
+    .querySelectorAll("script")
+    .forEach((el) => el.remove());
+
+  // REMOVE IFRAME
+  doc
+    .querySelectorAll("iframe")
+    .forEach((el) => el.remove());
+
+  // REMOVE INLINE STYLES
+  doc
+    .querySelectorAll("*")
+    .forEach((el) => {
+
+      el.removeAttribute("style");
+
+      el.removeAttribute("class");
+
+      el.removeAttribute(
+        "contenteditable"
       );
 
-    // REMOVE SCRIPTS
-    doc
-      .querySelectorAll("script")
-      .forEach((el) => el.remove());
+      el.removeAttribute(
+        "data-list"
+      );
+    });
 
-    // REMOVE IFRAME
-    doc
-      .querySelectorAll("iframe")
-      .forEach((el) => el.remove());
-
-    // REMOVE INLINE STYLES
-    doc
-      .querySelectorAll("*")
-      .forEach((el) => {
-
-        el.removeAttribute("style");
-
-        el.removeAttribute("class");
-
-        el.removeAttribute(
-          "contenteditable"
-        );
-
-        el.removeAttribute(
-          "data-list"
-        );
-      });
-
-    return doc.body.innerHTML;
-  };
+  return doc.body.innerHTML;
+};
 
   const formatContent = (html) => {
 
