@@ -372,7 +372,7 @@ const AppRoutes = () => {
 />
 
 <Route
-  path="s/:slug"
+  path="news/:slug"
   element={<ArticlePage />}
 />
 

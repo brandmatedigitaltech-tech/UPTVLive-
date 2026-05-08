@@ -64,7 +64,7 @@ router.get(
 
       // ARTICLE URL
       const articleUrl =
-        `${WEBSITE_URL}/article/${article.slug}`;
+  `${WEBSITE_URL}/news/${article.slug}`;
 
       // SEND HTML
      res.send(`
