@@ -5,7 +5,7 @@ export const shareToWhatsApp = (article) => {
 
   // ✅ CLEAN SHARE URL
   const url =
-    `https://www.uptvlive.com/s/${slug}`;
+    `https://www.uptvlive.com/article/${slug}`;
 
   const whatsappURL =
     `https://wa.me/?text=${encodeURIComponent(url)}`;
