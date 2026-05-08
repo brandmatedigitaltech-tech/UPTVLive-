@@ -125,7 +125,7 @@ content="${image}"
 setTimeout(() => {
   window.location.href =
     "${articleUrl}";
-}, 1500);
+}, 300);
 </script>
 
 
