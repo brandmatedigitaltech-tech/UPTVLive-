@@ -26,7 +26,7 @@ import TopCitySection from "./components/TopCitySection/TopCitySection";
 import SpecialSection from "./components/SpecialSection/SpecialSection";
 import Sidebar from "./components/Sidebar/Sidebar";
 import VideoSection from "./components/VideoSection/VideoSection";
-
+import SeoRedirect from "./components/SeoRedirect";
 // ================= PAGES =================
 import ArticlePage from "./components/ArticlePage/ArticlePage";
 import About from "./components/about/about";
@@ -372,6 +372,7 @@ const AppRoutes = () => {
             path="article/:slug"
             element={<ArticlePage />}
           />
+          
 
           {/* CITY */}
           <Route
@@ -397,6 +398,10 @@ const AppRoutes = () => {
             element={<Contact />}
           />
         </Route>
+        <Route
+  path="/s/:slug"
+  element={<SeoRedirect />}
+/>
 
         {/* LOGIN */}
         <Route

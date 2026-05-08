@@ -38,7 +38,8 @@ const NewsCard = ({ news }) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const url = `${window.location.origin}${articleLink}`;
+    const url =
+  `${window.location.origin}/s/${news.slug}`;
 
     if (navigator.share) {
       navigator.share({

@@ -1,14 +1,11 @@
 export const shareToWhatsApp = (article) => {
 
-  const title =
-    article?.title || "UPTV Live News";
-
   const slug =
     article?.slug || article?._id;
 
-  // ✅ SEO URL
+  // ✅ CLEAN SHARE URL
   const url =
-    `https://api.uptvlive.com/seo/article/${slug}`;
+    `https://www.uptvlive.com/s/${slug}`;
 
   const whatsappURL =
     `https://wa.me/?text=${encodeURIComponent(url)}`;

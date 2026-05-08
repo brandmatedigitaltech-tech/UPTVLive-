@@ -387,9 +387,9 @@ if (
 
     try {
 
-      await navigator.clipboard.writeText(
-        articleUrl
-      );
+await navigator.clipboard.writeText(
+  `https://www.uptvlive.com/s/${article.slug}`
+);
 
       alert("Link copied ✅");
 
@@ -559,7 +559,7 @@ if (
         await navigator.share({
           title: article.title,
           text: description,
-          url: articleUrl,
+          url: `https://www.uptvlive.com/s/${article.slug}`,
         });
 
       } else {
