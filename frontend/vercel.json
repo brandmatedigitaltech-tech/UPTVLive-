@@ -2,12 +2,7 @@
   "rewrites": [
     {
       "source": "/article/:slug",
-      "destination": "https://api.uptvlive.com/seo/s/:slug"
-    },
-
-    {
-      "source": "/s/:slug",
-      "destination": "https://api.uptvlive.com/seo/s/:slug"
+      "destination": "https://api.uptvlive.com/seo/article/:slug"
     },
 
     {

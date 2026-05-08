@@ -14,7 +14,7 @@ const API_URL =
 // ==========================================
 
 router.get(
-  "/s/:slug",
+  "/article/:slug",
   async (req, res) => {
 
     try {
@@ -121,6 +121,12 @@ name="twitter:image"
 content="${image}"
 />
 
+<script>
+setTimeout(() => {
+  window.location.href =
+    "${articleUrl}";
+}, 1500);
+</script>
 
 
 </head>
