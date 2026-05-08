@@ -1,6 +1,16 @@
 {
   "rewrites": [
     {
+      "source": "/article/:slug",
+      "destination": "https://api.uptvlive.com/seo/s/:slug"
+    },
+
+    {
+      "source": "/s/:slug",
+      "destination": "https://api.uptvlive.com/seo/s/:slug"
+    },
+
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

@@ -388,7 +388,7 @@ if (
     try {
 
 await navigator.clipboard.writeText(
-  `https://www.uptvlive.com/s/${article.slug}`
+  `https://www.uptvlive.com/article/${article.slug}`
 );
 
       alert("Link copied ✅");
@@ -460,6 +460,11 @@ await navigator.clipboard.writeText(
           property="og:site_name"
           content="UPTV Live"
         />
+
+        <link
+  rel="canonical"
+  href={articleUrl}
+/>
 
         {/* TWITTER */}
 
@@ -559,7 +564,7 @@ await navigator.clipboard.writeText(
         await navigator.share({
           title: article.title,
           text: description,
-          url: `https://www.uptvlive.com/s/${article.slug}`,
+          url: `https://www.uptvlive.com/article/${article.slug}`,
         });
 
       } else {

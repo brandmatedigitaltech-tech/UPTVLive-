@@ -26,7 +26,7 @@ import TopCitySection from "./components/TopCitySection/TopCitySection";
 import SpecialSection from "./components/SpecialSection/SpecialSection";
 import Sidebar from "./components/Sidebar/Sidebar";
 import VideoSection from "./components/VideoSection/VideoSection";
-import SeoRedirect from "./components/SeoRedirect";
+
 // ================= PAGES =================
 import ArticlePage from "./components/ArticlePage/ArticlePage";
 import About from "./components/about/about";
@@ -66,6 +66,9 @@ const GlobalSeo = () => {
 
   useEffect(() => {
     const path = location.pathname;
+    if (path.includes("/article/")) {
+  return;
+}
 
     // ✅ DEFAULT TITLE
     let pageTitle =
@@ -99,12 +102,7 @@ const GlobalSeo = () => {
       pageTitle =
         "Category News | UPTV Live";
 
-    } else if (
-      path.includes("/article/")
-    ) {
-      pageTitle =
-        "Latest Article | UPTV Live";
-    }
+    } 
 
     // ✅ TITLE
     document.title = pageTitle;
@@ -398,10 +396,7 @@ const AppRoutes = () => {
             element={<Contact />}
           />
         </Route>
-        <Route
-  path="/s/:slug"
-  element={<SeoRedirect />}
-/>
+
 
         {/* LOGIN */}
         <Route
