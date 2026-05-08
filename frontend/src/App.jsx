@@ -367,9 +367,15 @@ const AppRoutes = () => {
 
           {/* ARTICLE */}
           <Route
-            path="article/:slug"
-            element={<ArticlePage />}
-          />
+  path="article/:slug"
+  element={<ArticlePage />}
+/>
+
+<Route
+  path="s/:slug"
+  element={<ArticlePage />}
+/>
+
           
 
           {/* CITY */}
