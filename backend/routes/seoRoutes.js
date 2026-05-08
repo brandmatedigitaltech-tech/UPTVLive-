@@ -27,7 +27,7 @@ router.get(
       // FETCH ARTICLE
       const response =
         await axios.get(
-          `${API_URL}/slug/${slug}`
+          `${API_URL}/${slug}`
         );
 
       const article =
