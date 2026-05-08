@@ -1,49 +1,52 @@
-const { slugify } = require("transliteration");
+const { slugify } =
+  require("transliteration");
 
 const createSlug = (
   text = ""
 ) => {
 
-  // ✅ SAFE STRING
   let slug =
     String(text).trim();
 
-  // ✅ REMOVE HTML
+  // REMOVE HTML
   slug = slug.replace(
     /<[^>]*>/g,
     ""
   );
 
-  // ✅ HINDI → ENGLISH
+  // HINDI → ENGLISH
   slug = slugify(slug, {
     lowercase: true,
     separator: "-",
+    allowedChars:
+      "a-zA-Z0-9-",
   });
 
-  // ✅ REMOVE SPECIAL
+  // REMOVE SPECIAL
   slug = slug.replace(
     /[^a-z0-9-]/g,
     ""
   );
 
-  // ✅ CLEAN DASHES
+  // REMOVE EXTRA DASHES
   slug = slug.replace(
     /-+/g,
     "-"
   );
 
+  // REMOVE START-END DASH
   slug = slug.replace(
     /^-+|-+$/g,
     ""
   );
 
-  // ✅ LIMIT
+  // SHORT SEO URL
   slug = slug.substring(
     0,
-    120
+    80
   );
 
-  // ✅ FALLBACK
+  // FALLBACK
   if (!slug) {
 
     slug =

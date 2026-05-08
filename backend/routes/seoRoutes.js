@@ -14,7 +14,7 @@ const API_URL =
 // ==========================================
 
 router.get(
-  "/article/:slug",
+  "/s/:slug",
   async (req, res) => {
 
     try {
@@ -27,7 +27,7 @@ router.get(
       // FETCH ARTICLE
       const response =
         await axios.get(
-          `${API_URL}/${slug}`
+          `${API_URL}/slug${slug}`
         );
 
       const article =
@@ -64,7 +64,7 @@ router.get(
 
       // ARTICLE URL
       const articleUrl =
-        `${WEBSITE_URL}/article/${article.slug}`;
+        `${WEBSITE_URL}/s/${article.slug}`;
 
       // SEND HTML
      res.send(`
@@ -73,7 +73,7 @@ router.get(
 
 <head>
 
-<meta charset="UTF-8" />
+<meta name="robots" content="index, follow" />
 
 <title>${title}</title>
 
