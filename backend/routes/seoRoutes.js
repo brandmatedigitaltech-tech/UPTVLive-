@@ -27,7 +27,7 @@ router.get(
       // FETCH ARTICLE
       const response =
         await axios.get(
-          `${API_URL}/slug${slug}`
+          `${API_URL}/slug/${slug}`
         );
 
       const article =
@@ -64,7 +64,7 @@ router.get(
 
       // ARTICLE URL
       const articleUrl =
-        `${WEBSITE_URL}/s/${article.slug}`;
+        `${WEBSITE_URL}/article/${article.slug}`;
 
       // SEND HTML
      res.send(`
@@ -121,12 +121,7 @@ name="twitter:image"
 content="${image}"
 />
 
-<script>
-setTimeout(() => {
-  window.location.href =
-    "${articleUrl}";
-}, 3000);
-</script>
+
 
 </head>
 
@@ -139,12 +134,16 @@ text-align:center;
 >
 
 <h2>
-Redirecting to article...
+UPTV Live
 </h2>
 
 <p>
-UPTV Live News
+Loading article...
 </p>
+
+<a href="${articleUrl}">
+Open Article
+</a>
 
 </body>
 
