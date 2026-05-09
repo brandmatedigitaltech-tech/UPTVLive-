@@ -133,11 +133,6 @@ content="${image}"
 />
 
 <meta
-property="og:image:type"
-content="image/jpeg"
-/>
-
-<meta
 property="og:image:width"
 content="1200"
 />
@@ -185,7 +180,7 @@ content="${image}"
 
 <meta
 http-equiv="refresh"
-content="5;url=${WEBSITE_URL}/news/${article.slug}"
+content="1;url=${WEBSITE_URL}/news/${article.slug}"
 />
 
 </head>
