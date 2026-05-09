@@ -70,7 +70,7 @@ router.get(
 
       // FINAL URL
       const articleUrl =
-        `${WEBSITE_URL}/news/${article.slug}`;
+        `${WEBSITE_URL}/article/${article.slug}`;
 
       // HTML
       res.send(`
@@ -186,7 +186,7 @@ content="${image}"
 setTimeout(() => {
 
   window.location.href =
-    "${articleUrl}";
+  "${WEBSITE_URL}/news/${article.slug}";
 
 }, 3000);
 
