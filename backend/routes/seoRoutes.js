@@ -120,10 +120,29 @@ content="${title}"
 property="og:description"
 content="${description}"
 />
-
 <meta
 property="og:image"
 content="${image}"
+/>
+
+<meta
+property="og:image:secure_url"
+content="${image}"
+/>
+
+<meta
+property="og:image:type"
+content="image/jpeg"
+/>
+
+<meta
+property="og:image:width"
+content="1200"
+/>
+
+<meta
+property="og:image:height"
+content="630"
 />
 
 <meta
@@ -140,7 +159,6 @@ content="UPTV Live"
 property="og:locale"
 content="hi_IN"
 />
-
 <!-- TWITTER -->
 
 <meta
@@ -170,7 +188,7 @@ setTimeout(() => {
   window.location.href =
     "${articleUrl}";
 
-}, 500);
+}, 3000);
 
 </script>
 
