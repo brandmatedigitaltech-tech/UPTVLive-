@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import { shareToWhatsApp } from "../../utils/shareArticle";
 const FALLBACK_IMG = "/no-image.jpg";
 
 // ================= IMAGE =================
