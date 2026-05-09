@@ -3,15 +3,19 @@ const axios = require("axios");
 
 const router = express.Router();
 
+// =========================
+// CONFIG
+// =========================
+
 const WEBSITE_URL =
   "https://www.uptvlive.com";
 
 const API_URL =
   "https://api.uptvlive.com/api/news";
 
-// ==========================================
+// =========================
 // SEO ARTICLE ROUTE
-// ==========================================
+// =========================
 
 router.get(
   "/article/:slug",
@@ -19,33 +23,49 @@ router.get(
 
     try {
 
+      // =========================
+      // GET SLUG
+      // =========================
+
       const slug =
         decodeURIComponent(
           req.params.slug
         );
 
+      // =========================
       // FETCH ARTICLE
+      // =========================
+
       const response =
         await axios.get(
-          `${API_URL}/${slug}`
+          `${API_URL}/slug/${slug}`
         );
 
       const article =
         response.data;
 
+      // =========================
+      // NOT FOUND
+      // =========================
+
       if (!article) {
+
         return res
           .status(404)
           .send("Article not found");
+
       }
 
-      // TITLE
+      // =========================
+      // SEO DATA
+      // =========================
+
       const title =
         article.title ||
         "UPTV Live";
 
-      // DESCRIPTION
       const description =
+
         article.seoDescription ||
 
         article.content
@@ -56,26 +76,52 @@ router.get(
 
         "Latest Hindi News";
 
+      // =========================
       // IMAGE
+      // =========================
+
       const image =
+
         article.image ||
+
         article.images?.[0] ||
+
         "https://www.uptvlive.com/logo.jpeg";
 
-      // ARTICLE URL
-      const articleUrl =
-  `${WEBSITE_URL}/news/${article.slug}`;
+      // =========================
+      // FINAL ARTICLE URL
+      // =========================
 
-      // SEND HTML
-     res.send(`
+      const articleUrl =
+        `${WEBSITE_URL}/article/${article.slug}`;
+
+      // =========================
+      // HTML RESPONSE
+      // =========================
+
+      res.send(`
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-<meta name="robots" content="index, follow" />
+<meta charset="UTF-8" />
 
-<title>${title}</title>
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+/>
+
+<meta
+name="robots"
+content="index, follow"
+/>
+
+<title>
+${title}
+</title>
 
 <meta
 name="description"
@@ -87,19 +133,64 @@ rel="canonical"
 href="${articleUrl}"
 />
 
-<meta property="og:type" content="article" />
+<!-- ================= OG ================= -->
 
-<meta property="og:title" content="${title}" />
+<meta
+property="og:type"
+content="article"
+/>
 
-<meta property="og:description" content="${description}" />
+<meta
+property="og:title"
+content="${title}"
+/>
 
-<meta property="og:image" content="${image}" />
+<meta
+property="og:description"
+content="${description}"
+/>
 
-<meta property="og:url" content="${articleUrl}" />
+<meta
+property="og:url"
+content="${articleUrl}"
+/>
 
-<meta property="og:site_name" content="UPTV Live" />
+<meta
+property="og:site_name"
+content="UPTV Live"
+/>
 
-<meta property="og:locale" content="hi_IN" />
+<meta
+property="og:locale"
+content="hi_IN"
+/>
+
+<meta
+property="og:image"
+content="${image}"
+/>
+
+<meta
+property="og:image:secure_url"
+content="${image}"
+/>
+
+<meta
+property="og:image:width"
+content="1200"
+/>
+
+<meta
+property="og:image:height"
+content="630"
+/>
+
+<meta
+property="og:image:type"
+content="image/jpeg"
+/>
+
+<!-- ================= TWITTER ================= -->
 
 <meta
 name="twitter:card"
@@ -121,13 +212,12 @@ name="twitter:image"
 content="${image}"
 />
 
-<script>
-setTimeout(() => {
-  window.location.href =
-    "${articleUrl}";
-}, 300);
-</script>
+<!-- ================= REDIRECT ================= -->
 
+<meta
+http-equiv="refresh"
+content="0; url=${articleUrl}"
+/>
 
 </head>
 
@@ -154,15 +244,20 @@ Open Article
 </body>
 
 </html>
+
 `);
 
     } catch (err) {
 
-      console.log(err);
+      console.log(
+        "SEO ERROR:",
+        err.message
+      );
 
       res
         .status(500)
         .send("SEO Error");
+
     }
   }
 );
