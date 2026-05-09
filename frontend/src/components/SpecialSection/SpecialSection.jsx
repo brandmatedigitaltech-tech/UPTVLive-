@@ -49,7 +49,7 @@ const SpecialSection = () => {
         {!loading &&
           news.map((item) => (
             <Link
-              to={`/article/${item.slug}`}
+              to={`/news/${item.slug}`}
               className="special-card"
               key={item._id}
             >

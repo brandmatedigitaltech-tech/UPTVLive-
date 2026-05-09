@@ -117,7 +117,7 @@ const Hero = () => {
           {/* MAIN */}
           <div className="hero-main">
 
-            <Link to={`/article/${mainNews.slug}`}>
+            <Link to={`/news/${mainNews.slug}`}>
               <img
                 src={getImage(mainNews)}
                 alt={mainNews.title}
@@ -143,7 +143,7 @@ const Hero = () => {
                 </span>
               </div>
 
-              <Link to={`/article/${mainNews.slug}`} className="hero-link">
+              <Link to={`/news/${mainNews.slug}`} className="hero-link">
                 <div className="hero-title">
                   {mainNews.title}
                 </div>
@@ -175,7 +175,7 @@ const Hero = () => {
 
             {sideNews.map((item) => (
               <Link
-                to={`/article/${item.slug}`}
+                to={`/news/${item.slug}`}
                 key={item._id}
                 className="side-link"
               >

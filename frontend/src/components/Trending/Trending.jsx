@@ -51,7 +51,7 @@ const Trending = () => {
       {!loading &&
         news.map((item, index) => (
           <Link
-            to={`/article/${item.slug || item._id}`} // ✅ fallback
+            to={`/news/${item.slug || item._id}`} // ✅ fallback
             key={item._id}
             className="numbered-link"
           >

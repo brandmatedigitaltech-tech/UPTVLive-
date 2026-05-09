@@ -765,7 +765,7 @@ setMediaLinks(
 
               onClick={() =>
                 navigate(
-                  `/article/${
+                  `/news/${
                     item.slug ||
                     item._id
                   }`

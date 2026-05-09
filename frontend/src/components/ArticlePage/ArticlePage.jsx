@@ -804,7 +804,7 @@ await navigator.clipboard.writeText(
 
                   <Link
                     key={item._id}
-                    to={`/article/${item.slug}`}
+                    to={`/news/${item.slug}`}
                     className="related-card"
                   >
 

@@ -31,7 +31,7 @@ const NewsCard = ({ news }) => {
       : news.title
     : "No Title";
 
-  const articleLink = news.slug ? `/article/${news.slug}` : "#";
+  const articleLink = news.slug ? `/news/${news.slug}` : "#";
 
   // ================= SIMPLE SHARE =================
   const handleShare = (e) => {
@@ -39,7 +39,7 @@ const NewsCard = ({ news }) => {
     e.stopPropagation();
 
     const url =
-  `${window.location.origin}/article/${news.slug}`;
+  `${window.location.origin}/news/${news.slug}`;
 
     if (navigator.share) {
       navigator.share({

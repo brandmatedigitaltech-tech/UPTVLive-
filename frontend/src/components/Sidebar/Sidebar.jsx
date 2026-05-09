@@ -57,7 +57,7 @@ const Sidebar = () => {
         {!loading &&
           news.map((item, index) => (
             <Link
-              to={`/article/${item.slug || item._id}`}
+              to={`/news/${item.slug || item._id}`}
               key={item._id}
               className="numbered-link"
             >

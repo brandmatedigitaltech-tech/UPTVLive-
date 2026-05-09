@@ -206,7 +206,7 @@ const CitySection = () => {
           news.map(
             (item) => (
               <Link
-                to={`/article/${
+                to={`/news/${
                   item.slug ||
                   item._id
                 }`}

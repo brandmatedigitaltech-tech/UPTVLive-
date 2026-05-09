@@ -55,7 +55,7 @@ const BreakingNews = ({ newsData = [] }) => {
 
           {[...breakingItems, ...breakingItems].map((item, i) => (
             <Link
-              to={`/article/${item.slug || item._id}`}
+              to={`/news/${item.slug || item._id}`}
               key={i}
               className="ticker-item"
             >
