@@ -60,13 +60,15 @@ router.get(
         "Latest Hindi News";
 
       // IMAGE
-      const image =
+const image =
 
-        article.image ||
+  article.image?.startsWith("http")
+    ? article.image
 
-        article.images?.[0] ||
+    : article.images?.[0]?.startsWith("http")
+    ? article.images[0]
 
-        "https://www.uptvlive.com/logo.jpeg";
+    : "https://www.uptvlive.com/og-default.jpg";
 
       // FINAL URL
       const articleUrl =
