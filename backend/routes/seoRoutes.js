@@ -70,7 +70,7 @@ router.get(
 
       // FINAL URL
       const articleUrl =
-        `${WEBSITE_URL}/article/${article.slug}`;
+        `${WEBSITE_URL}/news/${article.slug}`;
 
       // HTML
       res.send(`

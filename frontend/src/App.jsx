@@ -366,10 +366,7 @@ const AppRoutes = () => {
           />
 
           {/* ARTICLE */}
-          <Route
-  path="article/:slug"
-  element={<ArticlePage />}
-/>
+
 
 <Route
   path="news/:slug"
