@@ -181,16 +181,10 @@ name="twitter:image"
 content="${image}"
 />
 
-<script>
-
-setTimeout(() => {
-
-  window.location.href =
-  "${WEBSITE_URL}/news/${article.slug}";
-
-}, 3000);
-
-</script>
+<meta
+http-equiv="refresh"
+content="5;url=${WEBSITE_URL}/news/${article.slug}"
+/>
 
 </head>
 
@@ -210,7 +204,7 @@ UPTV Live
 Loading article...
 </p>
 
-<a href="${articleUrl}">
+<a href="${WEBSITE_URL}/news/${article.slug}">
 Open Article
 </a>
 
