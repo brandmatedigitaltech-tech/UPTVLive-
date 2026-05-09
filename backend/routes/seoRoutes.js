@@ -178,10 +178,6 @@ name="twitter:image"
 content="${image}"
 />
 
-<meta
-http-equiv="refresh"
-content="1;url=${WEBSITE_URL}/news/${article.slug}"
-/>
 
 </head>
 
@@ -204,6 +200,13 @@ Loading article...
 <a href="${WEBSITE_URL}/news/${article.slug}">
 Open Article
 </a>
+
+<script>
+setTimeout(() => {
+  window.location.href =
+    "${WEBSITE_URL}/news/${article.slug}";
+}, 1000);
+</script>
 
 </body>
 
