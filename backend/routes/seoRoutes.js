@@ -3,19 +3,15 @@ const axios = require("axios");
 
 const router = express.Router();
 
-// =========================
-// CONFIG
-// =========================
-
 const WEBSITE_URL =
   "https://www.uptvlive.com";
 
 const API_URL =
   "https://api.uptvlive.com/api/news";
 
-// =========================
+// ==========================================
 // SEO ARTICLE ROUTE
-// =========================
+// ==========================================
 
 router.get(
   "/article/:slug",
@@ -23,19 +19,12 @@ router.get(
 
     try {
 
-      // =========================
-      // GET SLUG
-      // =========================
-
       const slug =
         decodeURIComponent(
           req.params.slug
         );
 
-      // =========================
       // FETCH ARTICLE
-      // =========================
-
       const response =
         await axios.get(
           `${API_URL}/${slug}`
@@ -43,10 +32,6 @@ router.get(
 
       const article =
         response.data;
-
-      // =========================
-      // NOT FOUND
-      // =========================
 
       if (!article) {
 
@@ -56,14 +41,12 @@ router.get(
 
       }
 
-      // =========================
-      // SEO DATA
-      // =========================
-
+      // TITLE
       const title =
         article.title ||
         "UPTV Live";
 
+      // DESCRIPTION
       const description =
 
         article.seoDescription ||
@@ -76,10 +59,7 @@ router.get(
 
         "Latest Hindi News";
 
-      // =========================
       // IMAGE
-      // =========================
-
       const image =
 
         article.image ||
@@ -88,19 +68,12 @@ router.get(
 
         "https://www.uptvlive.com/logo.jpeg";
 
-      // =========================
-      // FINAL ARTICLE URL
-      // =========================
-
+      // FINAL URL
       const articleUrl =
         `${WEBSITE_URL}/article/${article.slug}`;
 
-      // =========================
-      // HTML RESPONSE
-      // =========================
-
+      // HTML
       res.send(`
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -119,9 +92,7 @@ name="robots"
 content="index, follow"
 />
 
-<title>
-${title}
-</title>
+<title>${title}</title>
 
 <meta
 name="description"
@@ -133,7 +104,7 @@ rel="canonical"
 href="${articleUrl}"
 />
 
-<!-- ================= OG ================= -->
+<!-- OPEN GRAPH -->
 
 <meta
 property="og:type"
@@ -151,6 +122,11 @@ content="${description}"
 />
 
 <meta
+property="og:image"
+content="${image}"
+/>
+
+<meta
 property="og:url"
 content="${articleUrl}"
 />
@@ -165,32 +141,7 @@ property="og:locale"
 content="hi_IN"
 />
 
-<meta
-property="og:image"
-content="${image}"
-/>
-
-<meta
-property="og:image:secure_url"
-content="${image}"
-/>
-
-<meta
-property="og:image:width"
-content="1200"
-/>
-
-<meta
-property="og:image:height"
-content="630"
-/>
-
-<meta
-property="og:image:type"
-content="image/jpeg"
-/>
-
-<!-- ================= TWITTER ================= -->
+<!-- TWITTER -->
 
 <meta
 name="twitter:card"
@@ -212,12 +163,16 @@ name="twitter:image"
 content="${image}"
 />
 
-<!-- ================= REDIRECT ================= -->
+<script>
 
-<meta
-http-equiv="refresh"
-content="0; url=${articleUrl}"
-/>
+setTimeout(() => {
+
+  window.location.href =
+    "${articleUrl}";
+
+}, 500);
+
+</script>
 
 </head>
 
@@ -244,7 +199,6 @@ Open Article
 </body>
 
 </html>
-
 `);
 
     } catch (err) {
