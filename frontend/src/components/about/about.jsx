@@ -41,7 +41,7 @@ const About = () => {
         <div className="owner-section">
 
           <img
-            src="/images/owner.jpeg"
+            src="/public/owner.jpeg"
             alt="Abhay Tripathi"
             className="owner-img"
           />
