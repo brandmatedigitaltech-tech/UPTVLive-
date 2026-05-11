@@ -116,6 +116,15 @@ const imageHandler = () => {
 const imageUrl =
   res.data.images?.[0];
 
+  setForm((prev) => ({
+  ...prev,
+
+  images: [
+    ...(prev.images || []),
+    imageUrl,
+  ],
+}));
+
 if (!imageUrl) {
 
   return alert(
@@ -123,8 +132,10 @@ if (!imageUrl) {
   );
 }
 
-      const quill =
-        quillRef.current;
+const quill =
+  quillRef.current;
+
+if (!quill) return;
 
       const range =
         quill.getSelection();
@@ -565,8 +576,10 @@ if (!imageUrl) {
         const finalData = {
           ...form,
 
-          images:
-            uploadedImages,
+          images: [
+  ...form.images,
+  ...uploadedImages,
+],
 
           image:
             uploadedImages[0] || "",
