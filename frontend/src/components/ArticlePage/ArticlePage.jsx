@@ -1068,7 +1068,7 @@ const ArticlePage = () => {
                         item.slug
                       }
 
-                      to={`/article/${item.slug}`}
+                      to={`/news/${item.slug}`}
 
                       className="related-card"
                     >
