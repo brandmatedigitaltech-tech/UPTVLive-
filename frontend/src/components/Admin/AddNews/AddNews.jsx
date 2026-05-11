@@ -113,8 +113,15 @@ const imageHandler = () => {
           data
         );
 
-      const imageUrl =
-        res.data.images?.[0];
+const imageUrl =
+  res.data.images?.[0];
+
+if (!imageUrl) {
+
+  return alert(
+    "Image URL not received ❌"
+  );
+}
 
       const quill =
         quillRef.current;
@@ -261,7 +268,7 @@ const imageHandler = () => {
             ...prev,
 
             content:
-              quill.root.innerHTML,
+  quill.root.innerHTML.trim(),
           }));
         }
       );
