@@ -705,6 +705,108 @@ const content =
       }
     };
 
+
+    const shareArticle = (
+  item,
+  platform
+) => {
+
+  const articleUrl =
+    `https://www.uptvlive.com/news/${item.slug}`;
+
+  const title =
+    encodeURIComponent(
+      item.title
+    );
+
+  const url =
+    encodeURIComponent(
+      articleUrl
+    );
+
+  // WHATSAPP
+
+  if (
+    platform === "whatsapp"
+  ) {
+
+    window.open(
+      `https://wa.me/?text=${title}%20${url}`,
+      "_blank"
+    );
+  }
+
+  // FACEBOOK
+
+  if (
+    platform === "facebook"
+  ) {
+
+    window.open(
+      `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      "_blank"
+    );
+  }
+
+  // X / TWITTER
+
+  if (
+    platform === "x"
+  ) {
+
+    window.open(
+      `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+      "_blank"
+    );
+  }
+
+  // TELEGRAM
+
+  if (
+    platform === "telegram"
+  ) {
+
+    window.open(
+      `https://t.me/share/url?url=${url}&text=${title}`,
+      "_blank"
+    );
+  }
+
+  // INSTAGRAM
+
+  if (
+    platform === "instagram"
+  ) {
+
+    navigator.clipboard.writeText(
+      articleUrl
+    );
+
+    alert(
+      "Link copied ✅ Paste on Instagram"
+    );
+
+    window.open(
+      "https://www.instagram.com/",
+      "_blank"
+    );
+  }
+
+  // COPY
+
+  if (
+    platform === "copy"
+  ) {
+
+    navigator.clipboard.writeText(
+      articleUrl
+    );
+
+    alert(
+      "Link copied ✅"
+    );
+  }
+};
   // =====================================================
   // ================= DELETE ============================
   // =====================================================
@@ -1116,10 +1218,86 @@ setPreview(
 
                 </div>
 
+
+
                 {/* ACTIONS */}
 
                 <div className="actions">
+                  <div className="share-actions">
 
+  <button
+    type="button"
+    onClick={() =>
+      shareArticle(
+        item,
+        "whatsapp"
+      )
+    }
+  >
+    WhatsApp
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      shareArticle(
+        item,
+        "facebook"
+      )
+    }
+  >
+    Facebook
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      shareArticle(
+        item,
+        "x"
+      )
+    }
+  >
+    X
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      shareArticle(
+        item,
+        "telegram"
+      )
+    }
+  >
+    Telegram
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      shareArticle(
+        item,
+        "instagram"
+      )
+    }
+  >
+    Instagram
+  </button>
+
+  <button
+    type="button"
+    onClick={() =>
+      shareArticle(
+        item,
+        "copy"
+      )
+    }
+  >
+    Copy
+  </button>
+
+</div>
                   <button
   type="button"
                     onClick={() =>
