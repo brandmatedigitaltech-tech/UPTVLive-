@@ -555,41 +555,44 @@ const filteredNews =
   // ================= OPEN ==============================
   // =====================================================
 
-  const openPreview = (
-    item
-  ) => {
+const openPreview = (
+  item
+) => {
 
-    setPreviewItem({
-      ...item,
+  setPreviewItem({
+    ...item,
 
-      categories:
-        item.categories || [],
+    categories:
+      item.categories || [],
 
-      tags:
-        item.tags || [],
+    tags:
+      item.tags || [],
 
-      sections:
-        item.sections || [],
+    sections:
+      item.sections || [],
 
-      relatedArticles:
-        item.relatedArticles || [],
-        searchResults: [],
-    });
+    relatedArticles:
+      item.relatedArticles || [],
 
-    setMediaLinks(
-      item.mediaLinks?.length
-        ? item.mediaLinks
-        : [""]
-    );
+    searchResults: [],
+  });
 
-    setPreview(
-      (item.images || []).map(
-        (img) => ({
-          url: img,
-        })
-      )
-    );
-  };
+  setMediaLinks(
+    item.mediaLinks?.length
+      ? item.mediaLinks
+      : [""]
+  );
+
+  // ✅ SHOW EXISTING IMAGES
+  setPreview(
+    (item.images || []).map(
+      (img) => ({
+        url: img,
+      })
+    )
+  );
+};
+
 
   // =====================================================
   // ================= CLOSE =============================
@@ -615,9 +618,9 @@ const closeModal =
 
     setPreview([]);
 
-    alert("Images uploaded ✅");
+    
 
-setImageFiles([]);;
+setImageFiles([]);
 setDragActive(false);
     setMediaLinks([""]);
 
@@ -749,21 +752,6 @@ const handleFile = (
   files
 ) => {
 
-  preview.forEach(
-  (img) => {
-
-    if (
-      img.url?.startsWith(
-        "blob:"
-      )
-    ) {
-      URL.revokeObjectURL(
-        img.url
-      );
-    }
-  }
-);
-
   const fileArray =
     Array.from(files);
 
@@ -816,10 +804,36 @@ const handleFile = (
       })
     );
 
-  setPreview(
-    previewUrls
-  );
+setPreview((prev) => {
+
+  prev.forEach((img) => {
+
+    if (
+      img.url?.startsWith(
+        "blob:"
+      )
+    ) {
+
+      URL.revokeObjectURL(
+        img.url
+      );
+    }
+  });
+
+  return [
+
+    ...prev.filter(
+      (img) =>
+        !img.url?.startsWith(
+          "blob:"
+        )
+    ),
+
+    ...previewUrls,
+  ];
+});
 };
+
 const handleChange = (
   e
 ) => {
@@ -828,7 +842,6 @@ const handleChange = (
     e.target.files
   );
 };
-
   // =====================================================
   // ================= DRAG ==============================
   // =====================================================
@@ -875,82 +888,127 @@ setDragActive(
   // ================= UPLOAD ============================
   // =====================================================
 
-  const uploadImage =
-    async () => {
+  const uploadImage = async () => {
+
+  if (!imageFiles.length) {
+
+    return alert(
+      "Select images ❌"
+    );
+  }
+
+  try {
+
+    setUploading(true);
+
+    const data =
+      new FormData();
+
+    imageFiles.forEach(
+      (file) => {
+
+        data.append(
+          "images",
+          file
+        );
+      }
+    );
+
+    const res =
+      await API.post(
+        "/upload/upload-multiple",
+        data
+      );
+
+    const uploadedImages =
+      res.data.images || [];
+
+    setPreviewItem(
+      (prev) => ({
+
+        ...prev,
+
+        images: [
+          ...(prev.images || []),
+          ...uploadedImages,
+        ],
+
+image:
+  uploadedImages[0] ||
+  prev.image,
+      })
+    );
+
+    // ✅ REMOVE BLOB PREVIEWS
+    preview.forEach((img) => {
 
       if (
-        !imageFiles.length
+        img.url?.startsWith(
+          "blob:"
+        )
       ) {
-        return alert(
-          "Select images ❌"
+
+        URL.revokeObjectURL(
+          img.url
         );
       }
+    });
 
-      try {
+    // ✅ SHOW ONLY SERVER URLS
+setPreview((prev) => {
 
-        setUploading(true);
+  const existing =
+    prev.filter(
+      (img) =>
+        !img.url?.startsWith(
+          "blob:"
+        )
+    );
 
-        const data =
-          new FormData();
+  const merged = [
 
-        imageFiles.forEach(
-          (file) => {
-            data.append(
-              "images",
-              file
-            );
-          }
-        );
+    ...existing,
 
-        const res =
-          await API.post(
-            "/upload/upload-multiple",
-            data
-          );
+    ...uploadedImages.map(
+      (img) => ({
+        url: img,
+      })
+    ),
+  ];
 
-setPreviewItem(
-  (prev) => ({
+  const unique =
+    merged.filter(
+      (img, index, self) =>
+        index ===
+        self.findIndex(
+          (x) =>
+            x.url === img.url
+        )
+    );
 
-    ...prev,
+  return unique;
+});
 
-    images: [
-      ...(prev.images || []),
-      ...res.data.images,
-    ],
+    // ✅ CLEAR FILES
+    setImageFiles([]);
 
-    image:
-      prev.image ||
-      res.data.images[0],
-  })
-);
+    alert(
+      "Images uploaded ✅"
+    );
 
-setPreview((prev) => [
-  ...prev,
-  ...res.data.images.map(
-    (img) => ({
-      url: img,
-    })
-  ),
-]);
+  } catch (err) {
 
-        alert(
-          "Images uploaded ✅"
-        );
+    console.log(err);
 
-      } catch (err) {
+    alert(
+      "Upload failed ❌"
+    );
 
-        console.log(err);
+  } finally {
 
-        alert(
-          "Upload failed ❌"
-        );
-
-      } finally {
-
-        setUploading(false);
-      }
-    };
-
+    setUploading(false);
+  }
+};
   // =====================================================
   // ================= RETURN ============================
   // =====================================================
@@ -1314,10 +1372,14 @@ setPreview((prev) => [
 
   multiple
 
-  onChange={
-    handleChange
-  }
+onChange={(e) => {
+
+  handleChange(e);
+
+  e.target.value = null;
+}}
 />
+
 
                 {preview.length ===
                 0 ? (
@@ -1336,7 +1398,7 @@ setPreview((prev) => [
                       ) => (
 
                         <img
-                          key={i}
+                          key={`${img.url}-${i}`}
 
                           src={
                             img.url
