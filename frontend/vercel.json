@@ -4,29 +4,8 @@
       "source": "/article/:slug",
       "destination": "https://api.uptvlive.com/seo/article/:slug"
     },
-
     {
-      "source": "/news/:slug",
-      "destination": "/index.html"
-    },
-
-    {
-      "source": "/city/:path*",
-      "destination": "/index.html"
-    },
-
-    {
-      "source": "/category/:path*",
-      "destination": "/index.html"
-    },
-
-    {
-      "source": "/dashboard/:path*",
-      "destination": "/index.html"
-    },
-
-    {
-      "source": "/review/:path*",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
