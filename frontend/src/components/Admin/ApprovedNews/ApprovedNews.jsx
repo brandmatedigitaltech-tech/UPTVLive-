@@ -2,6 +2,7 @@ import {
   useEffect,
   useState,
   useRef,
+  useMemo,
 } from "react";
 
 import API from "../../../services/api";
@@ -208,6 +209,98 @@ const ApprovedNews = () => {
   const quillRef =
     useRef(null);
 
+    const imageHandler = () => {
+
+  const input =
+    document.createElement(
+      "input"
+    );
+
+  input.setAttribute(
+    "type",
+    "file"
+  );
+
+  input.setAttribute(
+    "accept",
+    "image/*"
+  );
+
+  input.click();
+
+  input.onchange =
+    async () => {
+
+      const file =
+        input.files[0];
+
+      if (!file) return;
+
+      try {
+
+        setUploading(true);
+
+        const data =
+          new FormData();
+
+        data.append(
+          "images",
+          file
+        );
+
+        const res =
+          await API.post(
+            "/upload/upload-multiple",
+            data
+          );
+
+        const imageUrl =
+          res.data.images?.[0];
+
+        if (!imageUrl) {
+
+          return alert(
+            "Image upload failed ❌"
+          );
+        }
+
+        const quill =
+          quillRef.current;
+          if (!quill) return;
+
+const range =
+  quill.getSelection(true);
+
+        const index =
+          range
+            ? range.index
+            : quill.getLength();
+
+        quill.insertEmbed(
+          index,
+          "image",
+          imageUrl
+        );
+
+        quill.setSelection(
+          index + 1
+        );
+
+      } catch (err) {
+
+        console.log(err);
+
+        alert(
+          "Upload failed ❌"
+        );
+
+      } finally {
+
+        setUploading(false);
+      }
+    };
+};
+
   // =====================================================
   // ================= FETCH =============================
   // =====================================================
@@ -289,7 +382,20 @@ const ApprovedNews = () => {
         console.log(err);
       }
     };
+useEffect(() => {
 
+  document.body.style.overflow =
+    previewItem
+      ? "hidden"
+      : "auto";
+
+  return () => {
+
+    document.body.style.overflow =
+      "auto";
+  };
+
+}, [previewItem]);
   // =====================================================
   // ================= INIT ==============================
   // =====================================================
@@ -303,7 +409,30 @@ const ApprovedNews = () => {
     fetchCities();
 
   }, []);
+useEffect(() => {
 
+  const esc = (e) => {
+
+    if (
+      e.key === "Escape"
+    ) {
+
+      closeModal();
+    }
+  };
+
+  window.addEventListener(
+    "keydown",
+    esc
+  );
+
+  return () =>
+    window.removeEventListener(
+      "keydown",
+      esc
+    );
+
+}, []);
   // =====================================================
   // ================= QUILL =============================
   // =====================================================
@@ -325,6 +454,7 @@ const ApprovedNews = () => {
   ) {
     return;
   }
+  
 
   const quill =
     new Quill(
@@ -336,7 +466,9 @@ const ApprovedNews = () => {
           "Edit article content...",
 
         modules: {
-          toolbar: [
+          toolbar: {
+            container: [
+
 
             [
               {
@@ -370,9 +502,14 @@ const ApprovedNews = () => {
               "link",
             ],
 
-            ["clean"],
-          ],
-        },
+["clean"],
+],
+
+handlers: {
+  image: imageHandler,
+},
+},
+},
       }
     );
 
@@ -396,19 +533,24 @@ const ApprovedNews = () => {
 
 }, [previewItem?._id]);
 
+
   // =====================================================
   // ================= FILTER ============================
   // =====================================================
 
-  const filteredNews =
-    news.filter((item) =>
-      item.title
-        ?.toLowerCase()
-        .includes(
-          search.toLowerCase()
-        )
+const filteredNews =
+  useMemo(() => {
+
+    return news.filter(
+      (item) =>
+        item.title
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
     );
 
+  }, [news, search]);
   // =====================================================
   // ================= OPEN ==============================
   // =====================================================
@@ -431,6 +573,7 @@ const ApprovedNews = () => {
 
       relatedArticles:
         item.relatedArticles || [],
+        searchResults: [],
     });
 
     setMediaLinks(
@@ -452,33 +595,37 @@ const ApprovedNews = () => {
   // ================= CLOSE =============================
   // =====================================================
 
-  const closeModal =
-    () => {
+const closeModal =
+  () => {
 
-      preview.forEach(
-        (img) => {
+    preview.forEach(
+      (img) => {
 
-          if (
-            img.url?.startsWith(
-              "blob:"
-            )
-          ) {
-            URL.revokeObjectURL(
-              img.url
-            );
-          }
+        if (
+          img.url?.startsWith(
+            "blob:"
+          )
+        ) {
+          URL.revokeObjectURL(
+            img.url
+          );
         }
-      );
+      }
+    );
 
-      setPreview([]);
+    setPreview([]);
 
-      setImageFiles([]);
+    alert("Images uploaded ✅");
 
-      setPreviewItem(null);
+setImageFiles([]);;
+setDragActive(false);
+    setMediaLinks([""]);
 
-      quillRef.current =
-        null;
-    };
+    setPreviewItem(null);
+
+    quillRef.current =
+      null;
+  };
 
   // =====================================================
   // ================= UPDATE ============================
@@ -491,10 +638,12 @@ const ApprovedNews = () => {
 
         setSaving(true);
 
-        const content =
-          cleanEditorHtml(
-            quillRef.current.root.innerHTML
-          );
+const content =
+  quillRef.current
+    ? cleanEditorHtml(
+        quillRef.current.root.innerHTML
+      )
+    : previewItem.content;
 
         await API.put(
           `/news/${previewItem._id}`,
@@ -596,42 +745,89 @@ const ApprovedNews = () => {
   // ================= FILE ==============================
   // =====================================================
 
-  const handleFile = (
-    files
-  ) => {
+const handleFile = (
+  files
+) => {
 
-    const fileArray =
-      Array.from(files);
+  preview.forEach(
+  (img) => {
 
-    setImageFiles(
-      fileArray
-    );
-
-    const previewUrls =
-      fileArray.map(
-        (file) => ({
-          file,
-
-          url:
-            URL.createObjectURL(
-              file
-            ),
-        })
+    if (
+      img.url?.startsWith(
+        "blob:"
+      )
+    ) {
+      URL.revokeObjectURL(
+        img.url
       );
+    }
+  }
+);
 
-    setPreview(
-      previewUrls
+  const fileArray =
+    Array.from(files);
+
+  const validFiles =
+    fileArray.filter(
+      (file) =>
+        file.type.startsWith(
+          "image/"
+        )
     );
-  };
 
-  const handleChange = (
-    e
-  ) => {
+  if (
+    validFiles.length === 0
+  ) {
 
-    handleFile(
-      e.target.files
+    return alert(
+      "Only image files allowed ❌"
     );
-  };
+  }
+
+  const maxSize =
+    5 * 1024 * 1024;
+
+  const oversized =
+    validFiles.find(
+      (file) =>
+        file.size > maxSize
+    );
+
+  if (oversized) {
+
+    return alert(
+      "Max image size is 5MB ❌"
+    );
+  }
+
+  setImageFiles(
+    validFiles
+  );
+
+  const previewUrls =
+    validFiles.map(
+      (file) => ({
+        file,
+
+        url:
+          URL.createObjectURL(
+            file
+          ),
+      })
+    );
+
+  setPreview(
+    previewUrls
+  );
+};
+const handleChange = (
+  e
+) => {
+
+  handleFile(
+    e.target.files
+  );
+};
 
   // =====================================================
   // ================= DRAG ==============================
@@ -645,12 +841,10 @@ const ApprovedNews = () => {
 
     e.stopPropagation();
 
-    setDragActive(
-      e.type ===
-        "dragenter" ||
-        e.type ===
-          "dragover"
-    );
+setDragActive(
+  e.type === "dragenter" ||
+  e.type === "dragover"
+);
   };
 
   // =====================================================
@@ -714,25 +908,30 @@ const ApprovedNews = () => {
             data
           );
 
-        setPreviewItem(
-          (prev) => ({
-            ...prev,
+setPreviewItem(
+  (prev) => ({
 
-            images:
-              res.data.images,
+    ...prev,
 
-            image:
-              res.data.images[0],
-          })
-        );
+    images: [
+      ...(prev.images || []),
+      ...res.data.images,
+    ],
 
-        setPreview(
-          res.data.images.map(
-            (img) => ({
-              url: img,
-            })
-          )
-        );
+    image:
+      prev.image ||
+      res.data.images[0],
+  })
+);
+
+setPreview((prev) => [
+  ...prev,
+  ...res.data.images.map(
+    (img) => ({
+      url: img,
+    })
+  ),
+]);
 
         alert(
           "Images uploaded ✅"
@@ -793,6 +992,15 @@ const ApprovedNews = () => {
           Loading...
         </p>
       )}
+
+      {
+  !loading &&
+  filteredNews.length === 0 && (
+    <p className="empty">
+      No approved news
+    </p>
+  )
+}
 
       {/* LIST */}
 
@@ -882,6 +1090,7 @@ const ApprovedNews = () => {
                 <div className="actions">
 
                   <button
+  type="button"
                     onClick={() =>
                       openPreview(
                         item
@@ -892,6 +1101,7 @@ const ApprovedNews = () => {
                   </button>
 
                   <button
+  type="button"
                     onClick={() =>
                       deleteNews(
                         item._id
@@ -915,19 +1125,32 @@ const ApprovedNews = () => {
 
       {previewItem && (
 
-        <div className="preview-modal">
+        <div
+  className="preview-modal"
 
-          <div className="preview-box">
+  onClick={
+    closeModal
+  }
+>
+
+          <div
+  className="preview-box"
+
+  onClick={(e) =>
+    e.stopPropagation()
+  }
+>
 
             {/* CLOSE */}
 
-            <button
-              className="close-btn"
+<button
+  type="button"
+  className="close-btn"
+  onClick={closeModal}
+  disabled={saving}
+>
 
-              onClick={
-                closeModal
-              }
-            >
+            
               ✖
             </button>
 
@@ -952,15 +1175,20 @@ const ApprovedNews = () => {
 
             {/* MAIN IMAGE */}
 
-            <img
-              src={getImage(
-                previewItem
-              )}
+<img
+  src={getImage(
+    previewItem
+  )}
 
-              alt="preview"
+  alt="preview"
 
-              className="main-preview-img"
-            />
+  className="main-preview-img"
+
+  onError={(e) => {
+    e.target.src =
+      FALLBACK_IMG;
+  }}
+/>
 
             {/* MEDIA */}
 
@@ -1013,6 +1241,7 @@ const ApprovedNews = () => {
                       {embedUrl && (
 
                         <iframe
+  loading="lazy"
                           src={embedUrl}
 
                           title={`media-${index}`}
@@ -1031,6 +1260,7 @@ const ApprovedNews = () => {
               )}
 
               <button
+  type="button"
                 className="upload-btn"
 
                 onClick={() =>
@@ -1077,15 +1307,17 @@ const ApprovedNews = () => {
                 }
               >
 
-                <input
-                  type="file"
+<input
+  type="file"
 
-                  multiple
+  accept="image/*"
 
-                  onChange={
-                    handleChange
-                  }
-                />
+  multiple
+
+  onChange={
+    handleChange
+  }
+/>
 
                 {preview.length ===
                 0 ? (
@@ -1123,6 +1355,7 @@ const ApprovedNews = () => {
               </div>
 
               <button
+  type="button"
                 className="upload-btn"
 
                 onClick={
@@ -1274,6 +1507,7 @@ const ApprovedNews = () => {
                   {/* ACTION */}
 
                   <button
+  type="button"
                     className={
                       alreadyAdded
                         ? "added-btn"
@@ -1388,6 +1622,7 @@ const ApprovedNews = () => {
             </div>
 
             <button
+  type="button"
               className="remove-related-btn"
 
               onClick={() => {
@@ -1441,13 +1676,14 @@ const ApprovedNews = () => {
                   ) => {
 
                     const selected =
-                      previewItem.categories.includes(
+                      previewItem.categories?.includes(
                         c.name
                       );
 
                     return (
 
                       <button
+  type="button"
                         key={
                           c._id
                         }
@@ -1467,7 +1703,7 @@ const ApprovedNews = () => {
 
                               categories:
                                 selected
-                                  ? prev.categories.filter(
+                                  ? (prev.categories || []).filter(
                                       (
                                         x
                                       ) =>
@@ -1510,13 +1746,14 @@ const ApprovedNews = () => {
                   ) => {
 
                     const selected =
-                      previewItem.tags.includes(
+                      previewItem.tags?.includes(
                         city.name
                       );
 
                     return (
 
                       <button
+  type="button"
                         key={
                           city._id
                         }
@@ -1536,7 +1773,7 @@ const ApprovedNews = () => {
 
                               tags:
                                 selected
-                                  ? prev.tags.filter(
+                                  ? (prev.tags || []).filter(
                                       (
                                         t
                                       ) =>
@@ -1579,13 +1816,14 @@ const ApprovedNews = () => {
                   ) => {
 
                     const selected =
-                      previewItem.sections.includes(
+                      previewItem.sections?.includes(
                         sec
                       );
 
                     return (
 
                       <button
+  type="button"
                         key={
                           sec
                         }
@@ -1605,7 +1843,7 @@ const ApprovedNews = () => {
 
                               sections:
                                 selected
-                                  ? prev.sections.filter(
+                                  ? (prev.sections || []).filter(
                                       (
                                         s
                                       ) =>
@@ -1637,6 +1875,7 @@ const ApprovedNews = () => {
             <div className="modal-actions">
 
               <button
+  type="button"
                 onClick={
                   updateNews
                 }
@@ -1653,7 +1892,10 @@ const ApprovedNews = () => {
               </button>
 
               <button
+  type="button"
+  
                 onClick={
+                  
                   closeModal
                 }
               >

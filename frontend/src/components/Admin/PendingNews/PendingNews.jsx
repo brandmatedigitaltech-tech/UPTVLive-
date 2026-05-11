@@ -131,6 +131,17 @@ const PendingNews = () => {
   const [cities, setCities] =
     useState([]);
 
+    const [imageFiles, setImageFiles] =
+  useState([]);
+
+const [preview, setPreview] =
+  useState([]);
+
+const [dragActive, setDragActive] =
+  useState(false);
+
+const [uploading, setUploading] =
+  useState(false);
   // =====================================================
   // ================= QUILL =============================
   // =====================================================
@@ -140,7 +151,93 @@ const PendingNews = () => {
 
   const quillRef =
     useRef(null);
+const imageHandler = () => {
 
+  const input =
+    document.createElement("input");
+
+  input.setAttribute(
+    "type",
+    "file"
+  );
+
+  input.setAttribute(
+    "accept",
+    "image/*"
+  );
+
+  input.click();
+
+  input.onchange = async () => {
+
+    const file =
+      input.files[0];
+
+    if (!file) return;
+
+    try {
+
+      setUploading(true);
+
+      const data =
+        new FormData();
+
+      data.append(
+        "images",
+        file
+      );
+
+      const res =
+        await API.post(
+          "/upload/upload-multiple",
+          data
+        );
+
+      const imageUrl =
+        res.data.images?.[0];
+
+      if (!imageUrl) {
+
+        return alert(
+          "Image upload failed ❌"
+        );
+      }
+
+      const quill =
+        quillRef.current;
+
+      const range =
+        quill.getSelection();
+
+      const index =
+        range
+          ? range.index
+          : quill.getLength();
+
+      quill.insertEmbed(
+        index,
+        "image",
+        imageUrl
+      );
+
+      quill.setSelection(
+        index + 1
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert(
+        "Upload failed ❌"
+      );
+
+    } finally {
+
+      setUploading(false);
+    }
+  };
+};
   // =====================================================
   // ================= FETCH =============================
   // =====================================================
@@ -311,7 +408,9 @@ useEffect(() => {
         theme: "snow",
 
         modules: {
-          toolbar: [
+          toolbar: {
+            container: [
+          
             [
               {
                 header: [
@@ -344,9 +443,14 @@ useEffect(() => {
               "link",
             ],
 
-            ["clean"],
-          ],
-        },
+           ["clean"],
+],
+
+handlers: {
+  image: imageHandler,
+},
+},
+},
       }
     );
 
@@ -368,7 +472,7 @@ useEffect(() => {
       null;
   };
 
-}, [editMode]);
+}, [editMode, previewItem?._id]);
 
 
   // =====================================================
@@ -432,24 +536,51 @@ useEffect(() => {
 
     searchResults: [],
   });
+  setPreview(
+  (item.images || []).map(
+    (img) => ({
+      url: img,
+    })
+  )
+);
 };
 
   // =====================================================
   // ================= CLOSE =============================
   // =====================================================
 
-  const closeModal =
-    () => {
+const closeModal =
+  () => {
 
-      setPreviewItem(
-        null
-      );
+    preview.forEach(
+      (img) => {
 
-      setEditMode(false);
+        if (
+          img.url?.startsWith(
+            "blob:"
+          )
+        ) {
 
-      quillRef.current =
-        null;
-    };
+          URL.revokeObjectURL(
+            img.url
+          );
+        }
+      }
+    );
+
+    setPreview([]);
+
+    setImageFiles([]);
+
+    setPreviewItem(
+      null
+    );
+
+    setEditMode(false);
+
+    quillRef.current =
+      null;
+  };
 
   // =====================================================
   // ================= UPDATE ============================
@@ -500,6 +631,8 @@ useEffect(() => {
 
             images:
               previewItem.images || [],
+              image:
+  previewItem.images?.[0] || "",
           }
         );
 
@@ -576,6 +709,8 @@ useEffect(() => {
 
             images:
               previewItem.images || [],
+              image:
+  previewItem.images?.[0] || "",
           }
         );
 
@@ -643,7 +778,150 @@ useEffect(() => {
         );
       }
     };
+const handleFile = (
+  files
+) => {
 
+  const fileArray =
+    Array.from(files);
+
+  setImageFiles(
+    fileArray
+  );
+
+  const previewUrls =
+    fileArray.map(
+      (file) => ({
+        file,
+
+        url:
+          URL.createObjectURL(
+            file
+          ),
+      })
+    );
+
+  setPreview(
+    previewUrls
+  );
+};
+
+const handleChange = (
+  e
+) => {
+
+  handleFile(
+    e.target.files
+  );
+};
+
+const handleDrag = (
+  e
+) => {
+
+  e.preventDefault();
+
+  e.stopPropagation();
+
+setDragActive(
+  e.type === "dragenter" ||
+  e.type === "dragover"
+);
+};
+
+const handleDrop = (
+  e
+) => {
+
+  e.preventDefault();
+
+  e.stopPropagation();
+
+  setDragActive(false);
+
+  if (
+    e.dataTransfer.files &&
+    e.dataTransfer.files.length > 0
+  ) {
+
+    handleFile(
+      e.dataTransfer.files
+    );
+  }
+};
+
+const uploadImage =
+  async () => {
+
+    if (
+      !imageFiles.length
+    ) {
+
+      return alert(
+        "Select image ❌"
+      );
+    }
+
+    try {
+
+      setUploading(true);
+
+      const data =
+        new FormData();
+
+      imageFiles.forEach(
+        (file) => {
+
+          data.append(
+            "images",
+            file
+          );
+        }
+      );
+
+      const res =
+        await API.post(
+          "/upload/upload-multiple",
+          data
+        );
+
+      setPreviewItem(
+        (prev) => ({
+          ...prev,
+
+          images:
+            res.data.images,
+
+          image:
+            res.data.images[0],
+        })
+      );
+
+      setPreview(
+        res.data.images.map(
+          (img) => ({
+            url: img,
+          })
+        )
+      );
+
+      alert(
+        "Thumbnail uploaded ✅"
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert(
+        "Upload failed ❌"
+      );
+
+    } finally {
+
+      setUploading(false);
+    }
+  };
   // =====================================================
   // ================= RETURN ============================
   // =====================================================
@@ -727,6 +1005,7 @@ useEffect(() => {
                 />
 
               </div>
+              
 
               {/* CONTENT */}
 
@@ -855,20 +1134,125 @@ useEffect(() => {
 
             {/* IMAGE */}
 
-            <img
-              src={getImage(
-                previewItem
-              )}
+{/* IMAGE */}
 
-              alt="preview"
+<img
+  src={getImage(
+    previewItem
+  )}
 
-              className="preview-image"
+  alt="preview"
 
-              onError={(e) => {
-                e.target.src =
-                  FALLBACK_IMG;
-              }}
-            />
+  className="preview-image"
+
+  onError={(e) => {
+    e.target.src =
+      FALLBACK_IMG;
+  }}
+/>
+
+{/* THUMBNAIL UPLOAD */}
+
+<div className="edit-section">
+
+  <label>
+    Update Thumbnail
+  </label>
+
+  <div
+    className={`drop-zone ${
+      dragActive
+        ? "active"
+        : ""
+    }`}
+
+    onDragEnter={
+      handleDrag
+    }
+
+    onDragOver={
+      handleDrag
+    }
+
+    onDragLeave={
+      handleDrag
+    }
+
+    onDrop={
+      handleDrop
+    }
+  >
+
+<input
+  type="file"
+  accept="image/*"
+  multiple
+
+      onChange={
+        handleChange
+      }
+    />
+
+    {
+      preview.length === 0 ? (
+
+        <p>
+          Drag & Drop or Click
+        </p>
+
+      ) : (
+
+        <div className="preview-grid">
+
+          {
+            preview.map(
+              (
+                img,
+                i
+              ) => (
+
+                <img
+                  key={i}
+
+                  src={
+                    img.url
+                  }
+
+                  className="preview-img"
+
+                  alt="preview"
+                />
+              )
+            )
+          }
+
+        </div>
+      )
+    }
+
+  </div>
+
+  <button
+    className="upload-btn"
+
+    onClick={
+      uploadImage
+    }
+
+    disabled={
+      uploading
+    }
+  >
+
+    {
+      uploading
+        ? "Uploading..."
+        : "Upload Thumbnail"
+    }
+
+  </button>
+
+</div>
 
             {/* CONTENT */}
 
