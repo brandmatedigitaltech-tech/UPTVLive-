@@ -478,7 +478,7 @@ const ArticlePage = () => {
       : FALLBACK_IMG;
 
   const articleUrl =
-    `https://www.uptvlive.com/news/${article.slug}`;
+    `https://www.uptvlive.com/article/${article.slug}`;
 
   const description =
 
