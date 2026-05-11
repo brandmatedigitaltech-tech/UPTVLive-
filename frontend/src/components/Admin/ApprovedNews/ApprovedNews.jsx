@@ -16,12 +16,12 @@ import "quill/dist/quill.snow.css";
 
 import "./ApprovedNews.css";
 
+// =====================================================
+// ================= CONSTANTS ==========================
+// =====================================================
+
 const FALLBACK_IMG =
   "/no-image.jpg";
-
-// =====================================================
-// ================= STATIC SECTION =====================
-// =====================================================
 
 const sectionsList = [
   "hero",
@@ -32,20 +32,20 @@ const sectionsList = [
 ];
 
 // =====================================================
-// ================= IMAGE HELPER =======================
+// ================= HELPERS ============================
 // =====================================================
 
 const getImage = (item) => {
 
   if (
-    Array.isArray(item.images) &&
+    Array.isArray(item?.images) &&
     item.images.length > 0
   ) {
     return item.images[0];
   }
 
   if (
-    item.image &&
+    item?.image &&
     item.image.trim() !== ""
   ) {
     return item.image;
@@ -54,26 +54,99 @@ const getImage = (item) => {
   return FALLBACK_IMG;
 };
 
-// =====================================================
-// ================= YOUTUBE ============================
-// =====================================================
+const cleanPreview = (
+  html = ""
+) => {
 
-const getYouTubeEmbed = (
+  return html
+    .replace(
+      /<[^>]+>/g,
+      ""
+    )
+    .slice(0, 150);
+};
+
+const cleanEditorHtml = (
+  html = ""
+) => {
+
+  return html
+    .replace(
+      /<span class="ql-ui".*?<\/span>/g,
+      ""
+    )
+
+    .replace(
+      /contenteditable="false"/g,
+      ""
+    )
+
+    .replace(
+      /data-list="[^"]*"/g,
+      ""
+    )
+
+    .replace(
+      /class="ql-[^"]*"/g,
+      ""
+    )
+
+    .replace(
+      /style="[^"]*"/g,
+      ""
+    );
+};
+
+const getEmbedLink = (
   url
 ) => {
 
-  if (!url)
+  if (!url) {
     return null;
+  }
 
-  const regExp =
-    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&]+)/;
+  // YOUTUBE
 
-  const match =
-    url.match(regExp);
+  if (
+    url.includes("youtube.com") ||
+    url.includes("youtu.be")
+  ) {
 
-  return match
-    ? `https://www.youtube.com/embed/${match[1]}`
-    : null;
+    const regExp =
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&]+)/;
+
+    const match =
+      url.match(regExp);
+
+    return match
+      ? `https://www.youtube.com/embed/${match[1]}`
+      : null;
+  }
+
+  // INSTAGRAM
+
+  if (
+    url.includes("instagram.com")
+  ) {
+
+    const cleanUrl =
+      url.split("?")[0];
+
+    return `${cleanUrl}embed`;
+  }
+
+  // FACEBOOK
+
+  if (
+    url.includes("facebook.com")
+  ) {
+
+    return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(
+      url
+    )}&show_text=true&width=500`;
+  }
+
+  return null;
 };
 
 // =====================================================
@@ -81,6 +154,9 @@ const getYouTubeEmbed = (
 // =====================================================
 
 const ApprovedNews = () => {
+
+  const navigate =
+    useNavigate();
 
   // =====================================================
   // ================= STATES ============================
@@ -92,17 +168,14 @@ const ApprovedNews = () => {
   const [loading, setLoading] =
     useState(false);
 
-  const [previewItem, setPreviewItem] =
-    useState(null);
-
-  const [editMode, setEditMode] =
-    useState(false);
-
   const [saving, setSaving] =
     useState(false);
 
-const [mediaLinks, setMediaLinks] =
-  useState([""]);
+  const [uploading, setUploading] =
+    useState(false);
+
+  const [previewItem, setPreviewItem] =
+    useState(null);
 
   const [categoriesList, setCategoriesList] =
     useState([]);
@@ -110,9 +183,11 @@ const [mediaLinks, setMediaLinks] =
   const [cities, setCities] =
     useState([]);
 
-  // =====================================================
-  // ================= IMAGE =============================
-  // =====================================================
+  const [search, setSearch] =
+    useState("");
+
+  const [mediaLinks, setMediaLinks] =
+    useState([""]);
 
   const [imageFiles, setImageFiles] =
     useState([]);
@@ -121,9 +196,6 @@ const [mediaLinks, setMediaLinks] =
     useState([]);
 
   const [dragActive, setDragActive] =
-    useState(false);
-
-  const [uploading, setUploading] =
     useState(false);
 
   // =====================================================
@@ -136,48 +208,39 @@ const [mediaLinks, setMediaLinks] =
   const quillRef =
     useRef(null);
 
-  const navigate =
-    useNavigate();
-
   // =====================================================
-  // ================= FETCH NEWS ========================
+  // ================= FETCH =============================
   // =====================================================
 
-  const fetchNews = async () => {
+  const fetchNews =
+    async () => {
 
-    try {
+      try {
 
-      setLoading(true);
+        setLoading(true);
 
-      const res =
-        await API.get(
-          "/news"
+        const res =
+          await API.get(
+            "/news"
+          );
+
+        setNews(
+          Array.isArray(
+            res.data
+          )
+            ? res.data
+            : []
         );
 
-      setNews(
-        Array.isArray(
-          res.data
-        )
-          ? res.data
-          : []
-      );
+      } catch (err) {
 
-    } catch (err) {
+        console.log(err);
 
-      console.log(
-        "Approved Error:",
-        err
-      );
+      } finally {
 
-    } finally {
-
-      setLoading(false);
-    }
-  };
-
-  // =====================================================
-  // ================= FETCH CATEGORY ====================
-// =====================================================
+        setLoading(false);
+      }
+    };
 
   const fetchCategories =
     async () => {
@@ -199,16 +262,9 @@ const [mediaLinks, setMediaLinks] =
 
       } catch (err) {
 
-        console.log(
-          "Category Error:",
-          err
-        );
+        console.log(err);
       }
     };
-
-  // =====================================================
-  // ================= FETCH CITIES ======================
-// =====================================================
 
   const fetchCities =
     async () => {
@@ -230,16 +286,13 @@ const [mediaLinks, setMediaLinks] =
 
       } catch (err) {
 
-        console.log(
-          "City Error:",
-          err
-        );
+        console.log(err);
       }
     };
 
   // =====================================================
   // ================= INIT ==============================
-// =====================================================
+  // =====================================================
 
   useEffect(() => {
 
@@ -253,108 +306,112 @@ const [mediaLinks, setMediaLinks] =
 
   // =====================================================
   // ================= QUILL =============================
-// =====================================================
+  // =====================================================
 
   useEffect(() => {
 
-    if (
-      !editMode ||
-      !editorRef.current
-    ) {
-      return;
-    }
+  // ✅ ONLY CREATE ONCE
+  if (
+    !previewItem ||
+    !editorRef.current ||
+    quillRef.current
+  ) {
+    return;
+  }
 
-    editorRef.current.innerHTML =
-      "";
+  // ✅ PREVENT DUPLICATE TOOLBAR
+  if (
+    editorRef.current.querySelector(".ql-toolbar")
+  ) {
+    return;
+  }
 
-    quillRef.current = null;
+  const quill =
+    new Quill(
+      editorRef.current,
+      {
+        theme: "snow",
 
-    const quill =
-      new Quill(
-        editorRef.current,
-        {
-          theme: "snow",
+        placeholder:
+          "Edit article content...",
 
-          placeholder:
-            "Edit news content...",
+        modules: {
+          toolbar: [
 
-          modules: {
-            toolbar: [
-              [
-                {
-                  header: [
-                    1,
-                    2,
-                    3,
-                    false,
-                  ],
-                },
-              ],
-
-              [
-                "bold",
-                "italic",
-                "underline",
-              ],
-
-              [
-                {
-                  list: "ordered",
-                },
-
-                {
-                  list: "bullet",
-                },
-              ],
-
-              [
-                "image",
-                "link",
-              ],
-
-              ["clean"],
+            [
+              {
+                header: [
+                  1,
+                  2,
+                  3,
+                  false,
+                ],
+              },
             ],
-          },
-        }
-      );
+
+            [
+              "bold",
+              "italic",
+              "underline",
+            ],
+
+            [
+              {
+                list: "ordered",
+              },
+
+              {
+                list: "bullet",
+              },
+            ],
+
+            [
+              "image",
+              "link",
+            ],
+
+            ["clean"],
+          ],
+        },
+      }
+    );
+
+  quillRef.current =
+    quill;
+
+  // ✅ LOAD CONTENT
+  quill.root.innerHTML =
+    previewItem.content || "";
+
+  // ✅ CLEANUP
+  return () => {
+
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
+    }
 
     quillRef.current =
-      quill;
+      null;
+  };
 
-    if (
-      previewItem?.content
-    ) {
-      quill.root.innerHTML =
-        previewItem.content;
-    }
-
-  }, [
-    editMode,
-    previewItem,
-  ]);
+}, [previewItem?._id]);
 
   // =====================================================
-  // ================= CLEAN HTML ========================
-// =====================================================
+  // ================= FILTER ============================
+  // =====================================================
 
-  const cleanHtml = (
-    html
-  ) => {
-
-    if (!html)
-      return "";
-
-    return html
-      .replace(
-        /<[^>]+>/g,
-        ""
-      )
-      .slice(0, 120);
-  };
+  const filteredNews =
+    news.filter((item) =>
+      item.title
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+    );
 
   // =====================================================
   // ================= OPEN ==============================
-// =====================================================
+  // =====================================================
 
   const openPreview = (
     item
@@ -364,80 +421,141 @@ const [mediaLinks, setMediaLinks] =
       ...item,
 
       categories:
-        Array.isArray(
-          item.categories
-        )
-          ? item.categories
-          : [],
+        item.categories || [],
 
       tags:
-        Array.isArray(
-          item.tags
-        )
-          ? item.tags
-          : [],
+        item.tags || [],
 
       sections:
-        Array.isArray(
-          item.sections
-        )
-          ? item.sections
-          : [],
+        item.sections || [],
+
+      relatedArticles:
+        item.relatedArticles || [],
     });
 
-setMediaLinks(
-  item.mediaLinks?.length
-    ? item.mediaLinks
-    : [""]
-);
-
-    setPreview(
-      (
-        item.images || []
-      ).map((img) => ({
-        url: img,
-      }))
+    setMediaLinks(
+      item.mediaLinks?.length
+        ? item.mediaLinks
+        : [""]
     );
 
-    setEditMode(true);
+    setPreview(
+      (item.images || []).map(
+        (img) => ({
+          url: img,
+        })
+      )
+    );
   };
 
   // =====================================================
   // ================= CLOSE =============================
-// =====================================================
+  // =====================================================
 
-  const closeModal = () => {
+  const closeModal =
+    () => {
 
-    preview.forEach(
-      (img) => {
+      preview.forEach(
+        (img) => {
 
-        if (
-          img.url?.startsWith(
-            "blob:"
-          )
-        ) {
-          URL.revokeObjectURL(
-            img.url
-          );
+          if (
+            img.url?.startsWith(
+              "blob:"
+            )
+          ) {
+            URL.revokeObjectURL(
+              img.url
+            );
+          }
         }
+      );
+
+      setPreview([]);
+
+      setImageFiles([]);
+
+      setPreviewItem(null);
+
+      quillRef.current =
+        null;
+    };
+
+  // =====================================================
+  // ================= UPDATE ============================
+  // =====================================================
+
+  const updateNews =
+    async () => {
+
+      try {
+
+        setSaving(true);
+
+        const content =
+          cleanEditorHtml(
+            quillRef.current.root.innerHTML
+          );
+
+        await API.put(
+          `/news/${previewItem._id}`,
+          {
+            title:
+              previewItem.title,
+
+            content,
+
+            mediaLinks:
+              mediaLinks
+                .map((l) =>
+                  l.trim()
+                )
+                .filter(Boolean),
+
+            images:
+              previewItem.images || [],
+
+            image:
+              previewItem.images?.[0] || "",
+
+            categories:
+              previewItem.categories || [],
+
+            tags:
+              previewItem.tags || [],
+
+            sections:
+              previewItem.sections || [],
+
+            relatedArticles:
+              previewItem.relatedArticles || [],
+          }
+        );
+
+        alert(
+          "News updated ✅"
+        );
+
+        closeModal();
+
+        fetchNews();
+
+      } catch (err) {
+
+        console.log(err);
+
+        alert(
+          "Update failed ❌"
+        );
+
+      } finally {
+
+        setSaving(false);
       }
-    );
-
-    setPreview([]);
-
-    setImageFiles([]);
-
-    setPreviewItem(null);
-
-    setEditMode(false);
-
-    quillRef.current =
-      null;
-  };
+    };
 
   // =====================================================
   // ================= DELETE ============================
-// =====================================================
+  // =====================================================
 
   const deleteNews =
     async (id) => {
@@ -475,84 +593,8 @@ setMediaLinks(
     };
 
   // =====================================================
-  // ================= UPDATE ============================
-// =====================================================
-
-  const updateNews =
-    async () => {
-
-      if (
-        !quillRef.current
-      ) {
-        return alert(
-          "Editor not ready ❌"
-        );
-      }
-
-      const content =
-        quillRef.current.root.innerHTML;
-
-      try {
-
-        setSaving(true);
-
-        await API.put(
-          `/news/${previewItem._id}`,
-          {
-            title:
-              previewItem.title,
-
-            content,
-
-            mediaLinks,
-
-            images:
-              previewItem.images ||
-              [],
-
-            image:
-              previewItem.images?.[0] ||
-              "",
-
-            categories:
-              previewItem.categories ||
-              [],
-
-            tags:
-              previewItem.tags ||
-              [],
-
-            sections:
-              previewItem.sections ||
-              [],
-          }
-        );
-
-        alert(
-          "Updated ✅"
-        );
-
-        closeModal();
-
-        fetchNews();
-
-      } catch (err) {
-
-        console.log(err);
-
-        alert(
-          "Update failed ❌"
-        );
-
-      } finally {
-
-        setSaving(false);
-      }
-    };
-
-  // =====================================================
   // ================= FILE ==============================
-// =====================================================
+  // =====================================================
 
   const handleFile = (
     files
@@ -593,7 +635,7 @@ setMediaLinks(
 
   // =====================================================
   // ================= DRAG ==============================
-// =====================================================
+  // =====================================================
 
   const handleDrag = (
     e
@@ -613,7 +655,7 @@ setMediaLinks(
 
   // =====================================================
   // ================= DROP ==============================
-// =====================================================
+  // =====================================================
 
   const handleDrop = (
     e
@@ -626,21 +668,18 @@ setMediaLinks(
     setDragActive(false);
 
     if (
-      e.dataTransfer
-        .files &&
-      e.dataTransfer.files
-        .length > 0
+      e.dataTransfer.files &&
+      e.dataTransfer.files.length > 0
     ) {
       handleFile(
-        e.dataTransfer
-          .files
+        e.dataTransfer.files
       );
     }
   };
 
   // =====================================================
   // ================= UPLOAD ============================
-// =====================================================
+  // =====================================================
 
   const uploadImage =
     async () => {
@@ -655,9 +694,7 @@ setMediaLinks(
 
       try {
 
-        setUploading(
-          true
-        );
+        setUploading(true);
 
         const data =
           new FormData();
@@ -682,12 +719,10 @@ setMediaLinks(
             ...prev,
 
             images:
-              res.data
-                .images,
+              res.data.images,
 
             image:
-              res.data
-                .images[0],
+              res.data.images[0],
           })
         );
 
@@ -713,26 +748,45 @@ setMediaLinks(
 
       } finally {
 
-        setUploading(
-          false
-        );
+        setUploading(false);
       }
     };
 
   // =====================================================
-  // ================= UI ================================
-// =====================================================
+  // ================= RETURN ============================
+  // =====================================================
 
   return (
+
     <div className="approved-container">
 
-      {/* ================= TITLE ================= */}
+      {/* HEADER */}
 
-      <h2 className="heading">
-        Approved News ✅
-      </h2>
+      <div className="approved-header">
 
-      {/* ================= LOADING ================= */}
+        <h2 className="heading">
+          Approved News ✅
+        </h2>
+
+        <input
+          type="text"
+
+          className="search-input"
+
+          placeholder="Search news..."
+
+          value={search}
+
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+        />
+
+      </div>
+
+      {/* LOADING */}
 
       {loading && (
         <p className="loading">
@@ -740,42 +794,30 @@ setMediaLinks(
         </p>
       )}
 
-      {/* ================= EMPTY ================= */}
-
-      {!loading &&
-        news.length ===
-          0 && (
-          <p className="empty">
-            No approved news
-          </p>
-        )}
-
-      {/* ================================================= */}
-      {/* ================= LIST ========================== */}
-      {/* ================================================= */}
+      {/* LIST */}
 
       <div className="news-list">
 
-        {news.map(
+        {filteredNews.map(
           (item) => (
+
             <div
               key={item._id}
 
               className="news-card"
-
-              onClick={() =>
-                navigate(
-                  `/news/${
-                    item.slug ||
-                    item._id
-                  }`
-                )
-              }
             >
 
               {/* IMAGE */}
 
-              <div className="image-box">
+              <div
+                className="image-box"
+
+                onClick={() =>
+                  navigate(
+                    `/news/${item.slug}`
+                  )
+                }
+              >
 
                 <img
                   src={getImage(
@@ -786,9 +828,7 @@ setMediaLinks(
 
                   loading="lazy"
 
-                  onError={(
-                    e
-                  ) => {
+                  onError={(e) => {
                     e.target.src =
                       FALLBACK_IMG;
                   }}
@@ -803,10 +843,13 @@ setMediaLinks(
                 <h3>
                   {item.title}
                 </h3>
+                <p className="news-author">
+  ✍️ By {item.author || "UPTV Live"}
+</p>
 
                 <p>
 
-                  {cleanHtml(
+                  {cleanPreview(
                     item.content
                   )}
 
@@ -823,6 +866,7 @@ setMediaLinks(
                       cat,
                       i
                     ) => (
+
                       <span
                         key={i}
                       >
@@ -835,15 +879,7 @@ setMediaLinks(
 
                 {/* ACTIONS */}
 
-                <div
-                  className="actions"
-
-                  onClick={(
-                    e
-                  ) =>
-                    e.stopPropagation()
-                  }
-                >
+                <div className="actions">
 
                   <button
                     onClick={() =>
@@ -875,11 +911,10 @@ setMediaLinks(
 
       </div>
 
-      {/* ================================================= */}
-      {/* ================= MODAL ========================= */}
-      {/* ================================================= */}
+      {/* MODAL */}
 
       {previewItem && (
+
         <div className="preview-modal">
 
           <div className="preview-box">
@@ -898,13 +933,24 @@ setMediaLinks(
 
             {/* TITLE */}
 
-            <h2>
-              {
+            <input
+              className="title-input"
+
+              value={
                 previewItem.title
               }
-            </h2>
 
-            {/* IMAGE */}
+              onChange={(e) =>
+                setPreviewItem({
+                  ...previewItem,
+
+                  title:
+                    e.target.value,
+                })
+              }
+            />
+
+            {/* MAIN IMAGE */}
 
             <img
               src={getImage(
@@ -916,79 +962,95 @@ setMediaLinks(
               className="main-preview-img"
             />
 
-            {/* ================================================= */}
-            {/* ================= YOUTUBE ====================== */}
-            {/* ================================================= */}
-
-            <div className="edit-section">
-
-  <label>
-    Media / Social Links
-  </label>
-
-  {
-    mediaLinks.map(
-      (link, index) => (
-
-        <input
-          key={index}
-
-          className="input"
-
-          placeholder="Paste Instagram / Facebook / YouTube / Website Link"
-
-          value={link}
-
-          onChange={(e) => {
-
-            const updated =
-              [...mediaLinks];
-
-            updated[index] =
-              e.target.value;
-
-            setMediaLinks(
-              updated
-            );
-          }}
-        />
-      )
-    )
-  }
-
-  <button
-    className="upload-btn"
-
-    type="button"
-
-    onClick={() => {
-
-      setMediaLinks([
-        ...mediaLinks,
-        "",
-      ]);
-    }}
-  >
-    + Add More Link
-  </button>
-
-</div>
-
-            {/* YOUTUBE PREVIEW */}
-
-{/* YOUTUBE PREVIEW */}
-
-
-
-            {/* ================================================= */}
-            {/* ================= IMAGE ======================== */}
-            {/* ================================================= */}
+            {/* MEDIA */}
 
             <div className="edit-section">
 
               <label>
-                Update Thumbnail /
-                Images
+                Media / Social Links
+              </label>
+
+              {mediaLinks.map(
+                (
+                  link,
+                  index
+                ) => {
+
+                  const embedUrl =
+                    getEmbedLink(
+                      link
+                    );
+
+                  return (
+
+                    <div
+                      key={index}
+                    >
+
+                      <input
+                        className="input"
+
+                        value={link}
+
+                        placeholder="Paste link"
+
+                        onChange={(e) => {
+
+                          const updated =
+                            [
+                              ...mediaLinks,
+                            ];
+
+                          updated[index] =
+                            e.target.value;
+
+                          setMediaLinks(
+                            updated
+                          );
+                        }}
+                      />
+
+                      {embedUrl && (
+
+                        <iframe
+                          src={embedUrl}
+
+                          title={`media-${index}`}
+
+                          className="media-preview"
+
+                          frameBorder="0"
+
+                          allowFullScreen
+                        />
+                      )}
+
+                    </div>
+                  );
+                }
+              )}
+
+              <button
+                className="upload-btn"
+
+                onClick={() =>
+                  setMediaLinks([
+                    ...mediaLinks,
+                    "",
+                  ])
+                }
+              >
+                + Add Link
+              </button>
+
+            </div>
+
+            {/* IMAGE */}
+
+            <div className="edit-section">
+
+              <label>
+                Update Images
               </label>
 
               <div
@@ -1032,19 +1094,20 @@ setMediaLinks(
                     Click
                   </p>
                 ) : (
-                  <div>
+
+                  <div className="preview-grid">
 
                     {preview.map(
                       (
                         img,
                         i
                       ) => (
+
                         <img
                           key={i}
 
                           src={
-                            img.url ||
-                            img
+                            img.url
                           }
 
                           className="preview-img"
@@ -1079,25 +1142,290 @@ setMediaLinks(
 
             </div>
 
-            {/* ================================================= */}
-            {/* ================= EDITOR ======================= */}
-            {/* ================================================= */}
+{/* ===================================================== */}
+{/* ================= RELATED NEWS ====================== */}
+{/* ===================================================== */}
+
+<div className="edit-section">
+
+  <div className="related-top">
+
+    <label>
+      Related News
+    </label>
+
+    <span className="related-count">
+      {
+        previewItem.relatedArticles
+          ?.length || 0
+      } Selected
+    </span>
+
+  </div>
+
+  {/* SEARCH INPUT */}
+
+  <input
+    type="text"
+
+    className="related-search-input"
+
+    placeholder="Search news title..."
+
+    onChange={(e) => {
+
+      const value =
+        e.target.value.toLowerCase();
+
+      if (!value.trim()) {
+
+        setPreviewItem(
+          (prev) => ({
+            ...prev,
+            searchResults: [],
+          })
+        );
+
+        return;
+      }
+
+      const filtered =
+        news.filter(
+          (n) =>
+            n._id !==
+              previewItem._id &&
+
+            n.title
+              ?.toLowerCase()
+              .includes(value)
+        );
+
+      setPreviewItem(
+        (prev) => ({
+          ...prev,
+
+          searchResults:
+            filtered.slice(0, 10),
+        })
+      );
+    }}
+  />
+
+  {/* SEARCH RESULTS */}
+
+  {
+    previewItem.searchResults
+      ?.length > 0 && (
+
+      <div className="related-search-results">
+
+        {
+          previewItem.searchResults.map(
+            (item) => {
+
+              const alreadyAdded =
+                previewItem.relatedArticles?.some(
+                  (a) =>
+                    a.slug ===
+                    item.slug
+                );
+
+              return (
+
+                <div
+                  key={item._id}
+
+                  className="related-search-card"
+                >
+
+                  {/* IMAGE */}
+
+                  <img
+                    src={
+                      getImage(item)
+                    }
+
+                    alt={item.title}
+
+                    onError={(e) => {
+                      e.target.src =
+                        FALLBACK_IMG;
+                    }}
+                  />
+
+                  {/* CONTENT */}
+
+                  <div className="related-search-content">
+
+                    <h4>
+                      {item.title}
+                    </h4>
+
+                    <p>
+                      {
+                        cleanPreview(
+                          item.content
+                        )
+                      }
+                    </p>
+
+                  </div>
+
+                  {/* ACTION */}
+
+                  <button
+                    className={
+                      alreadyAdded
+                        ? "added-btn"
+                        : "add-btn"
+                    }
+
+                    disabled={
+                      alreadyAdded
+                    }
+
+                    onClick={() => {
+
+                      if (
+                        alreadyAdded
+                      ) {
+                        return;
+                      }
+
+                      setPreviewItem(
+                        (prev) => ({
+                          ...prev,
+
+                          relatedArticles: [
+
+                            ...(prev.relatedArticles || []),
+
+                            {
+                              _id:
+                                item._id,
+
+                              title:
+                                item.title,
+
+                              slug:
+                                item.slug,
+
+                              image:
+                                getImage(
+                                  item
+                                ),
+                            },
+                          ],
+                        })
+                      );
+                    }}
+                  >
+
+                    {
+                      alreadyAdded
+                        ? "Added"
+                        : "+ Add"
+                    }
+
+                  </button>
+
+                </div>
+              );
+            }
+          )
+        }
+
+      </div>
+    )
+  }
+
+  {/* SELECTED NEWS */}
+
+  <div className="selected-related-news">
+
+    {
+      previewItem.relatedArticles
+        ?.length === 0 && (
+
+        <div className="empty-related">
+
+          No related news selected
+
+        </div>
+      )
+    }
+
+    {
+      previewItem.relatedArticles?.map(
+        (item, index) => (
+
+          <div
+            key={index}
+
+            className="selected-related-card"
+          >
+
+            <img
+              src={
+                item.image ||
+                FALLBACK_IMG
+              }
+
+              alt={item.title}
+
+              onError={(e) => {
+                e.target.src =
+                  FALLBACK_IMG;
+              }}
+            />
+
+            <div className="selected-related-content">
+
+              <p>
+                {item.title}
+              </p>
+
+            </div>
+
+            <button
+              className="remove-related-btn"
+
+              onClick={() => {
+
+                setPreviewItem(
+                  (prev) => ({
+                    ...prev,
+
+                    relatedArticles:
+                      prev.relatedArticles.filter(
+                        (x) =>
+                          x.slug !==
+                          item.slug
+                      ),
+                  })
+                );
+              }}
+            >
+              ✖
+            </button>
+
+          </div>
+        )
+      )
+    }
+
+  </div>
+
+</div>
+            {/* EDITOR */}
 
             <div
               ref={editorRef}
 
-              style={{
-                height:
-                  "250px",
-
-                marginTop:
-                  "15px",
-              }}
+              className="editor"
             />
 
-            {/* ================================================= */}
-            {/* ================= CATEGORY ===================== */}
-            {/* ================================================= */}
+            {/* CATEGORY */}
 
             <div className="edit-section">
 
@@ -1118,6 +1446,7 @@ setMediaLinks(
                       );
 
                     return (
+
                       <button
                         key={
                           c._id
@@ -1165,14 +1494,12 @@ setMediaLinks(
 
             </div>
 
-            {/* ================================================= */}
-            {/* ================= CITY ========================= */}
-            {/* ================================================= */}
+            {/* CITY */}
 
             <div className="edit-section">
 
               <label>
-                City
+                Cities
               </label>
 
               <div className="chip-container">
@@ -1188,6 +1515,7 @@ setMediaLinks(
                       );
 
                     return (
+
                       <button
                         key={
                           city._id
@@ -1235,9 +1563,7 @@ setMediaLinks(
 
             </div>
 
-            {/* ================================================= */}
-            {/* ================= SECTIONS ===================== */}
-            {/* ================================================= */}
+            {/* SECTION */}
 
             <div className="edit-section">
 
@@ -1258,6 +1584,7 @@ setMediaLinks(
                       );
 
                     return (
+
                       <button
                         key={
                           sec
@@ -1305,9 +1632,7 @@ setMediaLinks(
 
             </div>
 
-            {/* ================================================= */}
-            {/* ================= ACTIONS ====================== */}
-            {/* ================================================= */}
+            {/* ACTIONS */}
 
             <div className="modal-actions">
 

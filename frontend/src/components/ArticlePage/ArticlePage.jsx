@@ -1,4 +1,7 @@
-import { useParams, Link } from "react-router-dom";
+import {
+  useParams,
+  Link,
+} from "react-router-dom";
 
 import {
   useEffect,
@@ -33,7 +36,12 @@ const FALLBACK_IMG =
 
 const ArticlePage = () => {
 
-  const { slug } = useParams();
+  const { slug } =
+    useParams();
+
+  // =====================================================
+  // ================= STATES ============================
+  // =====================================================
 
   const [article, setArticle] =
     useState(null);
@@ -51,9 +59,15 @@ const ArticlePage = () => {
   // ================= SAFE IMAGE ========================
   // =====================================================
 
-  const getImage = (img) => {
+  const getImage = (
+    img
+  ) => {
 
-    if (!img || img.trim() === "") {
+    if (
+      !img ||
+      img.trim() === ""
+    ) {
+
       return FALLBACK_IMG;
     }
 
@@ -64,73 +78,106 @@ const ArticlePage = () => {
   // ================= CLEAN HTML ========================
   // =====================================================
 
-const decodeHtml = (html) => {
+  const decodeHtml = (
+    html
+  ) => {
 
-  if (!html) return "";
+    if (!html) {
+      return "";
+    }
 
-  // ✅ SAFE FOR REACT-SNAP
-  if (typeof window === "undefined") {
-    return html;
-  }
+    if (
+      typeof window ===
+      "undefined"
+    ) {
 
-  const txt =
-    document.createElement("textarea");
+      return html;
+    }
 
-  txt.innerHTML = html;
-
-  return txt.value;
-};
-
-const cleanHtml = (html) => {
-
-  if (!html) return "";
-
-  // ✅ SAFE FOR REACT-SNAP
-  if (typeof window === "undefined") {
-    return html;
-  }
-
-  const parser =
-    new DOMParser();
-
-  const doc =
-    parser.parseFromString(
-      html,
-      "text/html"
-    );
-
-  // REMOVE SCRIPTS
-  doc
-    .querySelectorAll("script")
-    .forEach((el) => el.remove());
-
-  // REMOVE IFRAME
-  doc
-    .querySelectorAll("iframe")
-    .forEach((el) => el.remove());
-
-  // REMOVE INLINE STYLES
-  doc
-    .querySelectorAll("*")
-    .forEach((el) => {
-
-      el.removeAttribute("style");
-
-      el.removeAttribute("class");
-
-      el.removeAttribute(
-        "contenteditable"
+    const txt =
+      document.createElement(
+        "textarea"
       );
 
-      el.removeAttribute(
-        "data-list"
+    txt.innerHTML = html;
+
+    return txt.value;
+  };
+
+  const cleanHtml = (
+    html
+  ) => {
+
+    if (!html) {
+      return "";
+    }
+
+    if (
+      typeof window ===
+      "undefined"
+    ) {
+
+      return html;
+    }
+
+    const parser =
+      new DOMParser();
+
+    const doc =
+      parser.parseFromString(
+        html,
+        "text/html"
       );
-    });
 
-  return doc.body.innerHTML;
-};
+    // REMOVE SCRIPT
 
-  const formatContent = (html) => {
+    doc
+      .querySelectorAll(
+        "script"
+      )
+      .forEach((el) =>
+        el.remove()
+      );
+
+    // REMOVE IFRAME
+
+    doc
+      .querySelectorAll(
+        "iframe"
+      )
+      .forEach((el) =>
+        el.remove()
+      );
+
+    // REMOVE INLINE ATTRIBUTES
+
+    doc
+      .querySelectorAll("*")
+      .forEach((el) => {
+
+        el.removeAttribute(
+          "style"
+        );
+
+        el.removeAttribute(
+          "class"
+        );
+
+        el.removeAttribute(
+          "contenteditable"
+        );
+
+        el.removeAttribute(
+          "data-list"
+        );
+      });
+
+    return doc.body.innerHTML;
+  };
+
+  const formatContent = (
+    html
+  ) => {
 
     return cleanHtml(
       decodeHtml(html)
@@ -138,86 +185,103 @@ const cleanHtml = (html) => {
   };
 
   // =====================================================
-  // ================= YOUTUBE ===========================
+  // ================= EMBED LINKS =======================
   // =====================================================
 
-// =====================================================
-// ================= MEDIA EMBED ========================
-// =====================================================
+  const getEmbedLink = (
+    url
+  ) => {
 
-const getEmbedLink = (url) => {
+    if (!url) {
+      return null;
+    }
 
-  if (!url) return null;
+    // ================= YOUTUBE =================
 
-  // ================= YOUTUBE =================
+    if (
+      url.includes(
+        "youtube.com"
+      ) ||
 
-  if (
-    url.includes("youtube.com") ||
-    url.includes("youtu.be")
-  ) {
+      url.includes(
+        "youtu.be"
+      )
+    ) {
 
-    const regExp =
-      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&]+)/;
+      const regExp =
+        /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&]+)/;
 
-    const match =
-      url.match(regExp);
+      const match =
+        url.match(regExp);
 
-    return match
-      ? `https://www.youtube.com/embed/${match[1]}`
-      : null;
-  }
+      return match
+        ? `https://www.youtube.com/embed/${match[1]}`
+        : null;
+    }
 
-  // ================= INSTAGRAM =================
+    // ================= INSTAGRAM =================
 
-// ================= INSTAGRAM =================
+    if (
+      url.includes(
+        "instagram.com"
+      )
+    ) {
 
-if (
-  url.includes("instagram.com")
-) {
+      const cleanUrl =
+        url.split("?")[0];
 
-  // REMOVE QUERY PARAMS
-  const cleanUrl =
-    url.split("?")[0];
+      return `${cleanUrl}embed`;
+    }
 
-  return `${cleanUrl}embed`;
-}
-  // ================= FACEBOOK =================
+    // ================= FACEBOOK =================
 
-  if (
-    url.includes("facebook.com")
-  ) {
+    if (
+      url.includes(
+        "facebook.com"
+      )
+    ) {
 
-    return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(url)}&show_text=true&width=500`;
-  }
+      return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(
+        url
+      )}&show_text=true&width=500`;
+    }
 
-  // ================= OTHER WEBSITE =================
+    // ================= OTHER =================
 
-  return null;
-};
+    return null;
+  };
+
   // =====================================================
   // ================= FETCH ARTICLE =====================
   // =====================================================
 
   useEffect(() => {
 
-    const fetchArticle = async () => {
+    const fetchArticle =
+      async () => {
 
-      try {
+        try {
 
-        const res =
-          await API.get(
-            `/news/${slug}`
+          const res =
+            await API.get(
+              `/news/${slug}`
+            );
+
+          setArticle(
+            res.data
           );
 
-        setArticle(res.data);
+          setCurrentIndex(
+            0
+          );
 
-        setCurrentIndex(0);
+        } catch (err) {
 
-      } catch (err) {
-
-        console.error(err);
-      }
-    };
+          console.error(
+            err
+          );
+        }
+      };
 
     fetchArticle();
 
@@ -227,47 +291,62 @@ if (
   // ================= AUTO SLIDER =======================
   // =====================================================
 
-  const stopSlider = () => {
+  const stopSlider =
+    () => {
 
-    if (intervalRef.current) {
-
-      clearInterval(
+      if (
         intervalRef.current
-      );
+      ) {
 
-      intervalRef.current = null;
-    }
-  };
-
-  const startSlider = () => {
-
-    stopSlider();
-
-    if (
-      !article?.images ||
-      article.images.length <= 1
-    ) {
-      return;
-    }
-
-    intervalRef.current =
-      setInterval(() => {
-
-        setCurrentIndex((prev) =>
-          prev ===
-          article.images.length - 1
-            ? 0
-            : prev + 1
+        clearInterval(
+          intervalRef.current
         );
 
-      }, 3000);
-  };
+        intervalRef.current =
+          null;
+      }
+    };
+
+  const startSlider =
+    () => {
+
+      stopSlider();
+
+      if (
+        !article?.images ||
+
+        article.images
+          .length <= 1
+      ) {
+
+        return;
+      }
+
+      intervalRef.current =
+        setInterval(() => {
+
+          setCurrentIndex(
+            (prev) =>
+
+              prev ===
+              article.images
+                .length -
+                1
+
+                ? 0
+
+                : prev + 1
+          );
+
+        }, 3000);
+    };
 
   useEffect(() => {
 
     startSlider();
 
-    return () => stopSlider();
+    return () =>
+      stopSlider();
 
   }, [article]);
 
@@ -283,7 +362,9 @@ if (
         try {
 
           const res =
-            await API.get("/news");
+            await API.get(
+              "/news"
+            );
 
           const allNews =
             Array.isArray(
@@ -294,36 +375,67 @@ if (
 
           const filtered =
             allNews
+
               .filter(
-                (n) =>
-                  n.slug !== slug &&
-                  (
+                (n) => {
+
+                  // SKIP CURRENT ARTICLE
+
+                  if (
+                    n.slug ===
+                    slug
+                  ) {
+
+                    return false;
+                  }
+
+                  // CATEGORY MATCH
+
+                  const categoryMatch =
                     n.categories?.some(
-                      (c) =>
+                      (
+                        c
+                      ) =>
                         article?.categories?.includes(
                           c
                         )
-                    ) ||
+                    );
 
+                  // TAG MATCH
+
+                  const tagMatch =
                     n.tags?.some(
-                      (t) =>
+                      (
+                        t
+                      ) =>
                         article?.tags?.includes(
                           t
                         )
-                    )
-                  )
-              )
-              .slice(0, 4);
+                    );
 
-          setRelatedNews(filtered);
+                  return (
+                    categoryMatch ||
+                    tagMatch
+                  );
+                }
+              )
+
+              .slice(0, 6);
+
+          setRelatedNews(
+            filtered
+          );
 
         } catch (err) {
 
-          console.log(err);
+          console.log(
+            err
+          );
         }
       };
 
     if (article) {
+
       fetchRelated();
     }
 
@@ -336,46 +448,59 @@ if (
   if (!article) {
 
     return (
+
       <p className="loading">
+
         Loading...
+
       </p>
     );
   }
 
   // =====================================================
-  // ================= SEO IMAGE =========================
+  // ================= SEO ===============================
   // =====================================================
 
   const seoImage =
+
     article.image?.startsWith(
       "http"
     )
+
       ? article.image
+
       : article.images?.[0]?.startsWith(
           "http"
         )
+
       ? article.images[0]
+
       : FALLBACK_IMG;
 
-  // =====================================================
-  // ================= ARTICLE URL =======================
-  // =====================================================
-
   const articleUrl =
-    `https://www.uptvlive.com/article/${article.slug}`;
-
-  // =====================================================
-  // ================= SEO DESCRIPTION ===================
-  // =====================================================
+    `https://www.uptvlive.com/news/${article.slug}`;
 
   const description =
+
     article.seoDescription ||
 
     article.content
-      ?.replace(/<[^>]*>?/gm, "")
-      ?.replace(/\s+/g, " ")
+      ?.replace(
+        /<[^>]*>?/gm,
+        ""
+      )
+
+      ?.replace(
+        /\s+/g,
+        " "
+      )
+
       ?.trim()
-      ?.slice(0, 160) ||
+
+      ?.slice(
+        0,
+        160
+      ) ||
 
     article.title;
 
@@ -383,28 +508,35 @@ if (
   // ================= COPY LINK =========================
   // =====================================================
 
-  const copyLink = async () => {
+  const copyLink =
+    async () => {
 
-    try {
+      try {
 
-await navigator.clipboard.writeText(
-  `https://www.uptvlive.com/article/${article.slug}`
-);
+        await navigator.clipboard.writeText(
+          articleUrl
+        );
 
-      alert("Link copied ✅");
+        alert(
+          "Link copied ✅"
+        );
 
-    } catch (err) {
+      } catch (err) {
 
-      console.log(err);
-    }
-  };
+        console.log(
+          err
+        );
+      }
+    };
 
   // =====================================================
   // ================= IMAGES ============================
   // =====================================================
 
   const images =
-    Array.isArray(article.images)
+    Array.isArray(
+      article.images
+    )
       ? article.images
       : [];
 
@@ -421,12 +553,17 @@ await navigator.clipboard.writeText(
       <Helmet>
 
         <title>
-          {article.title} | UPTV Live
+          {
+            article.title
+          }{" "}
+          | UPTV Live
         </title>
 
         <meta
           name="description"
-          content={description}
+          content={
+            description
+          }
         />
 
         {/* OPEN GRAPH */}
@@ -438,23 +575,30 @@ await navigator.clipboard.writeText(
 
         <meta
           property="og:title"
-          content={article.title}
+          content={
+            article.title
+          }
         />
 
         <meta
           property="og:description"
-          content={description}
+          content={
+            description
+          }
         />
 
         <meta
           property="og:image"
-          content={seoImage}
+          content={
+            seoImage
+          }
         />
-        
 
         <meta
           property="og:url"
-          content={articleUrl}
+          content={
+            articleUrl
+          }
         />
 
         <meta
@@ -463,9 +607,11 @@ await navigator.clipboard.writeText(
         />
 
         <link
-  rel="canonical"
-  href={articleUrl}
-/>
+          rel="canonical"
+          href={
+            articleUrl
+          }
+        />
 
         {/* TWITTER */}
 
@@ -476,17 +622,23 @@ await navigator.clipboard.writeText(
 
         <meta
           name="twitter:title"
-          content={article.title}
+          content={
+            article.title
+          }
         />
 
         <meta
           name="twitter:description"
-          content={description}
+          content={
+            description
+          }
         />
 
         <meta
           name="twitter:image"
-          content={seoImage}
+          content={
+            seoImage
+          }
         />
 
       </Helmet>
@@ -505,14 +657,16 @@ await navigator.clipboard.writeText(
       <p className="article-category">
 
         {
-          article.categories?.[0]
-          || "News"
+          article.categories?.[0] ||
+          "News"
         }
 
         {" | "}
 
         {
-          article.tags?.join(", ")
+          article.tags?.join(
+            ", "
+          )
         }
 
       </p>
@@ -520,19 +674,29 @@ await navigator.clipboard.writeText(
       {/* TITLE */}
 
       <h1 className="article-title">
-        {article.title}
+
+        {
+          article.title
+        }
+
       </h1>
 
       {/* META */}
 
       <div className="article-meta-row">
 
+        <p className="article-author">
+  ✍️ By {article.author}
+</p>
+
         <p className="article-meta">
 
           ⏰ {
+
             new Date(
               article.createdAt
             ).toLocaleString()
+
           }
 
           {" • "}
@@ -549,57 +713,81 @@ await navigator.clipboard.writeText(
           style={{
             display: "flex",
             gap: "8px",
-            flexWrap: "wrap",
+            flexWrap:
+              "wrap",
           }}
-
         >
 
-          <button
-  className="share-btn"
-  onClick={async () => {
-
-    try {
-
-      if (navigator.share) {
-
-        await navigator.share({
-          title: article.title,
-          text: description,
-          url: `https://www.uptvlive.com/article/${article.slug}`,
-        });
-
-      } else {
-
-        await navigator.clipboard.writeText(
-          articleUrl
-        );
-
-        alert("Link copied ✅");
-      }
-
-    } catch (err) {
-
-      console.log(err);
-    }
-  }}
->
-  Share
-</button>
+          {/* SHARE */}
 
           <button
             className="share-btn"
+
+            onClick={async () => {
+
+              try {
+
+                if (
+                  navigator.share
+                ) {
+
+                  await navigator.share(
+                    {
+                      title:
+                        article.title,
+
+                      text:
+                        description,
+
+                      url:
+                        articleUrl,
+                    }
+                  );
+
+                } else {
+
+                  await navigator.clipboard.writeText(
+                    articleUrl
+                  );
+
+                  alert(
+                    "Link copied ✅"
+                  );
+                }
+
+              } catch (err) {
+
+                console.log(
+                  err
+                );
+              }
+            }}
+          >
+            Share
+          </button>
+
+          {/* WHATSAPP */}
+
+          <button
+            className="share-btn"
+
             onClick={() =>
-              shareToWhatsApp(article)
+              shareToWhatsApp(
+                article
+              )
             }
           >
             WhatsApp
           </button>
 
-
+          {/* COPY */}
 
           <button
             className="share-btn"
-            onClick={copyLink}
+
+            onClick={
+              copyLink
+            }
           >
             Copy
           </button>
@@ -615,83 +803,118 @@ await navigator.clipboard.writeText(
       {/* IMAGE SLIDER */}
 
       {
-        images.length > 0
-          ? (
+        images.length > 0 ? (
 
-            <div
-              className="slider"
-              onMouseEnter={stopSlider}
-              onMouseLeave={startSlider}
-            >
+          <div
+            className="slider"
 
-              <img
-                src={getImage(
-                  images[currentIndex]
-                )}
-                className="slide-img"
-                alt={article.title}
-                loading="lazy"
-                onError={(e) => {
-                  e.target.src =
-                    FALLBACK_IMG;
-                }}
-              />
+            onMouseEnter={
+              stopSlider
+            }
 
-              {
-                images.length > 1 && (
-                  <>
-                    <button
-                      className="prev-btn"
-                      onClick={() =>
-                        setCurrentIndex(
-                          (prev) =>
-                            prev === 0
-                              ? images.length - 1
-                              : prev - 1
-                        )
-                      }
-                    >
-                      ‹
-                    </button>
-
-                    <button
-                      className="next-btn"
-                      onClick={() =>
-                        setCurrentIndex(
-                          (prev) =>
-                            prev ===
-                            images.length - 1
-                              ? 0
-                              : prev + 1
-                        )
-                      }
-                    >
-                      ›
-                    </button>
-                  </>
-                )
-              }
-
-            </div>
-
-          ) : (
+            onMouseLeave={
+              startSlider
+            }
+          >
 
             <img
               src={getImage(
-                article.image
+                images[
+                  currentIndex
+                ]
               )}
-              className="article-image"
-              alt={article.title}
+
+              className="slide-img"
+
+              alt={
+                article.title
+              }
+
               loading="lazy"
+
+              onError={(e) => {
+
+                e.target.src =
+                  FALLBACK_IMG;
+              }}
             />
 
-          )
+            {
+              images.length >
+                1 && (
+
+                <>
+                  <button
+                    className="prev-btn"
+
+                    onClick={() =>
+                      setCurrentIndex(
+                        (
+                          prev
+                        ) =>
+
+                          prev ===
+                          0
+
+                            ? images.length - 1
+
+                            : prev - 1
+                      )
+                    }
+                  >
+                    ‹
+                  </button>
+
+                  <button
+                    className="next-btn"
+
+                    onClick={() =>
+                      setCurrentIndex(
+                        (
+                          prev
+                        ) =>
+
+                          prev ===
+                          images.length -
+                            1
+
+                            ? 0
+
+                            : prev + 1
+                      )
+                    }
+                  >
+                    ›
+                  </button>
+                </>
+              )
+            }
+
+          </div>
+
+        ) : (
+
+          <img
+            src={getImage(
+              article.image
+            )}
+
+            className="article-image"
+
+            alt={
+              article.title
+            }
+
+            loading="lazy"
+          />
+        )
       }
 
       {/* CONTENT */}
 
       <div
         className="article-content"
+
         dangerouslySetInnerHTML={{
           __html:
             formatContent(
@@ -704,85 +927,194 @@ await navigator.clipboard.writeText(
 
       <AdBanner position="article_middle" />
 
-      {/* YOUTUBE */}
-
-      {/* ================= MEDIA LINKS ================= */}
-
-{
-  Array.isArray(article.mediaLinks) &&
-  article.mediaLinks.length > 0 && (
-
-    <div className="media-links-container">
+      {/* MEDIA LINKS */}
 
       {
-        article.mediaLinks.map(
-          (link, index) => {
+        Array.isArray(
+          article.mediaLinks
+        ) &&
 
-            const embedUrl =
-              getEmbedLink(link);
+        article.mediaLinks
+          .length > 0 && (
 
-            return (
+          <div className="media-links-container">
 
-<div
-  key={index}
-  className={`video-container
-    ${
-      link.includes("youtube")
-      || link.includes("youtu.be")
-        ? "youtube-embed"
-      : link.includes("instagram")
-        ? "instagram-embed"
-      : link.includes("facebook")
-        ? "facebook-embed"
-      : link.includes("twitter")
-        || link.includes("x.com")
-        ? "twitter-embed"
-      : "website-embed"
-    }
-  `}
->
+            {
+              article.mediaLinks.map(
+                (
+                  link,
+                  index
+                ) => {
 
-                {
-  embedUrl ? (
+                  const embedUrl =
+                    getEmbedLink(
+                      link
+                    );
 
-    <iframe
-      src={embedUrl}
-      title={`media-${index}`}
-      frameBorder="0"
-      allowFullScreen
-      
-    />
+                  return (
 
-  ) : (
+                    <div
+                      key={index}
 
-    <a
-      href={link}
-      target="_blank"
-      rel="noreferrer"
-      className="external-link-card"
-    >
+                      className={`video-container
 
-      🔗 Open External Content
+                      ${
+                        link.includes(
+                          "youtube"
+                        ) ||
 
-    </a>
-  )
-}
+                        link.includes(
+                          "youtu.be"
+                        )
 
-              </div>
-            );
-          }
+                          ? "youtube-embed"
+
+                          : link.includes(
+                              "instagram"
+                            )
+
+                          ? "instagram-embed"
+
+                          : link.includes(
+                              "facebook"
+                            )
+
+                          ? "facebook-embed"
+
+                          : link.includes(
+                              "twitter"
+                            ) ||
+
+                            link.includes(
+                              "x.com"
+                            )
+
+                          ? "twitter-embed"
+
+                          : "website-embed"
+                      }
+                    `}
+                    >
+
+                      {
+                        embedUrl ? (
+
+                          <iframe
+                            src={
+                              embedUrl
+                            }
+
+                            title={`media-${index}`}
+
+                            frameBorder="0"
+
+                            allowFullScreen
+                          />
+
+                        ) : (
+
+                          <a
+                            href={link}
+
+                            target="_blank"
+
+                            rel="noreferrer"
+
+                            className="external-link-card"
+                          >
+
+                            🔗 Open External Content
+
+                          </a>
+                        )
+                      }
+
+                    </div>
+                  );
+                }
+              )
+            }
+
+          </div>
         )
       }
-
-    </div>
-  )
-}
 
       {/* BOTTOM AD */}
 
       <AdBanner position="article_bottom" />
 
-      {/* RELATED */}
+      {/* TAGGED NEWS */}
+
+      {
+        article.relatedArticles
+          ?.length > 0 && (
+
+          <div className="related-section">
+
+            <h3>
+              🔥 Tagged News
+            </h3>
+
+            <div className="related-grid">
+
+              {
+                article.relatedArticles.map(
+                  (
+                    item
+                  ) => (
+
+                    <Link
+                      key={
+                        item.slug
+                      }
+
+                      to={`/news/${item.slug}`}
+
+                      className="related-card"
+                    >
+
+                      <img
+                        src={
+                          item.image ||
+
+                          FALLBACK_IMG
+                        }
+
+                        alt={
+                          item.title
+                        }
+
+                        loading="lazy"
+
+                        onError={(e) => {
+
+                          e.target.src =
+                            FALLBACK_IMG;
+                        }}
+                      />
+
+                      <div className="related-content">
+
+                        <p>
+                          {
+                            item.title
+                          }
+                        </p>
+
+                      </div>
+
+                    </Link>
+                  )
+                )
+              }
+
+            </div>
+
+          </div>
+        )
+      }
+
+      {/* AUTO RELATED */}
 
       <div className="related-section">
 
@@ -794,26 +1126,41 @@ await navigator.clipboard.writeText(
 
           {
             relatedNews.map(
-              (item) => {
+              (
+                item
+              ) => {
 
                 const img =
+
                   item.image ||
+
                   item.images?.[0] ||
+
                   FALLBACK_IMG;
 
                 return (
 
                   <Link
-                    key={item._id}
+                    key={
+                      item._id
+                    }
+
                     to={`/news/${item.slug}`}
+
                     className="related-card"
                   >
 
                     <img
                       src={img}
-                      alt={item.title}
+
+                      alt={
+                        item.title
+                      }
+
                       loading="lazy"
+
                       onError={(e) => {
+
                         e.target.src =
                           FALLBACK_IMG;
                       }}
@@ -822,10 +1169,12 @@ await navigator.clipboard.writeText(
                     <div className="related-content">
 
                       <p>
+
                         {
                           item.title ||
                           "No Title"
                         }
+
                       </p>
 
                     </div>

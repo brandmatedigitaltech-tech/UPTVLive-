@@ -85,6 +85,9 @@ const {
   .map((link) => link.trim())
   .filter(Boolean),
 
+  relatedArticles:
+  req.body.relatedArticles || [],
+
       sections: safeArray(sections).map((s) =>
         String(s).toLowerCase()
       ),
@@ -99,7 +102,10 @@ const {
 
       views: 0,
 
-      author: req.user?.email || "Writer",
+      author:
+  req.user?.name ||
+  req.user?.email ||
+  "UPTV Live",
     });
 
     return res.status(201).json(news);
@@ -307,6 +313,7 @@ const {
   categories,
   tags,
   images,
+  relatedArticles,
 } = req.body;
 
     const existingNews = await News.findById(
@@ -358,6 +365,15 @@ if (typeof mediaLinks !== "undefined") {
       .filter(Boolean);
 }
 
+// ================= RELATED ARTICLES =================
+if (
+  typeof relatedArticles !== "undefined"
+) {
+  updateData.relatedArticles =
+    safeArray(relatedArticles);
+}
+
+
     // ================= IMAGES =================
     if (typeof images !== "undefined") {
       const imgArray = safeArray(images);
@@ -408,6 +424,14 @@ if (typeof mediaLinks !== "undefined") {
     });
   }
 };
+
+// ================= RELATED ARTICLES =================
+if (
+  typeof relatedArticles !== "undefined"
+) {
+  updateData.relatedArticles =
+    safeArray(relatedArticles);
+}
 
 // ================= PENDING =================
 exports.getPendingNews = async (req, res) => {

@@ -1,18 +1,28 @@
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
-module.exports = (req, res, next) => {
+module.exports = async (req, res, next) => {
+
   try {
-    const authHeader = req.headers.authorization;
 
-    // ❌ No header
+    const authHeader =
+      req.headers.authorization;
+
+    // ❌ No token
     if (!authHeader) {
-      return res.status(401).json({ msg: "No token ❌" });
+
+      return res.status(401).json({
+        msg: "No token ❌",
+      });
     }
 
-    // ✅ Extract token from "Bearer TOKEN"
-    const token = authHeader.startsWith("Bearer ")
-      ? authHeader.split(" ")[1]
-      : authHeader;
+    // ✅ Extract token
+    const token =
+      authHeader.startsWith("Bearer ")
+
+        ? authHeader.split(" ")[1]
+
+        : authHeader;
 
     // 🔐 Verify token
     const decoded = jwt.verify(
@@ -20,16 +30,32 @@ module.exports = (req, res, next) => {
       process.env.JWT_SECRET || "SECRET_KEY_123"
     );
 
-    // 🔥 Attach user to request
-    req.user = decoded;
+    // ✅ Get full user from database
+    const user =
+      await User.findById(decoded.id);
+
+    if (!user) {
+
+      return res.status(401).json({
+        msg: "User not found ❌",
+      });
+    }
+
+    // ✅ Attach full user object
+    req.user = user;
 
     next();
 
   } catch (err) {
-    console.error("Auth Error:", err.message);
+
+    console.error(
+      "Auth Error:",
+      err.message
+    );
 
     return res.status(401).json({
-      msg: "Invalid or expired token ❌",
+      msg:
+        "Invalid or expired token ❌",
     });
   }
 };

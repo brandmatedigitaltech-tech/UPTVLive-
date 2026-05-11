@@ -12,12 +12,12 @@ import "quill/dist/quill.snow.css";
 
 import "./PendingNews.css";
 
+// =====================================================
+// ================= CONSTANTS ==========================
+// =====================================================
+
 const FALLBACK_IMG =
   "/no-image.jpg";
-
-// =====================================================
-// ================= STATIC SECTION =====================
-// =====================================================
 
 const sectionsList = [
   "hero",
@@ -28,26 +28,69 @@ const sectionsList = [
 ];
 
 // =====================================================
-// ================= IMAGE HELPER =======================
+// ================= HELPERS ============================
 // =====================================================
 
 const getImage = (item) => {
 
   if (
-    Array.isArray(item.images) &&
+    Array.isArray(item?.images) &&
     item.images.length > 0
   ) {
     return item.images[0];
   }
 
   if (
-    item.image &&
+    item?.image &&
     item.image.trim() !== ""
   ) {
     return item.image;
   }
 
   return FALLBACK_IMG;
+};
+
+const cleanHtml = (
+  html = ""
+) => {
+
+  return html
+    .replace(
+      /<span class="ql-ui".*?<\/span>/g,
+      ""
+    )
+
+    .replace(
+      /contenteditable="false"/g,
+      ""
+    )
+
+    .replace(
+      /data-list="[^"]*"/g,
+      ""
+    )
+
+    .replace(
+      /class="ql-[^"]*"/g,
+      ""
+    )
+
+    .replace(
+      /style="[^"]*"/g,
+      ""
+    );
+};
+
+const getTextPreview = (
+  html = ""
+) => {
+
+  return html
+    .replace(
+      /<[^>]+>/g,
+      ""
+    )
+    .slice(0, 120);
 };
 
 // =====================================================
@@ -63,13 +106,8 @@ const PendingNews = () => {
   const [news, setNews] =
     useState([]);
 
+
   const [loading, setLoading] =
-    useState(false);
-
-  const [previewItem, setPreviewItem] =
-    useState(null);
-
-  const [editMode, setEditMode] =
     useState(false);
 
   const [saving, setSaving] =
@@ -78,6 +116,15 @@ const PendingNews = () => {
   const [approving, setApproving] =
     useState(false);
 
+  const [previewItem, setPreviewItem] =
+    useState(null);
+
+  const [editMode, setEditMode] =
+    useState(false);
+
+  const [search, setSearch] =
+    useState("");
+
   const [categoriesList, setCategoriesList] =
     useState([]);
 
@@ -85,52 +132,50 @@ const PendingNews = () => {
     useState([]);
 
   // =====================================================
-  // ================= EDITOR ============================
+  // ================= QUILL =============================
   // =====================================================
 
-  const editorRef = useRef(null);
+  const editorRef =
+    useRef(null);
 
-  const quillRef = useRef(null);
+  const quillRef =
+    useRef(null);
 
   // =====================================================
-  // ================= FETCH NEWS ========================
+  // ================= FETCH =============================
   // =====================================================
 
-  const fetchNews = async () => {
+  const fetchNews =
+    async () => {
 
-    try {
+      try {
 
-      setLoading(true);
+        setLoading(true);
 
-      const res =
-        await API.get(
-          "/news/pending"
+        const res =
+          await API.get(
+            "/news/pending"
+          );
+
+        setNews(
+          Array.isArray(
+            res.data
+          )
+            ? res.data
+            : []
         );
 
-      setNews(
-        Array.isArray(
-          res.data
-        )
-          ? res.data
-          : []
-      );
+      } catch (err) {
 
-    } catch (err) {
+        console.error(err);
 
-      console.error(
-        "Pending Error:",
-        err
-      );
+      } finally {
 
-    } finally {
+        setLoading(false);
+      }
+    };
 
-      setLoading(false);
-    }
-  };
 
-  // =====================================================
-  // ================= FETCH CATEGORY ====================
-// =====================================================
 
   const fetchCategories =
     async () => {
@@ -152,16 +197,9 @@ const PendingNews = () => {
 
       } catch (err) {
 
-        console.error(
-          "Category Error:",
-          err
-        );
+        console.error(err);
       }
     };
-
-  // =====================================================
-  // ================= FETCH CITIES ======================
-// =====================================================
 
   const fetchCities =
     async () => {
@@ -183,46 +221,91 @@ const PendingNews = () => {
 
       } catch (err) {
 
-        console.error(
-          "City Error:",
-          err
-        );
+        console.error(err);
       }
     };
 
   // =====================================================
   // ================= INIT ==============================
-// =====================================================
+  // =====================================================
+
+useEffect(() => {
+
+  fetchNews();
+
+  
+
+  fetchCategories();
+
+  fetchCities();
+
+}, []);
+
+  // =====================================================
+  // ================= ESC CLOSE =========================
+  // =====================================================
 
   useEffect(() => {
 
-    fetchNews();
+    const esc = (e) => {
 
-    fetchCategories();
+      if (
+        e.key === "Escape"
+      ) {
+        closeModal();
+      }
+    };
 
-    fetchCities();
+    window.addEventListener(
+      "keydown",
+      esc
+    );
+
+    return () =>
+      window.removeEventListener(
+        "keydown",
+        esc
+      );
 
   }, []);
 
   // =====================================================
-  // ================= QUILL =============================
-// =====================================================
+  // ================= BODY LOCK =========================
+  // =====================================================
 
   useEffect(() => {
 
-    if (
-      !editMode ||
-      !editorRef.current
-    ) {
-      return;
-    }
+    document.body.style.overflow =
+      previewItem
+        ? "hidden"
+        : "auto";
 
-    editorRef.current.innerHTML =
-      "";
+  }, [previewItem]);
 
-    quillRef.current = null;
+  // =====================================================
+  // ================= QUILL INIT ========================
+  // =====================================================
 
-    const quill = new Quill(
+ useEffect(() => {
+
+  // ✅ ONLY INIT ONCE
+  if (
+    !editMode ||
+    !editorRef.current ||
+    quillRef.current
+  ) {
+    return;
+  }
+
+  // ✅ PREVENT DUPLICATE TOOLBARS
+  if (
+    editorRef.current.querySelector(".ql-toolbar")
+  ) {
+    return;
+  }
+
+  const quill =
+    new Quill(
       editorRef.current,
       {
         theme: "snow",
@@ -267,110 +350,130 @@ const PendingNews = () => {
       }
     );
 
-    quillRef.current = quill;
+  quillRef.current =
+    quill;
 
-    // ================= SET CONTENT =================
+  // ✅ SET CONTENT
+  quill.root.innerHTML =
+    previewItem?.content || "";
 
-    if (
-      previewItem?.content
-    ) {
-      quill.root.innerHTML =
-        previewItem.content;
+  // ✅ CLEANUP
+  return () => {
+
+    if (editorRef.current) {
+      editorRef.current.innerHTML = "";
     }
 
-  }, [editMode, previewItem]);
+    quillRef.current =
+      null;
+  };
+
+}, [editMode]);
+
 
   // =====================================================
-  // ================= TEXT PREVIEW ======================
-// =====================================================
+  // ================= FILTER ============================
+  // =====================================================
 
-  const getTextPreview = (
-    html
-  ) => {
+  const filteredNews =
+    news.filter((item) =>
+      item.title
+        ?.toLowerCase()
+        .includes(
+          search.toLowerCase()
+        )
+    );
 
-    if (!html)
-      return "";
+  // =====================================================
+  // ================= OPEN ==============================
+  // =====================================================
 
-    return html
-      .replace(
-        /<[^>]+>/g,
-        ""
+ const openPreview = (
+  item
+) => {
+
+  setPreviewItem({
+    ...item,
+
+    categories:
+      Array.isArray(
+        item.categories
       )
-      .slice(0, 120);
-  };
+        ? item.categories
+        : [],
 
-  // =====================================================
-  // ================= OPEN PREVIEW ======================
-// =====================================================
+    tags:
+      Array.isArray(
+        item.tags
+      )
+        ? item.tags
+        : [],
 
-  const openPreview = (
-    item
-  ) => {
+    sections:
+      Array.isArray(
+        item.sections
+      )
+        ? item.sections
+        : [],
 
-    setPreviewItem({
-      ...item,
+    mediaLinks:
+      Array.isArray(
+        item.mediaLinks
+      )
+        ? item.mediaLinks
+        : [],
 
-      categories:
-        Array.isArray(
-          item.categories
-        )
-          ? item.categories
-          : [],
+    relatedArticles:
+      Array.isArray(
+        item.relatedArticles
+      )
+        ? item.relatedArticles
+        : [],
 
-      tags:
-        Array.isArray(
-          item.tags
-        )
-          ? item.tags
-          : [],
-
-      sections:
-        Array.isArray(
-          item.sections
-        )
-          ? item.sections
-          : [],
-    });
-  };
+    searchResults: [],
+  });
+};
 
   // =====================================================
   // ================= CLOSE =============================
-// =====================================================
+  // =====================================================
 
-  const closeModal = () => {
+  const closeModal =
+    () => {
 
-    setPreviewItem(null);
+      setPreviewItem(
+        null
+      );
 
-    setEditMode(false);
+      setEditMode(false);
 
-    quillRef.current = null;
-  };
+      quillRef.current =
+        null;
+    };
 
   // =====================================================
   // ================= UPDATE ============================
-// =====================================================
+  // =====================================================
 
   const updateNews =
     async () => {
 
-      if (!previewItem)
+      if (
+        !previewItem
+      ) {
         return;
+      }
 
       try {
 
         setSaving(true);
 
-        let content =
-          previewItem.content;
-
-        // ================= QUILL CONTENT =================
-
-        if (
+        const content =
           quillRef.current
-        ) {
-          content =
-            quillRef.current.root.innerHTML;
-        }
+            ? cleanHtml(
+                quillRef.current.root.innerHTML
+              )
+            : previewItem.content;
 
         await API.put(
           `/news/${previewItem._id}`,
@@ -380,21 +483,23 @@ const PendingNews = () => {
 
             content,
 
-            youtubeUrl:
-              previewItem.youtubeUrl ||
-              "",
-
             categories:
-              previewItem.categories ||
-              [],
+              previewItem.categories || [],
 
             tags:
-              previewItem.tags ||
-              [],
+              previewItem.tags || [],
 
             sections:
-              previewItem.sections ||
-              [],
+              previewItem.sections || [],
+
+            mediaLinks:
+              previewItem.mediaLinks || [],
+
+            relatedArticles:
+              previewItem.relatedArticles || [],
+
+            images:
+              previewItem.images || [],
           }
         );
 
@@ -422,7 +527,7 @@ const PendingNews = () => {
 
   // =====================================================
   // ================= APPROVE ===========================
-// =====================================================
+  // =====================================================
 
   const approveNews =
     async (id) => {
@@ -439,33 +544,47 @@ const PendingNews = () => {
 
         setApproving(true);
 
-        // ================= SAVE DATA =================
+        const content =
+          quillRef.current
+            ? cleanHtml(
+                quillRef.current.root.innerHTML
+              )
+            : previewItem.content;
 
         await API.put(
           `/news/${id}`,
           {
+            title:
+              previewItem.title,
+
+            content,
+
             categories:
-              previewItem?.categories ||
-              [],
+              previewItem.categories || [],
 
             tags:
-              previewItem?.tags ||
-              [],
+              previewItem.tags || [],
 
             sections:
-              previewItem?.sections ||
-              [],
+              previewItem.sections || [],
+
+            mediaLinks:
+              previewItem.mediaLinks || [],
+
+            relatedArticles:
+              previewItem.relatedArticles || [],
+
+            images:
+              previewItem.images || [],
           }
         );
-
-        // ================= APPROVE =================
 
         await API.put(
           `/news/approve/${id}`
         );
 
         alert(
-          "News approved successfully ✅"
+          "Approved successfully ✅"
         );
 
         closeModal();
@@ -488,7 +607,7 @@ const PendingNews = () => {
 
   // =====================================================
   // ================= DELETE ============================
-// =====================================================
+  // =====================================================
 
   const deleteNews =
     async (id) => {
@@ -526,19 +645,40 @@ const PendingNews = () => {
     };
 
   // =====================================================
-  // ================= UI ================================
-// =====================================================
+  // ================= RETURN ============================
+  // =====================================================
 
   return (
+
     <div className="pending-container">
 
-      {/* ================= TITLE ================= */}
+      {/* HEADER */}
 
-      <h2 className="heading">
-        Pending News ⏱
-      </h2>
+      <div className="pending-header">
 
-      {/* ================= LOADING ================= */}
+        <h2 className="heading">
+          Pending News ⏱
+        </h2>
+
+        <input
+          type="text"
+
+          className="search-input"
+
+          placeholder="Search pending news..."
+
+          value={search}
+
+          onChange={(e) =>
+            setSearch(
+              e.target.value
+            )
+          }
+        />
+
+      </div>
+
+      {/* LOADING */}
 
       {loading && (
         <p className="loading">
@@ -546,24 +686,22 @@ const PendingNews = () => {
         </p>
       )}
 
-      {/* ================= EMPTY ================= */}
+      {/* EMPTY */}
 
       {!loading &&
-        news.length ===
-          0 && (
+        filteredNews.length === 0 && (
           <p className="empty">
             No pending news
           </p>
         )}
 
-      {/* ================================================= */}
-      {/* ================= NEWS LIST ===================== */}
-      {/* ================================================= */}
+      {/* NEWS */}
 
       <div className="news-list">
 
-        {news.map(
+        {filteredNews.map(
           (item) => (
+
             <div
               key={item._id}
               className="news-card"
@@ -582,9 +720,7 @@ const PendingNews = () => {
 
                   loading="lazy"
 
-                  onError={(
-                    e
-                  ) => {
+                  onError={(e) => {
                     e.target.src =
                       FALLBACK_IMG;
                   }}
@@ -596,9 +732,28 @@ const PendingNews = () => {
 
               <div className="news-content">
 
-                <h3>
-                  {item.title}
-                </h3>
+                <div className="top-row">
+
+                  <h3>
+                    {item.title}
+                  </h3>
+                  <p className="news-author">
+  ✍️ By {item.author || "UPTV Live"}
+</p>
+
+                  <span className="status-badge">
+                    Pending
+                  </span>
+
+                </div>
+
+                <p className="news-date">
+
+                  {new Date(
+                    item.createdAt
+                  ).toLocaleString()}
+
+                </p>
 
                 <p>
 
@@ -625,11 +780,16 @@ const PendingNews = () => {
                   </button>
 
                   <button
-                    onClick={() =>
+                    onClick={() => {
+
                       openPreview(
                         item
-                      )
-                    }
+                      );
+
+                      setEditMode(
+                        true
+                      );
+                    }}
                   >
                     ✏️ Review
                   </button>
@@ -654,11 +814,10 @@ const PendingNews = () => {
 
       </div>
 
-      {/* ================================================= */}
-      {/* ================= MODAL ========================= */}
-      {/* ================================================= */}
+      {/* MODAL */}
 
       {previewItem && (
+
         <div className="preview-modal">
 
           <div className="preview-box">
@@ -677,9 +836,22 @@ const PendingNews = () => {
 
             {/* TITLE */}
 
-            <h2>
-              {previewItem.title}
-            </h2>
+            <input
+              className="modal-title-input"
+
+              value={
+                previewItem.title
+              }
+
+              onChange={(e) =>
+                setPreviewItem({
+                  ...previewItem,
+
+                  title:
+                    e.target.value,
+                })
+              }
+            />
 
             {/* IMAGE */}
 
@@ -690,19 +862,21 @@ const PendingNews = () => {
 
               alt="preview"
 
+              className="preview-image"
+
               onError={(e) => {
                 e.target.src =
                   FALLBACK_IMG;
               }}
             />
 
-            {/* ================================================= */}
-            {/* ================= VIEW MODE ===================== */}
-            {/* ================================================= */}
+            {/* CONTENT */}
 
             {!editMode ? (
 
               <div
+                className="preview-content"
+
                 dangerouslySetInnerHTML={{
                   __html:
                     previewItem.content,
@@ -716,15 +890,13 @@ const PendingNews = () => {
 
                 style={{
                   height:
-                    "250px",
+                    "300px",
                 }}
               />
 
             )}
 
-            {/* ================================================= */}
-            {/* ================= CATEGORY ====================== */}
-            {/* ================================================= */}
+            {/* CATEGORY */}
 
             <div className="edit-section">
 
@@ -743,6 +915,7 @@ const PendingNews = () => {
                       );
 
                     return (
+
                       <button
                         key={c._id}
 
@@ -788,14 +961,12 @@ const PendingNews = () => {
 
             </div>
 
-            {/* ================================================= */}
-            {/* ================= CITY ========================== */}
-            {/* ================================================= */}
+            {/* CITY */}
 
             <div className="edit-section">
 
               <label>
-                City
+                Cities
               </label>
 
               <div className="chip-container">
@@ -809,6 +980,7 @@ const PendingNews = () => {
                       );
 
                     return (
+
                       <button
                         key={city._id}
 
@@ -854,9 +1026,7 @@ const PendingNews = () => {
 
             </div>
 
-            {/* ================================================= */}
-            {/* ================= SECTION ======================= */}
-            {/* ================================================= */}
+            {/* SECTION */}
 
             <div className="edit-section">
 
@@ -875,6 +1045,7 @@ const PendingNews = () => {
                       );
 
                     return (
+
                       <button
                         key={sec}
 
@@ -920,14 +1091,84 @@ const PendingNews = () => {
 
             </div>
 
-            {/* ================================================= */}
-            {/* ================= ACTIONS ======================= */}
-            {/* ================================================= */}
+            {/* MEDIA LINKS */}
+
+            <div className="edit-section">
+
+              <label>
+                Media Links
+              </label>
+
+              {previewItem.mediaLinks.map(
+                (
+                  link,
+                  index
+                ) => (
+
+                  <input
+                    key={index}
+
+                    className="input"
+
+                    value={link}
+
+                    placeholder="Paste media link"
+
+                    onChange={(e) => {
+
+                      const updated =
+                        [
+                          ...previewItem.mediaLinks,
+                        ];
+
+                      updated[index] =
+                        e.target.value;
+
+                      setPreviewItem({
+                        ...previewItem,
+
+                        mediaLinks:
+                          updated,
+                      });
+                    }}
+                  />
+                )
+              )}
+
+              <button
+                className="add-btn"
+
+                onClick={() =>
+                  setPreviewItem({
+                    ...previewItem,
+
+                    mediaLinks: [
+                      ...previewItem.mediaLinks,
+                      "",
+                    ],
+                  })
+                }
+              >
+                + Add Link
+              </button>
+
+            </div>
+{/* ===================================================== */}
+{/* ================= RELATED NEWS ====================== */}
+{/* ===================================================== */}
+
+{/* ===================================================== */}
+{/* ================= RELATED NEWS ====================== */}
+{/* ===================================================== */}
+
+
+            {/* ACTIONS */}
 
             <div className="modal-actions">
 
               {!editMode ? (
                 <>
+
                   <button
                     onClick={() =>
                       setEditMode(
@@ -965,9 +1206,11 @@ const PendingNews = () => {
                   >
                     ❌ Delete
                   </button>
+
                 </>
               ) : (
                 <>
+
                   <button
                     onClick={
                       updateNews
@@ -993,6 +1236,7 @@ const PendingNews = () => {
                   >
                     Cancel
                   </button>
+
                 </>
               )}
 

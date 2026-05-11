@@ -126,14 +126,22 @@ const jwt = require("jsonwebtoken");
 // ================= REGISTER =================
 exports.register = async (req, res) => {
   try {
-    let { email, password, role } = req.body;
+    let {
+  name,
+  email,
+  password,
+  role,
+} = req.body;
+
 
     // ✅ normalize email
     email = email.toLowerCase().trim();
 
-    if (!email || !password) {
-      return res.status(400).json({ msg: "Email & Password required" });
-    }
+if (!name || !email || !password) {
+  return res.status(400).json({
+    msg: "Name, Email & Password required ❌",
+  });
+}
 
     const existing = await User.findOne({ email });
     if (existing) {
@@ -143,6 +151,7 @@ exports.register = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     const user = await User.create({
+      name,
       email,
       password: hashed,
       role: role || "writer",
@@ -203,6 +212,7 @@ exports.login = async (req, res) => {
     res.json({
       token,
       user: {
+        name : user.name,
         id: user._id,
         email: user.email,
         role: user.role,

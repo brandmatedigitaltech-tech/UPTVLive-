@@ -68,6 +68,16 @@ mediaLinks: {
   type: [String],
   default: [],
 },
+
+relatedArticles: [
+  {
+    _id: String,
+    title: String,
+    slug: String,
+    image: String,
+  },
+],
+
     // ================= STATUS =================
     status: {
       type: String,
@@ -117,6 +127,8 @@ mediaLinks: {
     minimize: false,
   }
 );
+
+
 
 // ================= AUTO IMAGE FALLBACK =================
 newsSchema.pre("save", function (next) {

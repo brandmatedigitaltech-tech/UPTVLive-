@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/article/:slug",
+      "source": "/news/:slug",
       "destination": "https://api.uptvlive.com/seo/article/:slug"
     },
     {

@@ -4,7 +4,11 @@ import "./Users.css";
 
 const Users = () => {
   const [users, setUsers] = useState([]);
-  const [form, setForm] = useState({ email: "", password: "" });
+  const [form, setForm] = useState({
+  name: "",
+  email: "",
+  password: "",
+});
 
   const [loading, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(null); // 🔥 per-user loading
@@ -28,18 +32,30 @@ const Users = () => {
 
   // ================= ADD WRITER =================
   const addWriter = async () => {
-    if (!form.email || !form.password) {
-      return alert("Fill all fields ❌");
-    }
+if (
+  !form.name ||
+  !form.email ||
+  !form.password
+) {
+  return alert("Fill all fields ❌");
+}
 
     try {
       setActionLoading("add");
 
-      await API.post("/users/create", form);
+      await API.post("/users/create", {
+  name: form.name.trim(),
+  email: form.email.trim(),
+  password: form.password.trim(),
+});
 
       alert("Writer Added ✅");
 
-      setForm({ email: "", password: "" });
+      setForm({
+  name: "",
+  email: "",
+  password: "",
+});
       fetchUsers();
     } catch (err) {
       alert(err.response?.data?.msg || "Error ❌");
@@ -96,6 +112,17 @@ const Users = () => {
       <div className="users-form">
 
         <input
+  placeholder="Enter Writer Name"
+  value={form.name}
+  onChange={(e) =>
+    setForm({
+      ...form,
+      name: e.target.value,
+    })
+  }
+/>
+
+        <input
           placeholder="Enter Email"
           value={form.email}
           onChange={(e) =>
@@ -136,6 +163,9 @@ const Users = () => {
 
             {/* LEFT */}
             <div className="user-info">
+              <div className="user-name">
+  👤 {user.name}
+</div>
 
               <div className="user-email">{user.email}</div>
 

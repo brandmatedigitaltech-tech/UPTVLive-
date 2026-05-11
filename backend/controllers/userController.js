@@ -16,9 +16,13 @@ exports.createWriter = async (req, res) => {
   try {
     if (!isAdmin(req, res)) return;
 
-    const { email, password } = req.body;
+    const {
+  name,
+  email,
+  password,
+} = req.body;
 
-    if (!email || !password) {
+    if (!name || !email || !password) {
       return res.status(400).json({ msg: "Email & Password required" });
     }
 
@@ -30,6 +34,7 @@ exports.createWriter = async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     const user = await User.create({
+      name,
       email,
       password: hashed,
       role: "writer",

@@ -90,7 +90,14 @@ router.post(
 // ======================================================
 
 // ✅ CREATE NEWS
-router.post("/", createNews);
+const authMiddleware =
+  require("../middleware/authMiddleware");
+
+router.post(
+  "/",
+  authMiddleware,
+  createNews
+);
 
 // ✅ GET ALL APPROVED NEWS
 router.get("/", getNews);
