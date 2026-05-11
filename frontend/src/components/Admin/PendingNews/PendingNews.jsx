@@ -27,7 +27,6 @@ const sectionsList = [
   "special",
 ];
 
-
 // =====================================================
 // ================= HELPERS ============================
 // =====================================================
@@ -51,7 +50,6 @@ const getImage = (item) => {
   return FALLBACK_IMG;
 };
 
-// ✅ ADD THIS HERE
 const cleanHtml = (
   html = ""
 ) => {
@@ -75,6 +73,11 @@ const cleanHtml = (
     .replace(
       /class="ql-[^"]*"/g,
       ""
+    )
+
+    .replace(
+      /style="[^"]*"/g,
+      ""
     );
 };
 
@@ -89,7 +92,6 @@ const getTextPreview = (
     )
     .slice(0, 120);
 };
-
 
 // =====================================================
 // ================= COMPONENT ==========================
@@ -139,106 +141,6 @@ const PendingNews = () => {
   const quillRef =
     useRef(null);
 
-  // =====================================================
-// ================= IMAGE HANDLER =====================
-// =====================================================
-
-const imageHandler = () => {
-
-  const input =
-    document.createElement("input");
-
-  input.setAttribute(
-    "type",
-    "file"
-  );
-
-  input.setAttribute(
-    "accept",
-    "image/*"
-  );
-
-  input.click();
-
-  input.onchange = async () => {
-
-    const file =
-      input.files[0];
-
-    if (!file) return;
-
-    try {
-
-      const data =
-        new FormData();
-
-      data.append(
-        "images",
-        file
-      );
-
-      const res =
-        await API.post(
-          "/upload/upload-multiple",
-          data
-        );
-
-      const imageUrl =
-        res.data.images?.[0];
-
-      if (!imageUrl) {
-
-        return alert(
-          "Image upload failed ❌"
-        );
-      }
-
-      // ✅ SAVE IMAGE IN STATE
-
-      setPreviewItem((prev) => ({
-        ...prev,
-
-        images: [
-          ...(prev.images || []),
-          imageUrl,
-        ],
-      }));
-
-      const quill =
-        quillRef.current;
-
-      if (!quill) return;
-
-      const range =
-        quill.getSelection();
-
-      const index =
-        range
-          ? range.index
-          : quill.getLength();
-
-      // ✅ INSERT IMAGE
-
-      quill.insertEmbed(
-        index,
-        "image",
-        imageUrl
-      );
-
-      quill.setSelection(
-        index + 1
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-      alert(
-        "Image upload failed ❌"
-      );
-    }
-  };
-};
   // =====================================================
   // ================= FETCH =============================
   // =====================================================
@@ -396,9 +298,11 @@ useEffect(() => {
   }
 
   // ✅ PREVENT DUPLICATE TOOLBARS
-if (quillRef.current) {
-  return;
-}
+  if (
+    editorRef.current.querySelector(".ql-toolbar")
+  ) {
+    return;
+  }
 
   const quill =
     new Quill(
@@ -407,49 +311,42 @@ if (quillRef.current) {
         theme: "snow",
 
         modules: {
-  toolbar: {
-    container: [
+          toolbar: [
+            [
+              {
+                header: [
+                  1,
+                  2,
+                  3,
+                  false,
+                ],
+              },
+            ],
 
-      [
-        {
-          header: [
-            1,
-            2,
-            3,
-            false,
+            [
+              "bold",
+              "italic",
+              "underline",
+            ],
+
+            [
+              {
+                list: "ordered",
+              },
+
+              {
+                list: "bullet",
+              },
+            ],
+
+            [
+              "image",
+              "link",
+            ],
+
+            ["clean"],
           ],
         },
-      ],
-
-      [
-        "bold",
-        "italic",
-        "underline",
-      ],
-
-      [
-        {
-          list: "ordered",
-        },
-
-        {
-          list: "bullet",
-        },
-      ],
-
-      [
-        "image",
-        "link",
-      ],
-
-      ["clean"],
-    ],
-
-    handlers: {
-      image: imageHandler,
-    },
-  },
-},
       }
     );
 
@@ -457,9 +354,8 @@ if (quillRef.current) {
     quill;
 
   // ✅ SET CONTENT
-quill.clipboard.dangerouslyPasteHTML(
-  previewItem?.content || ""
-);
+  quill.root.innerHTML =
+    previewItem?.content || "";
 
   // ✅ CLEANUP
   return () => {
@@ -472,7 +368,7 @@ quill.clipboard.dangerouslyPasteHTML(
       null;
   };
 
-}, [editMode, previewItem]);
+}, [editMode]);
 
 
   // =====================================================
@@ -607,15 +503,9 @@ quill.clipboard.dangerouslyPasteHTML(
           }
         );
 
-      
-
         alert(
           "Updated successfully ✅"
         );
-        setPreviewItem((prev) => ({
-  ...prev,
-  content,
-}));
 
         closeModal();
 
@@ -661,64 +551,60 @@ quill.clipboard.dangerouslyPasteHTML(
               )
             : previewItem.content;
 
-setPreviewItem((prev) => ({
-  ...prev,
-  content,
-}));
+        await API.put(
+          `/news/${id}`,
+          {
+            title:
+              previewItem.title,
 
-await API.put(
-  `/news/${id}`,
-  {
-    title:
-      previewItem.title,
+            content,
 
-    content,
+            categories:
+              previewItem.categories || [],
 
-    categories:
-      previewItem.categories || [],
+            tags:
+              previewItem.tags || [],
 
-    tags:
-      previewItem.tags || [],
+            sections:
+              previewItem.sections || [],
 
-    sections:
-      previewItem.sections || [],
+            mediaLinks:
+              previewItem.mediaLinks || [],
 
-    mediaLinks:
-      previewItem.mediaLinks || [],
+            relatedArticles:
+              previewItem.relatedArticles || [],
 
-    relatedArticles:
-      previewItem.relatedArticles || [],
+            images:
+              previewItem.images || [],
+          }
+        );
 
-    images:
-      previewItem.images || [],
-  }
-);
+        await API.put(
+          `/news/approve/${id}`
+        );
 
-await API.put(
-  `/news/approve/${id}`
-);
+        alert(
+          "Approved successfully ✅"
+        );
 
-alert(
-  "Approved successfully ✅"
-);
+        closeModal();
 
-closeModal();
+        fetchNews();
 
-fetchNews();
+      } catch (err) {
 
-} catch (err) {
+        console.error(err);
 
-  console.error(err);
+        alert(
+          "Approval failed ❌"
+        );
 
-  alert(
-    "Approval failed ❌"
-  );
+      } finally {
 
-} finally {
+        setApproving(false);
+      }
+    };
 
-  setApproving(false);
-}
-};
   // =====================================================
   // ================= DELETE ============================
   // =====================================================
