@@ -97,6 +97,8 @@ const imageHandler = () => {
 
     try {
 
+      setUploading(true);
+
       const data =
         new FormData();
 
@@ -105,7 +107,6 @@ const imageHandler = () => {
         file
       );
 
-      // ✅ SAME API
       const res =
         await API.post(
           "/upload/upload-multiple",
@@ -115,22 +116,25 @@ const imageHandler = () => {
       const imageUrl =
         res.data.images?.[0];
 
-      // ✅ INSERT IMAGE INTO EDITOR
       const quill =
         quillRef.current;
 
       const range =
-        quill.getSelection(true);
+        quill.getSelection();
+
+      const index =
+        range
+          ? range.index
+          : quill.getLength();
 
       quill.insertEmbed(
-        range.index,
+        index,
         "image",
         imageUrl
       );
 
-      // ✅ MOVE CURSOR
       quill.setSelection(
-        range.index + 1
+        index + 1
       );
 
     } catch (err) {
@@ -140,6 +144,10 @@ const imageHandler = () => {
       alert(
         "Image upload failed ❌"
       );
+
+    } finally {
+
+      setUploading(false);
     }
   };
 };
