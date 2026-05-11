@@ -1087,3 +1087,26 @@
   cursor: pointer;
   font-size: 12px;
 }
+.main-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.share-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.share-actions button {
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.share-actions button:hover {
+  opacity: 0.9;
+}

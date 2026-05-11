@@ -706,13 +706,13 @@ const content =
     };
 
 
-    const shareArticle = (
+const shareArticle = (
   item,
   platform
 ) => {
 
   const articleUrl =
-    `https://www.uptvlive.com/news/${item.slug}`;
+    `https://www.uptvlive.com/article/${item.slug}`;
 
   const title =
     encodeURIComponent(
@@ -806,8 +806,7 @@ const content =
       "Link copied ✅"
     );
   }
-};
-  // =====================================================
+};  // =====================================================
   // ================= DELETE ============================
   // =====================================================
 
@@ -1155,7 +1154,7 @@ setPreview(
 
                 onClick={() =>
                   navigate(
-                    `/news/${item.slug}`
+                    `/article/${item.slug}`
                   )
                 }
               >
