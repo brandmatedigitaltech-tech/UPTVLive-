@@ -1,4 +1,16 @@
 import {
+  FaWhatsapp,
+  FaFacebookF,
+  FaTelegramPlane,
+  
+  FaCopy,
+} from "react-icons/fa";
+
+import {
+  FaXTwitter,
+} from "react-icons/fa6";
+
+import {
   useEffect,
   useState,
   useRef,
@@ -779,7 +791,8 @@ const shareArticle = (
       "Link copied ✅"
     );
   }
-};  // =====================================================
+};  
+  // =====================================================
   // ================= DELETE ============================
   // =====================================================
 
@@ -1224,70 +1237,59 @@ setPreview(
 
   <div className="share-actions">
 
-    <button
-      type="button"
-      onClick={() =>
-        shareArticle(
-          item,
-          "whatsapp"
-        )
-      }
-    >
-      WhatsApp
-    </button>
+  <button
+    type="button"
+    className="share-btn whatsapp"
+    onClick={() =>
+      shareArticle(item, "whatsapp")
+    }
+  >
+    <FaWhatsapp />
+  </button>
 
-    <button
-      type="button"
-      onClick={() =>
-        shareArticle(
-          item,
-          "facebook"
-        )
-      }
-    >
-      Facebook
-    </button>
+  <button
+    type="button"
+    className="share-btn facebook"
+    onClick={() =>
+      shareArticle(item, "facebook")
+    }
+  >
+    <FaFacebookF />
+  </button>
 
-    <button
-      type="button"
-      onClick={() =>
-        shareArticle(
-          item,
-          "x"
-        )
-      }
-    >
-      X
-    </button>
+  <button
+    type="button"
+    className="share-btn x"
+    onClick={() =>
+      shareArticle(item, "x")
+    }
+  >
+    <FaXTwitter />
+  </button>
 
-    <button
-      type="button"
-      onClick={() =>
-        shareArticle(
-          item,
-          "telegram"
-        )
-      }
-    >
-      Telegram
-    </button>
+  <button
+    type="button"
+    className="share-btn telegram"
+    onClick={() =>
+      shareArticle(item, "telegram")
+    }
+  >
+    <FaTelegramPlane />
+  </button>
 
 
 
-    <button
-      type="button"
-      onClick={() =>
-        shareArticle(
-          item,
-          "copy"
-        )
-      }
-    >
-      Copy
-    </button>
+  <button
+    type="button"
+    className="share-btn copy"
+    onClick={() =>
+      shareArticle(item, "copy")
+    }
+  >
+    <FaCopy />
+  </button>
 
-  </div>
-
+</div>
 </div>
 </div>
             </div>
