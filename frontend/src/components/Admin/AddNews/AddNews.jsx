@@ -67,11 +67,89 @@ const AddNews = () => {
   const quillRef =
     useRef(null);
 
+    // =====================================================
+// QUILL IMAGE HANDLER
+// =====================================================
+
+const imageHandler = () => {
+
+  const input =
+    document.createElement("input");
+
+  input.setAttribute(
+    "type",
+    "file"
+  );
+
+  input.setAttribute(
+    "accept",
+    "image/*"
+  );
+
+  input.click();
+
+  input.onchange = async () => {
+
+    const file =
+      input.files[0];
+
+    if (!file) return;
+
+    try {
+
+      const data =
+        new FormData();
+
+      data.append(
+        "images",
+        file
+      );
+
+      // ✅ SAME API
+      const res =
+        await API.post(
+          "/upload/upload-multiple",
+          data
+        );
+
+      const imageUrl =
+        res.data.images?.[0];
+
+      // ✅ INSERT IMAGE INTO EDITOR
+      const quill =
+        quillRef.current;
+
+      const range =
+        quill.getSelection(true);
+
+      quill.insertEmbed(
+        range.index,
+        "image",
+        imageUrl
+      );
+
+      // ✅ MOVE CURSOR
+      quill.setSelection(
+        range.index + 1
+      );
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert(
+        "Image upload failed ❌"
+      );
+    }
+  };
+};
+
   // =====================================================
   // FETCH NEWS
   // =====================================================
 
   useEffect(() => {
+    
 
     const fetchNews =
       async () => {
@@ -118,42 +196,49 @@ const AddNews = () => {
               "Write news content...",
 
             modules: {
-              toolbar: [
-                [
-                  {
-                    header: [
-                      1,
-                      2,
-                      3,
-                      false,
-                    ],
-                  },
-                ],
+  toolbar: {
+    container: [
 
-                [
-                  "bold",
-                  "italic",
-                  "underline",
-                ],
+      [
+        {
+          header: [
+            1,
+            2,
+            3,
+            false,
+          ],
+        },
+      ],
 
-                [
-                  {
-                    list: "ordered",
-                  },
+      [
+        "bold",
+        "italic",
+        "underline",
+      ],
 
-                  {
-                    list: "bullet",
-                  },
-                ],
+      [
+        {
+          list: "ordered",
+        },
 
-                [
-                  "link",
-                  "image",
-                ],
+        {
+          list: "bullet",
+        },
+      ],
 
-                ["clean"],
-              ],
-            },
+      [
+        "link",
+        "image",
+      ],
+
+      ["clean"],
+    ],
+
+    handlers: {
+      image: imageHandler,
+    },
+  },
+},
           }
         );
 
