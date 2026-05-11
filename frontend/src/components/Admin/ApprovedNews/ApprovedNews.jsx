@@ -124,17 +124,8 @@ const getEmbedLink = (
       : null;
   }
 
-  // INSTAGRAM
+  
 
-  if (
-    url.includes("instagram.com")
-  ) {
-
-    const cleanUrl =
-      url.split("?")[0];
-
-    return `${cleanUrl}embed`;
-  }
 
   // FACEBOOK
 
@@ -772,25 +763,7 @@ const shareArticle = (
     );
   }
 
-  // INSTAGRAM
 
-  if (
-    platform === "instagram"
-  ) {
-
-    navigator.clipboard.writeText(
-      articleUrl
-    );
-
-    alert(
-      "Link copied ✅ Paste on Instagram"
-    );
-
-    window.open(
-      "https://www.instagram.com/",
-      "_blank"
-    );
-  }
 
   // COPY
 
@@ -1299,17 +1272,7 @@ setPreview(
       Telegram
     </button>
 
-    <button
-      type="button"
-      onClick={() =>
-        shareArticle(
-          item,
-          "instagram"
-        )
-      }
-    >
-      Instagram
-    </button>
+
 
     <button
       type="button"
