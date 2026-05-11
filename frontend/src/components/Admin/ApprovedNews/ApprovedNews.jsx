@@ -1223,107 +1223,111 @@ setPreview(
                 {/* ACTIONS */}
 
                 <div className="actions">
-                  <div className="share-actions">
 
-  <button
-    type="button"
-    onClick={() =>
-      shareArticle(
-        item,
-        "whatsapp"
-      )
-    }
-  >
-    WhatsApp
-  </button>
+  {/* MAIN ACTIONS */}
 
-  <button
-    type="button"
-    onClick={() =>
-      shareArticle(
-        item,
-        "facebook"
-      )
-    }
-  >
-    Facebook
-  </button>
+  <div className="main-actions">
 
-  <button
-    type="button"
-    onClick={() =>
-      shareArticle(
-        item,
-        "x"
-      )
-    }
-  >
-    X
-  </button>
+    <button
+      type="button"
+      onClick={() =>
+        openPreview(item)
+      }
+    >
+      ✏️ Edit
+    </button>
 
-  <button
-    type="button"
-    onClick={() =>
-      shareArticle(
-        item,
-        "telegram"
-      )
-    }
-  >
-    Telegram
-  </button>
+    <button
+      type="button"
+      onClick={() =>
+        deleteNews(item._id)
+      }
+    >
+      ❌ Delete
+    </button>
 
-  <button
-    type="button"
-    onClick={() =>
-      shareArticle(
-        item,
-        "instagram"
-      )
-    }
-  >
-    Instagram
-  </button>
+  </div>
 
-  <button
-    type="button"
-    onClick={() =>
-      shareArticle(
-        item,
-        "copy"
-      )
-    }
-  >
-    Copy
-  </button>
+  {/* SHARE ACTIONS */}
+
+  <div className="share-actions">
+
+    <button
+      type="button"
+      onClick={() =>
+        shareArticle(
+          item,
+          "whatsapp"
+        )
+      }
+    >
+      WhatsApp
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        shareArticle(
+          item,
+          "facebook"
+        )
+      }
+    >
+      Facebook
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        shareArticle(
+          item,
+          "x"
+        )
+      }
+    >
+      X
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        shareArticle(
+          item,
+          "telegram"
+        )
+      }
+    >
+      Telegram
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        shareArticle(
+          item,
+          "instagram"
+        )
+      }
+    >
+      Instagram
+    </button>
+
+    <button
+      type="button"
+      onClick={() =>
+        shareArticle(
+          item,
+          "copy"
+        )
+      }
+    >
+      Copy
+    </button>
+
+  </div>
 
 </div>
-                  <button
-  type="button"
-                    onClick={() =>
-                      openPreview(
-                        item
-                      )
-                    }
-                  >
-                    ✏️ Edit
-                  </button>
-
-                  <button
-  type="button"
-                    onClick={() =>
-                      deleteNews(
-                        item._id
-                      )
-                    }
-                  >
-                    ❌ Delete
-                  </button>
-
-                </div>
-
-              </div>
-
+</div>
             </div>
           )
         )}
