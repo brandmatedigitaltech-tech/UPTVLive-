@@ -109,7 +109,7 @@ const imageHandler = () => {
 
       const res =
         await API.post(
-          "/upload/upload-multiple",
+          "/news/upload-multiple",
           data
         );
 
@@ -441,7 +441,7 @@ const imageHandler = () => {
 
       const res =
         await API.post(
-          "/upload/upload-multiple",
+          "/news/upload-multiple",
           data
         );
 
