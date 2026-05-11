@@ -923,21 +923,17 @@ setDragActive(
     const uploadedImages =
       res.data.images || [];
 
-    setPreviewItem(
-      (prev) => ({
+setPreviewItem((prev) => ({
 
-        ...prev,
+  ...prev,
 
-        images: [
-          ...(prev.images || []),
-          ...uploadedImages,
-        ],
+  // ✅ REPLACE OLD IMAGES
+  images: uploadedImages,
 
-image:
-  uploadedImages[0] ||
-  prev.image,
-      })
-    );
+  // ✅ MAIN THUMBNAIL
+  image: uploadedImages[0] || "",
+
+}));
 
     // ✅ REMOVE BLOB PREVIEWS
     preview.forEach((img) => {
@@ -955,39 +951,16 @@ image:
     });
 
     // ✅ SHOW ONLY SERVER URLS
-setPreview((prev) => {
+// ✅ REPLACE PREVIEW WITH ONLY NEW IMAGE
+setPreview(
 
-  const existing =
-    prev.filter(
-      (img) =>
-        !img.url?.startsWith(
-          "blob:"
-        )
-    );
+  uploadedImages.map(
+    (img) => ({
+      url: img,
+    })
+  )
 
-  const merged = [
-
-    ...existing,
-
-    ...uploadedImages.map(
-      (img) => ({
-        url: img,
-      })
-    ),
-  ];
-
-  const unique =
-    merged.filter(
-      (img, index, self) =>
-        index ===
-        self.findIndex(
-          (x) =>
-            x.url === img.url
-        )
-    );
-
-  return unique;
-});
+);
 
     // ✅ CLEAR FILES
     setImageFiles([]);
