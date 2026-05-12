@@ -1140,7 +1140,7 @@ setPreview(
 
                 onClick={() =>
                   navigate(
-                    `/article/${item.slug}`
+                    `/news/${item.slug}`
                   )
                 }
               >
