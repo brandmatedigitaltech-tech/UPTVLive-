@@ -1,4 +1,13 @@
 import {
+  FaWhatsapp,
+  FaCopy,
+  FaShareAlt,
+} from "react-icons/fa";
+
+import {
+  FaXTwitter,
+} from "react-icons/fa6";
+import {
   useParams,
   Link,
 } from "react-router-dom";
@@ -709,90 +718,72 @@ const ArticlePage = () => {
 
         {/* SHARE */}
 
-        <div
-          style={{
-            display: "flex",
-            gap: "8px",
-            flexWrap:
-              "wrap",
-          }}
-        >
+        {/* SHARE BUTTONS */}
 
-          {/* SHARE */}
+<div className="article-share-buttons">
 
-          <button
-            className="share-btn"
+  {/* SHARE API */}
 
-            onClick={async () => {
+  <button
+    className="share-icon-btn share-native"
 
-              try {
+    onClick={async () => {
 
-                if (
-                  navigator.share
-                ) {
+      try {
 
-                  await navigator.share(
-                    {
-                      title:
-                        article.title,
+        if (navigator.share) {
 
-                      text:
-                        description,
+          await navigator.share({
+            title: article.title,
+            text: description,
+            url: articleUrl,
+          });
 
-                      url:
-                        articleUrl,
-                    }
-                  );
+        } else {
 
-                } else {
+          await navigator.clipboard.writeText(
+            articleUrl
+          );
 
-                  await navigator.clipboard.writeText(
-                    articleUrl
-                  );
+          alert("Link copied ✅");
+        }
 
-                  alert(
-                    "Link copied ✅"
-                  );
-                }
+      } catch (err) {
 
-              } catch (err) {
+        console.log(err);
+      }
+    }}
+  >
+    <FaShareAlt />
+  </button>
 
-                console.log(
-                  err
-                );
-              }
-            }}
-          >
-            Share
-          </button>
+  {/* WHATSAPP */}
 
-          {/* WHATSAPP */}
+  <button
+    className="share-icon-btn whatsapp"
 
-          <button
-            className="share-btn"
+    onClick={() =>
+      shareToWhatsApp(article)
+    }
+  >
+    <FaWhatsapp />
+  </button>
 
-            onClick={() =>
-              shareToWhatsApp(
-                article
-              )
-            }
-          >
-            WhatsApp
-          </button>
+  {/* X / TWITTER */}
 
-          {/* COPY */}
 
-          <button
-            className="share-btn"
 
-            onClick={
-              copyLink
-            }
-          >
-            Copy
-          </button>
+  {/* COPY */}
 
-        </div>
+  <button
+    className="share-icon-btn copy"
+
+    onClick={copyLink}
+  >
+    <FaCopy />
+  </button>
+
+</div>
 
       </div>
 

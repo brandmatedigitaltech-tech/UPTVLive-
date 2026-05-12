@@ -24,15 +24,6 @@
   align-items: center;
 }
 
-.share-btn {
-  background: #e53935;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 12px;
-}
 
 /* ================= TITLE ================= */
 .article-title {
@@ -295,4 +286,78 @@
   .related-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ======================================== */
+/* ============ SHARE BUTTONS ============= */
+/* ======================================== */
+
+.article-share-buttons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.share-icon-btn {
+  width: 42px;
+  height: 42px;
+
+  border: none;
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+
+  cursor: pointer;
+
+  font-size: 17px;
+
+  transition: 0.25s ease;
+
+  box-shadow:
+    0 4px 10px rgba(0,0,0,0.15);
+}
+
+.share-icon-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+}
+
+/* COLORS */
+
+.share-native {
+  background: #ff3b30;
+}
+
+.whatsapp {
+  background: #25D366;
+}
+
+.twitter {
+  background: #000;
+}
+
+.copy {
+  background: #2563eb;
+}
+
+/* ======================================== */
+/* ============== MOBILE ================== */
+/* ======================================== */
+
+@media (max-width: 768px) {
+
+  .article-meta-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .article-share-buttons {
+    width: 100%;
+  }
+
 }
