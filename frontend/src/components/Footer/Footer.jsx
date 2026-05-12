@@ -370,12 +370,20 @@ function Footer() {
 
       {/* ================= BOTTOM ================= */}
 
-      <div className="footer-bottom">
+<div className="footer-bottom">
 
-        © 2026 All Rights Reserved.
-        Brandmate Digital
+  © 2026 All Rights Reserved.{" "}
 
-      </div>
+  <a
+    href="https://brandmatedigital.com/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="footer-link"
+  >
+    Brandmate Digital
+  </a>
+
+</div>
 
     </footer>
   );
