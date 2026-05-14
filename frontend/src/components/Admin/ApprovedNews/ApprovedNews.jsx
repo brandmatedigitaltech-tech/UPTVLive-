@@ -714,27 +714,46 @@ const shareArticle = (
   platform
 ) => {
 
+  // =========================================
+  // FINAL ARTICLE URL
+  // =========================================
+
   const articleUrl =
     `https://www.uptvlive.com/article/${item.slug}`;
 
-  // ✅ REMOVE HTML TAGS
+  // =========================================
+  // CLEAN DESCRIPTION
+  // =========================================
+
   const plainContent =
+
     item.content
       ?.replace(/<[^>]+>/g, "")
       ?.replace(/\s+/g, " ")
       ?.trim()
-      ?.slice(0, 180);
+      ?.slice(0, 180) ||
 
-  // ✅ HASHTAGS
+    "Latest News";
+
+  // =========================================
+  // HASHTAGS
+  // =========================================
+
   const hashtags =
+
     item.categories
       ?.map(
         (cat) =>
           `#${cat.replace(/\s/g, "")}`
       )
-      .join(" ") || "";
+      .join(" ") ||
 
-  // ✅ FINAL TEXT
+    "";
+
+  // =========================================
+  // SHARE TEXT
+  // =========================================
+
   const shareText = `
 
 ${item.title}
@@ -761,7 +780,9 @@ ${articleUrl}
   // WHATSAPP
   // =========================================
 
-  if (platform === "whatsapp") {
+  if (
+    platform === "whatsapp"
+  ) {
 
     window.open(
       `https://wa.me/?text=${encodedText}`,
@@ -773,10 +794,12 @@ ${articleUrl}
   // FACEBOOK
   // =========================================
 
-  if (platform === "facebook") {
+  if (
+    platform === "facebook"
+  ) {
 
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       "_blank"
     );
   }
@@ -785,7 +808,9 @@ ${articleUrl}
   // X / TWITTER
   // =========================================
 
-  if (platform === "x") {
+  if (
+    platform === "x"
+  ) {
 
     const twitterText = `
 
@@ -793,14 +818,12 @@ ${item.title}
 
 ${hashtags}
 
-${articleUrl}
-
 `;
 
     window.open(
       `https://twitter.com/intent/tweet?text=${encodeURIComponent(
         twitterText
-      )}`,
+      )}&url=${encodedUrl}`,
       "_blank"
     );
   }
@@ -809,7 +832,9 @@ ${articleUrl}
   // TELEGRAM
   // =========================================
 
-  if (platform === "telegram") {
+  if (
+    platform === "telegram"
+  ) {
 
     window.open(
       `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
@@ -821,13 +846,17 @@ ${articleUrl}
   // COPY
   // =========================================
 
-  if (platform === "copy") {
+  if (
+    platform === "copy"
+  ) {
 
     navigator.clipboard.writeText(
-      shareText
+      articleUrl
     );
 
-    alert("Copied ✅");
+    alert(
+      "Link copied ✅"
+    );
   }
 };  // =====================================================
   // ================= DELETE ============================
