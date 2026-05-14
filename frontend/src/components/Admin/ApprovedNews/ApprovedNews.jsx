@@ -717,82 +717,119 @@ const shareArticle = (
   const articleUrl =
     `https://www.uptvlive.com/article/${item.slug}`;
 
-  const title =
+  // ✅ REMOVE HTML TAGS
+  const plainContent =
+    item.content
+      ?.replace(/<[^>]+>/g, "")
+      ?.replace(/\s+/g, " ")
+      ?.trim()
+      ?.slice(0, 180);
+
+  // ✅ HASHTAGS
+  const hashtags =
+    item.categories
+      ?.map(
+        (cat) =>
+          `#${cat.replace(/\s/g, "")}`
+      )
+      .join(" ") || "";
+
+  // ✅ FINAL TEXT
+  const shareText = `
+
+${item.title}
+
+${plainContent}...
+
+${hashtags}
+
+${articleUrl}
+
+`;
+
+  const encodedText =
     encodeURIComponent(
-      item.title
+      shareText
     );
 
-  const url =
+  const encodedUrl =
     encodeURIComponent(
       articleUrl
     );
 
+  // =========================================
   // WHATSAPP
+  // =========================================
 
-  if (
-    platform === "whatsapp"
-  ) {
+  if (platform === "whatsapp") {
 
     window.open(
-      `https://wa.me/?text=${title}%20${url}`,
+      `https://wa.me/?text=${encodedText}`,
       "_blank"
     );
   }
 
+  // =========================================
   // FACEBOOK
+  // =========================================
 
-  if (
-    platform === "facebook"
-  ) {
+  if (platform === "facebook") {
 
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`,
       "_blank"
     );
   }
 
+  // =========================================
   // X / TWITTER
+  // =========================================
 
-  if (
-    platform === "x"
-  ) {
+  if (platform === "x") {
+
+    const twitterText = `
+
+${item.title}
+
+${hashtags}
+
+${articleUrl}
+
+`;
 
     window.open(
-      `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
+      `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+        twitterText
+      )}`,
       "_blank"
     );
   }
 
+  // =========================================
   // TELEGRAM
+  // =========================================
 
-  if (
-    platform === "telegram"
-  ) {
+  if (platform === "telegram") {
 
     window.open(
-      `https://t.me/share/url?url=${url}&text=${title}`,
+      `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
       "_blank"
     );
   }
 
-
-
+  // =========================================
   // COPY
+  // =========================================
 
-  if (
-    platform === "copy"
-  ) {
+  if (platform === "copy") {
 
     navigator.clipboard.writeText(
-      articleUrl
+      shareText
     );
 
-    alert(
-      "Link copied ✅"
-    );
+    alert("Copied ✅");
   }
-};  
-  // =====================================================
+};  // =====================================================
   // ================= DELETE ============================
   // =====================================================
 
