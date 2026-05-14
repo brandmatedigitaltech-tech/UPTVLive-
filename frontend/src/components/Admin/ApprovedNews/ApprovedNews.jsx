@@ -709,89 +709,90 @@ const content =
     };
 
 
-const shareArticle = (item, platform) => {
+const shareArticle = (
+  item,
+  platform
+) => {
 
   const articleUrl =
     `https://www.uptvlive.com/article/${item.slug}`;
 
-  // 🔥 REMOVE HTML
-  const plainContent =
-    item.content
-      ?.replace(/<[^>]+>/g, "")
-      ?.slice(0, 200);
+  const title =
+    encodeURIComponent(
+      item.title
+    );
 
-  // 🔥 HASHTAGS
-  const hashtags =
-    item.categories
-      ?.map((c) => `#${c.replace(/\s/g, "")}`)
-      .join(" ") || "";
+  const url =
+    encodeURIComponent(
+      articleUrl
+    );
 
-  // 🔥 FINAL TEXT
-  const text = `
-${item.title}
+  // WHATSAPP
 
-${plainContent}...
-
-${hashtags}
-
-${articleUrl}
-`;
-
-  const encodedText =
-    encodeURIComponent(text);
-
-  const encodedUrl =
-    encodeURIComponent(articleUrl);
-
-  // ================= WHATSAPP =================
-
-  if (platform === "whatsapp") {
+  if (
+    platform === "whatsapp"
+  ) {
 
     window.open(
-      `https://wa.me/?text=${encodedText}`,
+      `https://wa.me/?text=${title}%20${url}`,
       "_blank"
     );
   }
 
-  // ================= FACEBOOK =================
+  // FACEBOOK
 
-  if (platform === "facebook") {
+  if (
+    platform === "facebook"
+  ) {
 
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       "_blank"
     );
   }
 
-  // ================= X =================
+  // X / TWITTER
 
-  if (platform === "x") {
+  if (
+    platform === "x"
+  ) {
 
     window.open(
-      `https://twitter.com/intent/tweet?text=${encodedText}`,
+      `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
       "_blank"
     );
   }
 
-  // ================= TELEGRAM =================
+  // TELEGRAM
 
-  if (platform === "telegram") {
+  if (
+    platform === "telegram"
+  ) {
 
     window.open(
-      `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+      `https://t.me/share/url?url=${url}&text=${title}`,
       "_blank"
     );
   }
 
-  // ================= COPY =================
 
-  if (platform === "copy") {
 
-    navigator.clipboard.writeText(text);
+  // COPY
 
-    alert("Copied ✅");
+  if (
+    platform === "copy"
+  ) {
+
+    navigator.clipboard.writeText(
+      articleUrl
+    );
+
+    alert(
+      "Link copied ✅"
+    );
   }
-};  // =====================================================
+};  
+  // =====================================================
   // ================= DELETE ============================
   // =====================================================
 
