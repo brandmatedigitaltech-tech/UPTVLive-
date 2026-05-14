@@ -1,21 +1,6 @@
 const express = require("express");
 const axios = require("axios");
-const escapeHtml = (
-  text = ""
-) => {
 
-  return text
-
-    .replace(/&/g, "&amp;")
-
-    .replace(/</g, "&lt;")
-
-    .replace(/>/g, "&gt;")
-
-    .replace(/"/g, "&quot;")
-
-    .replace(/'/g, "&#039;");
-};
 const router = express.Router();
 
 const WEBSITE_URL =
@@ -57,34 +42,25 @@ router.get(
       }
 
       // TITLE
-const title =
-  escapeHtml(
-    article.title || "UPTV Live"
-  );
+      const title =
+        article.title ||
+        "UPTV Live";
 
       // DESCRIPTION
-const cleanText =
+      const description =
 
-  article.content
-    ?.replace(/<[^>]+>/g, "")
-    ?.replace(/\n/g, " ")
-    ?.replace(/\r/g, " ")
-    ?.replace(/\s+/g, " ")
-    ?.trim();
+        article.seoDescription ||
 
-const description =
-  escapeHtml(
+        article.content
+          ?.replace(/<[^>]+>/g, "")
+          ?.replace(/\s+/g, " ")
+          ?.trim()
+          ?.slice(0, 180) ||
 
-    article.seoDescription ||
-
-    cleanText?.slice(0, 120) ||
-
-    "Latest Hindi News"
-
-  );
+        "Latest Hindi News";
 
       // IMAGE
-const image = encodeURI(
+const image =
 
   article.image?.startsWith("http")
     ? article.image
@@ -92,9 +68,7 @@ const image = encodeURI(
     : article.images?.[0]?.startsWith("http")
     ? article.images[0]
 
-    : "https://www.uptvlive.com/og-default.jpg"
-
-);
+    : "https://www.uptvlive.com/og-default.jpg";
 
       // FINAL URL
       const articleUrl =
@@ -107,10 +81,6 @@ const image = encodeURI(
 <html lang="en">
 
 <head>
-
-<meta property="og:image:type" content="image/jpeg" />
-
-<meta name="twitter:image:alt" content="${title}" />
 
 <meta charset="UTF-8" />
 
@@ -156,11 +126,6 @@ content="${description}"
 property="og:image"
 content="${image}"
 />
-<meta property="og:image:alt" content="${title}" />
-
-<meta property="article:publisher" content="https://www.facebook.com/uptvlive" />
-
-<meta name="theme-color" content="#d60000" />
 
 <meta
 property="og:image:secure_url"
@@ -237,15 +202,10 @@ Open Article
 </a>
 
 <script>
-
 setTimeout(() => {
-
-window.location.replace(
-  "${WEBSITE_URL}/news/${article.slug}"
-
-
-}, 3000);
-
+  window.location.href =
+    "${WEBSITE_URL}/news/${article.slug}";
+}, 1000);
 </script>
 
 </body>

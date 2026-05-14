@@ -714,137 +714,70 @@ const shareArticle = (
   platform
 ) => {
 
-  // =========================================
-  // FINAL ARTICLE URL
-  // =========================================
-
   const articleUrl =
     `https://www.uptvlive.com/article/${item.slug}`;
 
-  // =========================================
-  // CLEAN DESCRIPTION
-  // =========================================
-
-  const plainContent =
-
-    item.content
-      ?.replace(/<[^>]+>/g, "")
-      ?.replace(/\s+/g, " ")
-      ?.trim()
-      ?.slice(0, 180) ||
-
-    "Latest News";
-
-  // =========================================
-  // HASHTAGS
-  // =========================================
-
-  const hashtags =
-
-    item.categories
-      ?.map(
-        (cat) =>
-          `#${cat.replace(/\s/g, "")}`
-      )
-      .join(" ") ||
-
-    "";
-
-  // =========================================
-  // SHARE TEXT
-  // =========================================
-
-  const shareText = `
-
-${item.title}
-
-${plainContent}...
-
-${hashtags}
-
-${articleUrl}
-
-`;
-
-  const encodedText =
+  const title =
     encodeURIComponent(
-      shareText
+      item.title
     );
 
-  const encodedUrl =
+  const url =
     encodeURIComponent(
       articleUrl
     );
 
-  // =========================================
   // WHATSAPP
-  // =========================================
 
   if (
     platform === "whatsapp"
   ) {
 
     window.open(
-      `https://wa.me/?text=${encodedText}`,
+      `https://wa.me/?text=${title}%20${url}`,
       "_blank"
     );
   }
 
-  // =========================================
   // FACEBOOK
-  // =========================================
 
   if (
     platform === "facebook"
   ) {
 
     window.open(
-      `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
+      `https://www.facebook.com/sharer/sharer.php?u=${url}`,
       "_blank"
     );
   }
 
-  // =========================================
   // X / TWITTER
-  // =========================================
 
   if (
     platform === "x"
   ) {
 
-    const twitterText = `
-
-${item.title}
-
-${hashtags}
-
-`;
-
     window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-        twitterText
-      )}&url=${encodedUrl}`,
+      `https://twitter.com/intent/tweet?url=${url}&text=${title}`,
       "_blank"
     );
   }
 
-  // =========================================
   // TELEGRAM
-  // =========================================
 
   if (
     platform === "telegram"
   ) {
 
     window.open(
-      `https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`,
+      `https://t.me/share/url?url=${url}&text=${title}`,
       "_blank"
     );
   }
 
-  // =========================================
+
+
   // COPY
-  // =========================================
 
   if (
     platform === "copy"
@@ -858,7 +791,8 @@ ${hashtags}
       "Link copied ✅"
     );
   }
-};  // =====================================================
+};  
+  // =====================================================
   // ================= DELETE ============================
   // =====================================================
 
