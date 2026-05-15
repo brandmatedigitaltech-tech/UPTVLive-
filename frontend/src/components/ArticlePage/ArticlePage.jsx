@@ -250,9 +250,9 @@ const ArticlePage = () => {
       )
     ) {
 
-      return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(
-        url
-      )}&show_text=true&width=500`;
+return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(
+  url
+)}&show_text=true&width=100%`;
     }
 
     // ================= OTHER =================
