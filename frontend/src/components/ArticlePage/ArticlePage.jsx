@@ -252,7 +252,7 @@ const ArticlePage = () => {
 
 return `https://www.facebook.com/plugins/post.php?href=${encodeURIComponent(
   url
-)}&show_text=true&width=100%`;
+)}&show_text=true&width=auto`;
     }
 
     // ================= OTHER =================
