@@ -63,9 +63,9 @@ const TopBar = () => {
                   {role === "admin" ? "Admin" : "Writer"}
                 </span>
 
-                <Link to={dashboardLink} className="dashboard-link">
+                {/* <Link to={dashboardLink} className="dashboard-link">
                   👤 Dashboard
-                </Link>
+                </Link> */}
 
                 <button className="logout-btn" onClick={logout}>
                   Logout
@@ -73,9 +73,9 @@ const TopBar = () => {
 
               </div>
             ) : (
-              <Link to="/admin" className="login-btn">
-                ＋
-              </Link>
+              // <Link to="/admin" className="login-btn">
+              //   ＋
+              // </Link>
             )}
 
           </div>
